@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "pannellum/build/pannellum.css";
 import "pannellum";
 import "./App.css";
+import { mapData } from "./data/mapData";
+import { validateMapData } from "./utils/validateMapData";
 
 function createArrowTooltip(hotSpotDiv, args) {
   hotSpotDiv.classList.add("custom-arrow-hotspot");
@@ -18,10 +20,58 @@ function createArrowTooltip(hotSpotDiv, args) {
   hotSpotDiv.appendChild(label);
 }
 
-function MiniMap({ sceneConfig, currentScene, onSceneClick, isMoving }) {
+function getSceneConnections(map, sceneId) {
+  return map.connections.filter(
+    (connection) =>
+      connection.from === sceneId &&
+      map.scenes[connection.from] &&
+      map.scenes[connection.to]
+  );
+}
+
+function buildPannellumScenes(map, goToScene) {
+  return Object.fromEntries(
+    Object.entries(map.scenes).map(([sceneId, scene]) => {
+      const sceneConnections = getSceneConnections(map, sceneId);
+
+      return [
+        sceneId,
+        {
+          title: scene.title,
+          type: "equirectangular",
+          panorama: scene.panorama,
+          yaw: scene.view.initialYaw,
+          pitch: scene.view.initialPitch,
+          hfov:
+            window.innerWidth < 768
+              ? map.settings.mobileHfov
+              : scene.view.initialHfov || map.settings.defaultHfov,
+
+          hotSpots: sceneConnections.map((connection) => ({
+            yaw: connection.hotspot.yaw,
+            pitch: connection.hotspot.pitch,
+            type: "info",
+            text: connection.label,
+            cssClass: "hidden-default-hotspot",
+            createTooltipFunc: createArrowTooltip,
+            createTooltipArgs: {
+              label: connection.label,
+              icon: connection.hotspot.icon,
+            },
+            clickHandlerFunc: () => {
+              goToScene(connection.to, map.scenes[connection.to]?.title);
+            },
+          })),
+        },
+      ];
+    })
+  );
+}
+
+function MiniMap({ map, currentScene, onSceneClick, isMoving }) {
   const [mapZoom, setMapZoom] = useState(0.72);
 
-  const activeScene = sceneConfig[currentScene];
+  const activeScene = map.scenes[currentScene];
 
   function zoomInMap() {
     setMapZoom((prev) => Math.min(prev + 0.12, 1.25));
@@ -40,7 +90,7 @@ function MiniMap({ sceneConfig, currentScene, onSceneClick, isMoving }) {
       <div className="mini-map-header">
         <div>
           <div className="mini-map-title">SITE MAP</div>
-          <div className="mini-map-subtitle">Current walkthrough</div>
+          <div className="mini-map-subtitle">{map.name}</div>
         </div>
 
         <div className="mini-map-zoom-controls">
@@ -48,7 +98,11 @@ function MiniMap({ sceneConfig, currentScene, onSceneClick, isMoving }) {
             −
           </button>
 
-          <button type="button" onClick={resetMapZoom} className="mini-map-reset">
+          <button
+            type="button"
+            onClick={resetMapZoom}
+            className="mini-map-reset"
+          >
             reset
           </button>
 
@@ -62,14 +116,17 @@ function MiniMap({ sceneConfig, currentScene, onSceneClick, isMoving }) {
         <div
           className="mini-map-world"
           style={{
-            "--active-left": activeScene?.mapPosition.left || "50%",
-            "--active-top": activeScene?.mapPosition.top || "50%",
+            "--active-left": `${activeScene?.minimap.x ?? 50}%`,
+            "--active-top": `${activeScene?.minimap.y ?? 50}%`,
             "--map-zoom": mapZoom,
           }}
         >
-          <div className="mini-map-path-line"></div>
+          <div className="mini-map-path-line vertical-top"></div>
+          <div className="mini-map-path-line vertical-bottom"></div>
+          <div className="mini-map-path-line horizontal-left"></div>
+          <div className="mini-map-path-line horizontal-right"></div>
 
-          {Object.entries(sceneConfig).map(([sceneId, scene]) => (
+          {Object.entries(map.scenes).map(([sceneId, scene]) => (
             <button
               key={sceneId}
               disabled={isMoving}
@@ -77,14 +134,14 @@ function MiniMap({ sceneConfig, currentScene, onSceneClick, isMoving }) {
                 currentScene === sceneId ? "active" : ""
               }`}
               style={{
-                left: scene.mapPosition.left,
-                top: scene.mapPosition.top,
+                left: `${scene.minimap.x}%`,
+                top: `${scene.minimap.y}%`,
               }}
               onClick={() => onSceneClick(sceneId, scene.title)}
               title={scene.title}
             >
               <span className="mini-map-dot"></span>
-              <span className="mini-map-label">{scene.mapLabel}</span>
+              <span className="mini-map-label">{scene.label}</span>
             </button>
           ))}
         </div>
@@ -95,92 +152,27 @@ function MiniMap({ sceneConfig, currentScene, onSceneClick, isMoving }) {
 
 function App() {
   const viewerRef = useRef(null);
+  const viewerShellRef = useRef(null);
   const viewerInstance = useRef(null);
   const moveTimerRef = useRef(null);
   const isMovingRef = useRef(false);
-  const currentSceneRef = useRef("Sea");
+  const currentSceneRef = useRef(mapData.settings.firstScene);
 
-  const [currentScene, setCurrentScene] = useState("Sea");
+  const [currentScene, setCurrentScene] = useState(mapData.settings.firstScene);
   const [isMoving, setIsMoving] = useState(false);
   const [moveLabel, setMoveLabel] = useState("");
-  const viewerShellRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [debugEnabled, setDebugEnabled] = useState(true);
+  const [viewerDebug, setViewerDebug] = useState({
+  yaw: 0,
+  pitch: 0,
+  hfov: 0,
+});
 
-  const sceneConfig = useMemo(
-    () => ({
-      Sea: {
-  title: "Sea",
-  panorama: "/panos/sea.jpg",
-  mapLabel: "Sea",
-  mapPosition: { left: "50%", top: "52%" },
-  initialYaw: 0,
-  initialPitch: 0,
-  hotspots: [
-    { label: "Rome", target: "Rome", yaw: 0, pitch: -10, icon: "↑" },
-    { label: "Room", target: "Room", yaw: -90, pitch: -8, icon: "←" },
-    { label: "Heaven", target: "Heaven", yaw: 90, pitch: -8, icon: "→" },
-  ],
-},
+  const map = useMemo(() => mapData, []);
+  const mapValidation = useMemo(() => validateMapData(map), [map]);
 
-Rome: {
-  title: "Rome",
-  panorama: "/panos/drone.jpg",
-  mapLabel: "Rome",
-  mapPosition: { left: "50%", top: "22%" },
-  initialYaw: 0,
-  initialPitch: 0,
-  hotspots: [
-    { label: "River", target: "River", yaw: 0, pitch: -10, icon: "↑" },
-    { label: "Sea", target: "Sea", yaw: 180, pitch: -10, icon: "↓" },
-    { label: "Room", target: "Room", yaw: -90, pitch: -8, icon: "←" },
-    { label: "Heaven", target: "Heaven", yaw: 90, pitch: -8, icon: "→" },
-  ],
-},
-
-River: {
-  title: "River",
-  panorama: "/panos/river.jpg",
-  mapLabel: "River",
-  mapPosition: { left: "50%", top: "82%" },
-  initialYaw: 0,
-  initialPitch: 0,
-  hotspots: [
-    { label: "Rome", target: "Rome", yaw: 180, pitch: -10, icon: "↓" },
-    { label: "Room", target: "Room", yaw: -90, pitch: -8, icon: "←" },
-    { label: "Heaven", target: "Heaven", yaw: 90, pitch: -8, icon: "→" },
-  ],
-},
-
-Room: {
-  title: "Room",
-  panorama: "/panos/room.jpg",
-  mapLabel: "Room",
-  mapPosition: { left: "18%", top: "52%" },
-  initialYaw: 0,
-  initialPitch: 0,
-  hotspots: [
-    { label: "Sea", target: "Sea", yaw: 0, pitch: -10, icon: "↑" },
-    { label: "Rome", target: "Rome", yaw: 90, pitch: -8, icon: "→" },
-    { label: "River", target: "River", yaw: 180, pitch: -10, icon: "↓" },
-  ],
-},
-
-Heaven: {
-  title: "Heaven",
-  panorama: "/panos/heaven.jpg",
-  mapLabel: "Heaven",
-  mapPosition: { left: "82%", top: "52%" },
-  initialYaw: 0,
-  initialPitch: 0,
-  hotspots: [
-    { label: "Sea", target: "Sea", yaw: 0, pitch: -10, icon: "↑" },
-    { label: "Rome", target: "Rome", yaw: -90, pitch: -8, icon: "←" },
-    { label: "River", target: "River", yaw: 180, pitch: -10, icon: "↓" },
-  ],
-},
-    }),
-    []
-  );
+  const currentTitle = map.scenes[currentScene]?.title || "Street View";
 
   function setMovingState(value) {
     isMovingRef.current = value;
@@ -194,10 +186,10 @@ Heaven: {
 
   function animatedGoToScene(sceneId, label = "") {
     if (!viewerInstance.current || isMovingRef.current) return;
-    if (!sceneConfig[sceneId]) return;
+    if (!map.scenes[sceneId]) return;
     if (sceneId === currentSceneRef.current) return;
 
-    setMoveLabel(label || sceneConfig[sceneId].title || "Next Area");
+    setMoveLabel(label || map.scenes[sceneId].title || "Next Area");
     setMovingState(true);
 
     if (moveTimerRef.current) {
@@ -215,79 +207,84 @@ Heaven: {
     }, 650);
   }
 
-  useEffect(() => {
-  function handleFullscreenChange() {
-    const active = document.fullscreenElement === viewerShellRef.current;
-    setIsFullscreen(active);
+  async function toggleFullscreen() {
+    const shell = viewerShellRef.current;
+    if (!shell) return;
 
-    setTimeout(() => {
-      if (viewerInstance.current?.resize) {
-        viewerInstance.current.resize();
+    try {
+      if (!document.fullscreenElement) {
+        await shell.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
       }
-    }, 100);
+    } catch (error) {
+      console.error("Fullscreen failed:", error);
+    }
   }
 
-  document.addEventListener("fullscreenchange", handleFullscreenChange);
-
-  return () => {
-    document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  };
-}, []);
-
-  async function toggleFullscreen() {
-  const shell = viewerShellRef.current;
-  if (!shell) return;
+  async function copyCurrentHotspot() {
+  const text = `{
+  id: "${currentScene.toLowerCase()}-to-target",
+  from: "${currentScene}",
+  to: "TargetScene",
+  label: "Target Label",
+  type: "move",
+  hotspot: {
+    yaw: ${viewerDebug.yaw},
+    pitch: ${viewerDebug.pitch},
+    icon: "↑",
+  },
+},`;
 
   try {
-    if (!document.fullscreenElement) {
-      await shell.requestFullscreen();
-    } else {
-      await document.exitFullscreen();
-    }
+    await navigator.clipboard.writeText(text);
+    console.log("Copied hotspot:", text);
   } catch (error) {
-    console.error("Fullscreen failed:", error);
+    console.error("Failed to copy hotspot:", error);
   }
 }
 
   useEffect(() => {
+    function handleFullscreenChange() {
+      const active = document.fullscreenElement === viewerShellRef.current;
+      setIsFullscreen(active);
+
+      setTimeout(() => {
+        if (viewerInstance.current?.resize) {
+          viewerInstance.current.resize();
+        }
+      }, 100);
+    }
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+    if (!viewerInstance.current) return;
+
+    setViewerDebug({
+      yaw: Number(viewerInstance.current.getYaw()?.toFixed(2) || 0),
+      pitch: Number(viewerInstance.current.getPitch()?.toFixed(2) || 0),
+      hfov: Number(viewerInstance.current.getHfov()?.toFixed(2) || 0),
+    });
+  }, 250);
+
+      return () => clearInterval(interval);
+    }, []);
+
+  useEffect(() => {
     if (!viewerRef.current || !window.pannellum) return;
 
-    const pannellumScenes = Object.fromEntries(
-      Object.entries(sceneConfig).map(([sceneId, scene]) => [
-        sceneId,
-        {
-          title: scene.title,
-          type: "equirectangular",
-          panorama: scene.panorama,
-          pitch: scene.initialPitch,
-          yaw: scene.initialYaw,
-          hfov: window.innerWidth < 768 ? 90 : 110,
-
-          hotSpots: scene.hotspots.map((hotspot) => ({
-            pitch: hotspot.pitch,
-            yaw: hotspot.yaw,
-            type: "info",
-            text: hotspot.label,
-            cssClass: "hidden-default-hotspot",
-            createTooltipFunc: createArrowTooltip,
-            createTooltipArgs: {
-              label: hotspot.label,
-              icon: hotspot.icon,
-            },
-            clickHandlerFunc: () => {
-              animatedGoToScene(
-                hotspot.target,
-                sceneConfig[hotspot.target]?.title
-              );
-            },
-          })),
-        },
-      ])
-    );
+    const pannellumScenes = buildPannellumScenes(map, animatedGoToScene);
 
     viewerInstance.current = window.pannellum.viewer(viewerRef.current, {
       default: {
-        firstScene: "Sea",
+        firstScene: map.settings.firstScene,
         sceneFadeDuration: 300,
         autoLoad: true,
         showControls: true,
@@ -312,9 +309,7 @@ Heaven: {
         viewerInstance.current = null;
       }
     };
-  }, [sceneConfig]);
-
-  const currentTitle = sceneConfig[currentScene]?.title || "Street View";
+  }, [map]);
 
   return (
     <div className="app-shell">
@@ -326,12 +321,12 @@ Heaven: {
 
               <div>
                 <div className="brand-title">STREET VIEW</div>
-                <div className="brand-subtitle">EQUIRECTANGULAR DEMO</div>
+                <div className="brand-subtitle">STRUCTURED MAP DEMO</div>
               </div>
             </div>
 
             <div className="topbar-center">
-              {Object.entries(sceneConfig).map(([sceneId, scene]) => (
+              {Object.entries(map.scenes).map(([sceneId, scene]) => (
                 <button
                   key={sceneId}
                   disabled={isMoving}
@@ -362,7 +357,7 @@ Heaven: {
           <div>
             <div className="street-summary-title">{currentTitle}</div>
             <div className="street-summary-subtitle">
-              Drag the view. Arrows are embedded inside the 360 panorama.
+              Map is now structured as scenes and connections.
             </div>
           </div>
         </div>
@@ -374,39 +369,110 @@ Heaven: {
 
       <main className="street-viewer-wrapper">
         <div
-  ref={viewerShellRef}
-  className={`viewer-motion-shell ${isMoving ? "moving" : ""} ${
-    isFullscreen ? "is-fullscreen" : ""
-  }`}
->
-  <div ref={viewerRef} className="panorama-viewer" />
+          ref={viewerShellRef}
+          className={`viewer-motion-shell ${isMoving ? "moving" : ""} ${
+            isFullscreen ? "is-fullscreen" : ""
+          }`}
+        >
+          <div ref={viewerRef} className="panorama-viewer" />
 
-  <MiniMap
-    sceneConfig={sceneConfig}
-    currentScene={currentScene}
-    onSceneClick={animatedGoToScene}
-    isMoving={isMoving}
-  />
+          <MiniMap
+            map={map}
+            currentScene={currentScene}
+            onSceneClick={animatedGoToScene}
+            isMoving={isMoving}
+          />
 
+          <button
+            type="button"
+            className="custom-fullscreen-btn"
+            onClick={toggleFullscreen}
+            title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+          >
+            {isFullscreen ? "⤢" : "⛶"}
+          </button>
+
+          <div className={`debug-panel ${debugEnabled ? "open" : "closed"}`}>
   <button
     type="button"
-    className="custom-fullscreen-btn"
-    onClick={toggleFullscreen}
-    title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+    className="debug-toggle-btn"
+    onClick={() => setDebugEnabled((prev) => !prev)}
   >
-    {isFullscreen ? "⤢" : "⛶"}
+    {debugEnabled ? "Hide Debug" : "Show Debug"}
   </button>
 
-  <div className={`move-transition ${isMoving ? "active" : ""}`}>
-    <div className="move-tunnel"></div>
-    <div className="move-pulse"></div>
+  {debugEnabled && (
+    <>
+      <div className="debug-title">Viewer Debug</div>
 
-    <div className="move-text">
-      <div className="move-kicker">Moving to</div>
-      <div className="move-destination">{moveLabel}</div>
-    </div>
-  </div>
+      <div className="debug-row">
+        <span>Scene</span>
+        <strong>{currentScene}</strong>
+      </div>
+
+      <div className="debug-row">
+        <span>Yaw</span>
+        <strong>{viewerDebug.yaw}</strong>
+      </div>
+
+      <div className="debug-row">
+        <span>Pitch</span>
+        <strong>{viewerDebug.pitch}</strong>
+      </div>
+
+      <div className="debug-row">
+        <span>HFOV</span>
+        <strong>{viewerDebug.hfov}</strong>
+      </div>
+
+      <button
+        type="button"
+        className="debug-copy-btn"
+        onClick={copyCurrentHotspot}
+      >
+        Copy hotspot
+      </button>
+
+      {(mapValidation.errors.length > 0 ||
+        mapValidation.warnings.length > 0) && (
+        <div className="debug-validation">
+          {mapValidation.errors.length > 0 && (
+            <div>
+              <div className="debug-section-title error">Errors</div>
+              {mapValidation.errors.map((error) => (
+                <div key={error} className="debug-message error">
+                  {error}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {mapValidation.warnings.length > 0 && (
+            <div>
+              <div className="debug-section-title warning">Warnings</div>
+              {mapValidation.warnings.map((warning) => (
+                <div key={warning} className="debug-message warning">
+                  {warning}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  )}
 </div>
+
+          <div className={`move-transition ${isMoving ? "active" : ""}`}>
+            <div className="move-tunnel"></div>
+            <div className="move-pulse"></div>
+
+            <div className="move-text">
+              <div className="move-kicker">Moving to</div>
+              <div className="move-destination">{moveLabel}</div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );
