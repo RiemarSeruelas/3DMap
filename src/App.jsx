@@ -19,14 +19,42 @@ function createArrowTooltip(hotSpotDiv, args) {
 }
 
 function MiniMap({ sceneConfig, currentScene, onSceneClick, isMoving }) {
+  const [mapZoom, setMapZoom] = useState(0.72);
+
   const activeScene = sceneConfig[currentScene];
+
+  function zoomInMap() {
+    setMapZoom((prev) => Math.min(prev + 0.12, 1.25));
+  }
+
+  function zoomOutMap() {
+    setMapZoom((prev) => Math.max(prev - 0.12, 0.45));
+  }
+
+  function resetMapZoom() {
+    setMapZoom(0.72);
+  }
 
   return (
     <div className="mini-map">
       <div className="mini-map-header">
         <div>
           <div className="mini-map-title">SITE MAP</div>
-          <div className="mini-map-subtitle">Current walkthrough path</div>
+          <div className="mini-map-subtitle">Current walkthrough</div>
+        </div>
+
+        <div className="mini-map-zoom-controls">
+          <button type="button" onClick={zoomOutMap} disabled={mapZoom <= 0.45}>
+            −
+          </button>
+
+          <button type="button" onClick={resetMapZoom} className="mini-map-reset">
+            reset
+          </button>
+
+          <button type="button" onClick={zoomInMap} disabled={mapZoom >= 1.25}>
+            +
+          </button>
         </div>
       </div>
 
@@ -36,6 +64,7 @@ function MiniMap({ sceneConfig, currentScene, onSceneClick, isMoving }) {
           style={{
             "--active-left": activeScene?.mapPosition.left || "50%",
             "--active-top": activeScene?.mapPosition.top || "50%",
+            "--map-zoom": mapZoom,
           }}
         >
           <div className="mini-map-path-line"></div>
@@ -74,175 +103,81 @@ function App() {
   const [currentScene, setCurrentScene] = useState("Sea");
   const [isMoving, setIsMoving] = useState(false);
   const [moveLabel, setMoveLabel] = useState("");
+  const viewerShellRef = useRef(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const sceneConfig = useMemo(
     () => ({
       Sea: {
-        title: "Sea",
-        panorama: "/panos/sea.jpg",
-        mapLabel: "Sea",
-        mapPosition: { left: "18%", top: "68%" },
-        initialYaw: 0,
-        initialPitch: 0,
-        hotspots: [
-          {
-            label: "Rome",
-            target: "Rome",
-            yaw: 0,
-            pitch: -10,
-            icon: "↑",
-          },
-          {
-            label: "Room",
-            target: "Room",
-            yaw: -90,
-            pitch: -8,
-            icon: "↑",
-          },
-          {
-            label: "Heaven",
-            target: "Heaven",
-            yaw: 90,
-            pitch: -8,
-            icon: "↑",
-          },
-        ],
-      },
+  title: "Sea",
+  panorama: "/panos/sea.jpg",
+  mapLabel: "Sea",
+  mapPosition: { left: "50%", top: "52%" },
+  initialYaw: 0,
+  initialPitch: 0,
+  hotspots: [
+    { label: "Rome", target: "Rome", yaw: 0, pitch: -10, icon: "↑" },
+    { label: "Room", target: "Room", yaw: -90, pitch: -8, icon: "←" },
+    { label: "Heaven", target: "Heaven", yaw: 90, pitch: -8, icon: "→" },
+  ],
+},
 
-      Rome: {
-        title: "Rome",
-        panorama: "/panos/drone.jpg",
-        mapLabel: "Rome",
-        mapPosition: { left: "45%", top: "48%" },
-        initialYaw: 0,
-        initialPitch: 0,
-        hotspots: [
-          {
-            label: "River",
-            target: "River",
-            yaw: 0,
-            pitch: -10,
-            icon: "↑",
-          },
-          {
-            label: "Sea",
-            target: "Sea",
-            yaw: 180,
-            pitch: -10,
-            icon: "↑",
-          },
-          {
-            label: "Room",
-            target: "Room",
-            yaw: -90,
-            pitch: -8,
-            icon: "↑",
-          },
-          {
-            label: "Heaven",
-            target: "Heaven",
-            yaw: 90,
-            pitch: -8,
-            icon: "↑",
-          },
-        ],
-      },
+Rome: {
+  title: "Rome",
+  panorama: "/panos/drone.jpg",
+  mapLabel: "Rome",
+  mapPosition: { left: "50%", top: "22%" },
+  initialYaw: 0,
+  initialPitch: 0,
+  hotspots: [
+    { label: "River", target: "River", yaw: 0, pitch: -10, icon: "↑" },
+    { label: "Sea", target: "Sea", yaw: 180, pitch: -10, icon: "↓" },
+    { label: "Room", target: "Room", yaw: -90, pitch: -8, icon: "←" },
+    { label: "Heaven", target: "Heaven", yaw: 90, pitch: -8, icon: "→" },
+  ],
+},
 
-      River: {
-        title: "River",
-        panorama: "/panos/river.jpg",
-        mapLabel: "River",
-        mapPosition: { left: "78%", top: "28%" },
-        initialYaw: 0,
-        initialPitch: 0,
-        hotspots: [
-          {
-            label: "Rome",
-            target: "Rome",
-            yaw: 180,
-            pitch: -10,
-            icon: "↑",
-          },
-          {
-            label: "Room",
-            target: "Room",
-            yaw: -90,
-            pitch: -8,
-            icon: "↑",
-          },
-          {
-            label: "Heaven",
-            target: "Heaven",
-            yaw: 90,
-            pitch: -8,
-            icon: "↑",
-          },
-        ],
-      },
+River: {
+  title: "River",
+  panorama: "/panos/river.jpg",
+  mapLabel: "River",
+  mapPosition: { left: "50%", top: "82%" },
+  initialYaw: 0,
+  initialPitch: 0,
+  hotspots: [
+    { label: "Rome", target: "Rome", yaw: 180, pitch: -10, icon: "↓" },
+    { label: "Room", target: "Room", yaw: -90, pitch: -8, icon: "←" },
+    { label: "Heaven", target: "Heaven", yaw: 90, pitch: -8, icon: "→" },
+  ],
+},
 
-      Room: {
-        title: "Room",
-        panorama: "/panos/room.jpg",
-        mapLabel: "Room",
-        mapPosition: { left: "22%", top: "28%" },
-        initialYaw: 0,
-        initialPitch: 0,
-        hotspots: [
-          {
-            label: "Sea",
-            target: "Sea",
-            yaw: 0,
-            pitch: -10,
-            icon: "↑",
-          },
-          {
-            label: "Rome",
-            target: "Rome",
-            yaw: 90,
-            pitch: -8,
-            icon: "↑",
-          },
-          {
-            label: "River",
-            target: "River",
-            yaw: 180,
-            pitch: -10,
-            icon: "↑",
-          },
-        ],
-      },
+Room: {
+  title: "Room",
+  panorama: "/panos/room.jpg",
+  mapLabel: "Room",
+  mapPosition: { left: "18%", top: "52%" },
+  initialYaw: 0,
+  initialPitch: 0,
+  hotspots: [
+    { label: "Sea", target: "Sea", yaw: 0, pitch: -10, icon: "↑" },
+    { label: "Rome", target: "Rome", yaw: 90, pitch: -8, icon: "→" },
+    { label: "River", target: "River", yaw: 180, pitch: -10, icon: "↓" },
+  ],
+},
 
-      Heaven: {
-        title: "Heaven",
-        panorama: "/panos/heaven.jpg",
-        mapLabel: "Heaven",
-        mapPosition: { left: "72%", top: "72%" },
-        initialYaw: 0,
-        initialPitch: 0,
-        hotspots: [
-          {
-            label: "Sea",
-            target: "Sea",
-            yaw: 0,
-            pitch: -10,
-            icon: "↑",
-          },
-          {
-            label: "Rome",
-            target: "Rome",
-            yaw: -90,
-            pitch: -8,
-            icon: "↑",
-          },
-          {
-            label: "River",
-            target: "River",
-            yaw: 180,
-            pitch: -10,
-            icon: "↑",
-          },
-        ],
-      },
+Heaven: {
+  title: "Heaven",
+  panorama: "/panos/heaven.jpg",
+  mapLabel: "Heaven",
+  mapPosition: { left: "82%", top: "52%" },
+  initialYaw: 0,
+  initialPitch: 0,
+  hotspots: [
+    { label: "Sea", target: "Sea", yaw: 0, pitch: -10, icon: "↑" },
+    { label: "Rome", target: "Rome", yaw: -90, pitch: -8, icon: "←" },
+    { label: "River", target: "River", yaw: 180, pitch: -10, icon: "↓" },
+  ],
+},
     }),
     []
   );
@@ -279,6 +214,40 @@ function App() {
       }, 250);
     }, 650);
   }
+
+  useEffect(() => {
+  function handleFullscreenChange() {
+    const active = document.fullscreenElement === viewerShellRef.current;
+    setIsFullscreen(active);
+
+    setTimeout(() => {
+      if (viewerInstance.current?.resize) {
+        viewerInstance.current.resize();
+      }
+    }, 100);
+  }
+
+  document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+  return () => {
+    document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  };
+}, []);
+
+  async function toggleFullscreen() {
+  const shell = viewerShellRef.current;
+  if (!shell) return;
+
+  try {
+    if (!document.fullscreenElement) {
+      await shell.requestFullscreen();
+    } else {
+      await document.exitFullscreen();
+    }
+  } catch (error) {
+    console.error("Fullscreen failed:", error);
+  }
+}
 
   useEffect(() => {
     if (!viewerRef.current || !window.pannellum) return;
@@ -322,6 +291,8 @@ function App() {
         sceneFadeDuration: 300,
         autoLoad: true,
         showControls: true,
+        showZoomCtrl: true,
+        showFullscreenCtrl: false,
         compass: false,
       },
       scenes: pannellumScenes,
@@ -402,26 +373,40 @@ function App() {
       </section>
 
       <main className="street-viewer-wrapper">
-        <div className={`viewer-motion-shell ${isMoving ? "moving" : ""}`}>
-          <div ref={viewerRef} className="panorama-viewer" />
+        <div
+  ref={viewerShellRef}
+  className={`viewer-motion-shell ${isMoving ? "moving" : ""} ${
+    isFullscreen ? "is-fullscreen" : ""
+  }`}
+>
+  <div ref={viewerRef} className="panorama-viewer" />
 
-          <MiniMap
-            sceneConfig={sceneConfig}
-            currentScene={currentScene}
-            onSceneClick={animatedGoToScene}
-            isMoving={isMoving}
-          />
+  <MiniMap
+    sceneConfig={sceneConfig}
+    currentScene={currentScene}
+    onSceneClick={animatedGoToScene}
+    isMoving={isMoving}
+  />
 
-          <div className={`move-transition ${isMoving ? "active" : ""}`}>
-            <div className="move-tunnel"></div>
-            <div className="move-pulse"></div>
+  <button
+    type="button"
+    className="custom-fullscreen-btn"
+    onClick={toggleFullscreen}
+    title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+  >
+    {isFullscreen ? "⤢" : "⛶"}
+  </button>
 
-            <div className="move-text">
-              <div className="move-kicker">Moving to</div>
-              <div className="move-destination">{moveLabel}</div>
-            </div>
-          </div>
-        </div>
+  <div className={`move-transition ${isMoving ? "active" : ""}`}>
+    <div className="move-tunnel"></div>
+    <div className="move-pulse"></div>
+
+    <div className="move-text">
+      <div className="move-kicker">Moving to</div>
+      <div className="move-destination">{moveLabel}</div>
+    </div>
+  </div>
+</div>
       </main>
     </div>
   );
