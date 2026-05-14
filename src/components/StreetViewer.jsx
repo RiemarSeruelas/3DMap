@@ -29,77 +29,74 @@ function getSceneConnections(map, sceneId) {
 }
 
 function MiniMap({ map, currentScene, onSceneClick, isMoving }) {
-  const [mapZoom, setMapZoom] = useState(0.72);
+  const currentSceneData = map.scenes?.[currentScene];
 
-  const activeScene = map.scenes[currentScene];
+  const currentX =
+    currentSceneData?.mapPoint?.x ?? currentSceneData?.minimap?.x ?? 50;
+
+  const currentY =
+    currentSceneData?.mapPoint?.y ?? currentSceneData?.minimap?.y ?? 50;
+
+  const moveX = 50 - currentX;
+  const moveY = 50 - currentY;
 
   return (
-    <div className="mini-map">
+    <div className="mini-map image-mini-map">
       <div className="mini-map-header">
         <div>
           <div className="mini-map-title">SITE MAP</div>
-          <div className="mini-map-subtitle">{map.name}</div>
-        </div>
-
-        <div className="mini-map-zoom-controls">
-          <button
-            type="button"
-            onClick={() => setMapZoom((prev) => Math.max(prev - 0.12, 0.45))}
-            disabled={mapZoom <= 0.45}
-          >
-            −
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setMapZoom(0.72)}
-            className="mini-map-reset"
-          >
-            reset
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setMapZoom((prev) => Math.min(prev + 0.12, 1.25))}
-            disabled={mapZoom >= 1.25}
-          >
-            +
-          </button>
+          <div className="mini-map-subtitle">
+            {currentSceneData?.label || currentSceneData?.title || map.name}
+          </div>
         </div>
       </div>
 
-      <div className="mini-map-body">
+      <div className="image-mini-map-body">
         <div
-          className="mini-map-world"
+          className="mini-map-moving-layer"
           style={{
-            "--active-left": `${activeScene?.minimap?.x ?? 50}%`,
-            "--active-top": `${activeScene?.minimap?.y ?? 50}%`,
-            "--map-zoom": mapZoom,
+            transform: `translate(${moveX}%, ${moveY}%)`,
           }}
         >
-          <div className="mini-map-path-line vertical-top"></div>
-          <div className="mini-map-path-line vertical-bottom"></div>
-          <div className="mini-map-path-line horizontal-left"></div>
-          <div className="mini-map-path-line horizontal-right"></div>
+          <img
+            src={map.mapImage || "/maps/savoury-placeholder.jpg"}
+            alt={map.name}
+            className="image-mini-map-img"
+          />
 
-          {Object.entries(map.scenes).map(([sceneId, scene]) => (
-            <button
-              key={sceneId}
-              disabled={isMoving}
-              className={`mini-map-node ${
-                currentScene === sceneId ? "active" : ""
-              }`}
-              style={{
-                left: `${scene.minimap?.x ?? 50}%`,
-                top: `${scene.minimap?.y ?? 50}%`,
-              }}
-              onClick={() => onSceneClick(sceneId, scene.title)}
-              title={scene.title}
-            >
-              <span className="mini-map-dot"></span>
-              <span className="mini-map-label">{scene.label}</span>
-            </button>
-          ))}
+          <svg
+            className="image-mini-map-svg"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+          >
+            {Object.entries(map.scenes).map(([sceneId, scene]) => {
+              const x = scene.mapPoint?.x ?? scene.minimap?.x ?? 50;
+              const y = scene.mapPoint?.y ?? scene.minimap?.y ?? 50;
+              const active = currentScene === sceneId;
+
+              return (
+                <g
+                  key={sceneId}
+                  className={`mini-map-scene-point ${active ? "active" : ""}`}
+                  onClick={() => {
+                    if (!isMoving && !active) {
+                      onSceneClick(sceneId, scene.title);
+                    }
+                  }}
+                >
+                  <circle cx={x} cy={y} r={active ? 3.2 : 2.4} />
+
+                  <text x={x} y={y - 4.5} textAnchor="middle">
+                    {scene.label}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+
+        <div className="mini-map-center-position">
+          <span></span>
         </div>
       </div>
     </div>

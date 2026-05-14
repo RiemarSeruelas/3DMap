@@ -4,6 +4,7 @@ import KioskPage from "./pages/KioskPage";
 import AreaMapPage from "./pages/AreaMapPage";
 import StreetViewPage from "./pages/StreetViewPage";
 
+
 function ProtectedRoute({ children }) {
   const isLoggedIn = sessionStorage.getItem("streetViewAuth") === "true";
 

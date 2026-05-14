@@ -36,24 +36,22 @@ function StreetViewPage() {
   }
 
   return (
-    <div className="viewer-page">
-      <div className="viewer-page-inner">
-        <header className="viewer-page-header">
-          <button
-            className="back-btn"
-            onClick={() => navigate(`/map/${siteId}`)}
-          >
-            ← Back to Map
-          </button>
+    <div className="viewer-page clean-viewer-page">
+      <button
+        className="floating-back-btn"
+        onClick={() => navigate(`/map/${siteId}`)}
+      >
+        ← Map
+      </button>
 
-          <div>
-            <div className="viewer-kicker">{site.name}</div>
-            <h1>{area.name}</h1>
-          </div>
-        </header>
-
-        <StreetViewer mapData={area.tour} />
+      <div className="viewer-area-pill">
+        <span>{site.name}</span>
+        <strong>{area.name}</strong>
       </div>
+
+      <main className="clean-viewer-body">
+        <StreetViewer mapData={area.tour} />
+      </main>
     </div>
   );
 }

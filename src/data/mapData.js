@@ -7,7 +7,7 @@ export const siteOptions = [
   },
   {
     id: "dressings",
-    name: "Dressings",
+    name: "Dressings Block",
     subtitle: "Dressings manufacturing area",
     image: "/maps/dressings-placeholder.jpg",
   },
@@ -77,6 +77,7 @@ const savouryProductTour = {
   id: "savoury-product-tour",
   name: "Savoury Product Tour",
   version: 1,
+  mapImage: "/maps/savoury-placeholder.jpg",
 
   settings: {
     firstScene: "ProductEntrance",
@@ -91,7 +92,7 @@ const savouryProductTour = {
       label: "Entrance",
       panorama: "/panos/drone.jpg",
 
-      minimap: {
+      mapPoint: {
         x: 50,
         y: 80,
       },
@@ -109,9 +110,45 @@ const savouryProductTour = {
       label: "Middle",
       panorama: "/panos/heaven.jpg",
 
-      minimap: {
+      mapPoint: {
         x: 50,
-        y: 50,
+        y: 62,
+      },
+
+      view: {
+        initialYaw: 0,
+        initialPitch: 0,
+        initialHfov: 110,
+      },
+    },
+
+    ProductFiller: {
+      id: "ProductFiller",
+      title: "Product Filler Area",
+      label: "Filler",
+      panorama: "/panos/sea.jpg",
+
+      mapPoint: {
+        x: 50,
+        y: 47,
+      },
+
+      view: {
+        initialYaw: 0,
+        initialPitch: 0,
+        initialHfov: 110,
+      },
+    },
+
+    ProductPacking: {
+      id: "ProductPacking",
+      title: "Product Packing Area",
+      label: "Packing",
+      panorama: "/panos/room.jpg",
+
+      mapPoint: {
+        x: 50,
+        y: 32,
       },
 
       view: {
@@ -127,9 +164,9 @@ const savouryProductTour = {
       label: "End",
       panorama: "/panos/river.jpg",
 
-      minimap: {
+      mapPoint: {
         x: 50,
-        y: 20,
+        y: 18,
       },
 
       view: {
@@ -168,8 +205,60 @@ const savouryProductTour = {
     },
 
     {
-      id: "product-middle-to-end",
+      id: "product-middle-to-filler",
       from: "ProductMiddle",
+      to: "ProductFiller",
+      label: "Go Forward",
+      type: "move",
+      hotspot: {
+        yaw: 0,
+        pitch: -8,
+        icon: "↑",
+      },
+    },
+
+    {
+      id: "product-filler-to-middle",
+      from: "ProductFiller",
+      to: "ProductMiddle",
+      label: "Go Back",
+      type: "move",
+      hotspot: {
+        yaw: 180,
+        pitch: -8,
+        icon: "↓",
+      },
+    },
+
+    {
+      id: "product-filler-to-packing",
+      from: "ProductFiller",
+      to: "ProductPacking",
+      label: "Go Forward",
+      type: "move",
+      hotspot: {
+        yaw: 0,
+        pitch: -8,
+        icon: "↑",
+      },
+    },
+
+    {
+      id: "product-packing-to-filler",
+      from: "ProductPacking",
+      to: "ProductFiller",
+      label: "Go Back",
+      type: "move",
+      hotspot: {
+        yaw: 180,
+        pitch: -8,
+        icon: "↓",
+      },
+    },
+
+    {
+      id: "product-packing-to-end",
+      from: "ProductPacking",
       to: "ProductEnd",
       label: "Go Forward",
       type: "move",
@@ -181,9 +270,9 @@ const savouryProductTour = {
     },
 
     {
-      id: "product-end-to-middle",
+      id: "product-end-to-packing",
       from: "ProductEnd",
-      to: "ProductMiddle",
+      to: "ProductPacking",
       label: "Go Back",
       type: "move",
       hotspot: {

@@ -8,36 +8,30 @@ function AreaMapPage() {
 
   const site = factoryMaps[siteId];
   const [hoveredArea, setHoveredArea] = useState(null);
+  const [selectedArea, setSelectedArea] = useState(null);
 
   const selectedAreaName = useMemo(() => {
-    if (!hoveredArea) return "Click a highlighted mapped area";
-    return hoveredArea.name;
-  }, [hoveredArea]);
+    if (selectedArea) return `Opening ${selectedArea.name}`;
+    if (hoveredArea) return hoveredArea.name;
+    return "Click a mapped area";
+  }, [hoveredArea, selectedArea]);
 
   if (!site) {
     return <Navigate to="/" replace />;
   }
 
+  function openArea(area) {
+    setSelectedArea(area);
+
+    setTimeout(() => {
+      navigate(`/viewer/${site.id}/${area.id}`);
+    }, 750);
+  }
+
   return (
-    <div className="area-page">
-      <header className="area-floating-header">
-        <button className="back-btn" onClick={() => navigate("/")}>
-          ← Back
-        </button>
-
-        <div className="area-header-info">
-          <div className="area-kicker">SELECT AREA</div>
-          <h1>{site.name}</h1>
-          <p>{selectedAreaName}</p>
-        </div>
-
-        <div className="area-header-tip">
-          Edit polygon <code>points</code> in <code>mapData.js</code>
-        </div>
-      </header>
-
-      <main className="area-center-stage">
-        <section className="area-map-card">
+    <div className={`area-page simple-map-page ${selectedArea ? "area-switching" : ""}`}>
+      <main className="simple-map-body">
+        <section className="area-map-card simple-map-card">
           <img src={site.mapImage} alt={site.name} className="area-map-image" />
 
           <svg
@@ -49,13 +43,43 @@ function AreaMapPage() {
               <polygon
                 key={area.id}
                 points={area.points}
-                className="clickable-area"
+                className={`clickable-area ${
+                  hoveredArea?.id === area.id ? "is-hovered" : ""
+                } ${selectedArea?.id === area.id ? "is-selected" : ""}`}
                 onMouseEnter={() => setHoveredArea(area)}
                 onMouseLeave={() => setHoveredArea(null)}
-                onClick={() => navigate(`/viewer/${site.id}/${area.id}`)}
+                onClick={() => openArea(area)}
               />
             ))}
           </svg>
+
+          <div className="map-floating-info">
+            <button
+              type="button"
+              className="map-back-btn"
+              onClick={() => navigate("/")}
+            >
+              ← Back
+            </button>
+
+            <div>
+              <div className="map-floating-kicker">SELECT AREA</div>
+              <div className="map-floating-title">{site.name}</div>
+              <div className="map-floating-subtitle">{selectedAreaName}</div>
+            </div>
+          </div>
+
+          {selectedArea && (
+            <div className="area-open-transition">
+              <div className="area-open-ring"></div>
+              <div className="area-open-pulse"></div>
+
+              <div className="area-open-label">
+                <span>ENTERING AREA</span>
+                <strong>{selectedArea.name}</strong>
+              </div>
+            </div>
+          )}
         </section>
       </main>
     </div>
