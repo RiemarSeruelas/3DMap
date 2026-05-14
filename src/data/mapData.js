@@ -6,24 +6,6 @@ export const siteOptions = [
     image: "/maps/savoury-placeholder.jpg",
   },
   {
-    id: "rd",
-    name: "Research and Development",
-    subtitle: "R&D laboratories and test areas",
-    image: "/maps/rd-placeholder.jpg",
-  },
-  {
-    id: "hr",
-    name: "Human Resource",
-    subtitle: "HR and people services",
-    image: "/maps/hr-placeholder.jpg",
-  },
-  {
-    id: "engineering",
-    name: "Engineering",
-    subtitle: "Utilities, workshop, and maintenance",
-    image: "/maps/engineering-placeholder.jpg",
-  },
-  {
     id: "dressings",
     name: "Dressings",
     subtitle: "Dressings manufacturing area",
@@ -31,15 +13,6 @@ export const siteOptions = [
   },
 ];
 
-/*
-  This creates a simple tour with only ONE panorama scene.
-
-  Example:
-  panorama: "/panos/savoury/admin.jpg"
-
-  Means your file should be placed here:
-  public/panos/savoury/admin.jpg
-*/
 function createSingleSceneTour({
   id,
   name,
@@ -256,38 +229,6 @@ const savouryLogisticsTour = createSingleSceneTour({
 
 /* ================= OTHER SAMPLE TOURS ================= */
 
-const rdLabTour = createSingleSceneTour({
-  id: "rd-lab-tour",
-  name: "R&D Laboratory Tour",
-  sceneId: "RDLab",
-  sceneTitle: "R&D Laboratory",
-  panorama: "/panos/rd/lab.jpg",
-});
-
-const hrOfficeTour = createSingleSceneTour({
-  id: "hr-office-tour",
-  name: "HR Office Tour",
-  sceneId: "HROffice",
-  sceneTitle: "HR Office",
-  panorama: "/panos/hr/office.jpg",
-});
-
-const engineeringWorkshopTour = createSingleSceneTour({
-  id: "engineering-workshop-tour",
-  name: "Engineering Workshop Tour",
-  sceneId: "EngineeringWorkshop",
-  sceneTitle: "Engineering Workshop",
-  panorama: "/panos/engineering/workshop.jpg",
-});
-
-const engineeringUtilitiesTour = createSingleSceneTour({
-  id: "engineering-utilities-tour",
-  name: "Engineering Utilities Tour",
-  sceneId: "EngineeringUtilities",
-  sceneTitle: "Utilities Area",
-  panorama: "/panos/engineering/utilities.jpg",
-});
-
 const dressingsMainTour = createSingleSceneTour({
   id: "dressings-main-tour",
   name: "Dressings Main Tour",
@@ -350,57 +291,6 @@ export const factoryMaps = {
     ],
   },
 
-  rd: {
-    id: "rd",
-    name: "Research and Development",
-    mapImage: "/maps/rd-placeholder.jpg",
-
-    areas: [
-      {
-        id: "rd-lab",
-        name: "R&D Laboratory",
-        points: "20,25 55,20 65,42 45,60 22,55",
-        tour: rdLabTour,
-      },
-    ],
-  },
-
-  hr: {
-    id: "hr",
-    name: "Human Resource",
-    mapImage: "/maps/hr-placeholder.jpg",
-
-    areas: [
-      {
-        id: "hr-office",
-        name: "HR Office",
-        points: "30,30 70,30 72,65 28,68",
-        tour: hrOfficeTour,
-      },
-    ],
-  },
-
-  engineering: {
-    id: "engineering",
-    name: "Engineering",
-    mapImage: "/maps/engineering-placeholder.jpg",
-
-    areas: [
-      {
-        id: "engineering-workshop",
-        name: "Engineering Workshop",
-        points: "12,40 38,32 55,44 52,72 25,80",
-        tour: engineeringWorkshopTour,
-      },
-      {
-        id: "engineering-utilities",
-        name: "Utilities Area",
-        points: "60,25 88,28 86,62 66,70 55,50",
-        tour: engineeringUtilitiesTour,
-      },
-    ],
-  },
-
   dressings: {
     id: "dressings",
     name: "Dressings",
@@ -408,9 +298,57 @@ export const factoryMaps = {
 
     areas: [
       {
-        id: "dressings-main",
-        name: "Dressings Main Area",
-        points: "18,35 48,22 78,36 70,74 32,80",
+        id: "dressings-relishes",
+        name: "Dressings Relishes Area",
+        points: "12.2,14.9 20.5,14.8 20.8,24.7 13,24.7",
+        tour: dressingsMainTour,
+      },
+      {
+        id: "dressings-prodhalal",
+        name: "Dressings Production (Halal) Area",
+        points: "36.3, 34 54,34 54,39.6 36.3,39.6",
+        tour: dressingsMainTour,
+      },
+      {
+        id: "dressings-logistics",
+        name: "Dressings Logistics Area",
+        points: "15.3,56 27.4,56 27.4,61 15.3,61",
+        tour: dressingsMainTour,
+      },
+      {
+        id: "dressings-engineering",
+        name: "Dressings Engineering Area",
+        points: "34,48 44,48 44,53 34,53",
+        tour: dressingsMainTour,
+      },
+      {
+        id: "dressings-qa",
+        name: "Dressings Quality Assurance Area",
+        points: "45.8, 48.5 54.5,48.5 54.5,45.3 54.5,45.3 56.5,45.3 56.5, 53.4 45.8, 53.4",
+        tour: dressingsMainTour,
+      },
+      {
+        id: "dressings-palletshed",
+        name: "Dressings Pallet Shipment Area",
+        points: "23.6, 78 30.8,78 30.8,84 23.6,84",
+        tour: dressingsMainTour,
+      },
+      {
+        id: "dressings-fgloading",
+        name: "Dressings Finished Goods Loading Area",
+        points: "35, 77 53,77 53,85 35,85",
+        tour: dressingsMainTour,
+      },
+      {
+        id: "dressings-wastedisposal",
+        name: "Dressings Waste Disposal Area",
+        points: "35, 87 56,87 56,92 35,92",
+        tour: dressingsMainTour,
+      },
+      {
+        id: "dressings-prodnonhalal",
+        name: "Dressings Production (Non-Halal) Area",
+        points: "85,2.4 97.4,2.4 96.4,21.5 84,21.5",
         tour: dressingsMainTour,
       },
     ],
