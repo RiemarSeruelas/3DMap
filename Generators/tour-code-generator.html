@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mapData.js Generator</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eef4fb;
+      color: #0f172a;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 420px minmax(0, 1fr);
+    }
+
+    .panel {
+      padding: 22px;
+      background: white;
+      border-right: 1px solid #dbe3ef;
+      overflow: auto;
+      box-shadow: 12px 0 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .workspace {
+      padding: 22px;
+      display: grid;
+      grid-template-rows: auto 1fr 1fr;
+      gap: 14px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      font-weight: 950;
+    }
+
+    p {
+      margin: 0 0 18px;
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    label {
+      display: block;
+      margin: 13px 0 7px;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.12em;
+      color: #334155;
+      text-transform: uppercase;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #dbe3ef;
+      border-radius: 12px;
+      padding: 10px 12px;
+      outline: none;
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+      background: #f8fafc;
+    }
+
+    textarea {
+      resize: vertical;
+      font-family: Consolas, monospace;
+      line-height: 1.45;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #0f8cff;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(15, 140, 255, 0.14);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 16px;
+    }
+
+    button {
+      min-height: 40px;
+      border: none;
+      border-radius: 12px;
+      padding: 8px 10px;
+      color: white;
+      background: linear-gradient(135deg, #062b63, #0f8cff);
+      font-size: 12px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button.green {
+      background: linear-gradient(135deg, #064e3b, #059669);
+    }
+
+    button.dark {
+      background: linear-gradient(135deg, #020617, #334155);
+    }
+
+    button.red {
+      background: linear-gradient(135deg, #7f1d1d, #ef4444);
+    }
+
+    .note {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      color: #475569;
+      background: #f1f5f9;
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1.45;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .box-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .box-title h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 950;
+    }
+
+    .copy-note {
+      color: #059669;
+      font-size: 12px;
+      font-weight: 900;
+      display: none;
+    }
+
+    .copy-note.show {
+      display: block;
+    }
+
+    .code-box,
+    .file-box {
+      width: 100%;
+      height: 100%;
+      min-height: 260px;
+      padding: 16px;
+      border-radius: 18px;
+      border: none;
+      color: #e2e8f0;
+      background: #020617;
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.2);
+      font-size: 13px;
+      line-height: 1.55;
+      white-space: pre;
+      overflow: auto;
+      font-family: Consolas, monospace;
+    }
+
+    .file-box {
+      background: #111827;
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        border-right: none;
+        border-bottom: 1px solid #dbe3ef;
+      }
+
+      .workspace {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="panel">
+      <h1>mapData.js Generator</h1>
+      <p>
+        Choose what you want to generate, fill the simple fields, then copy the
+        snippet or update your pasted <strong>mapData.js</strong>.
+      </p>
+
+      <label>Generate Option</label>
+      <select id="mode">
+        <option value="siteOption">Site Option</option>
+        <option value="scene">Scene</option>
+        <option value="connection">Connection</option>
+        <option value="singleSceneTour">Single Scene Tour</option>
+      </select>
+
+      <!-- SITE OPTION -->
+      <div id="siteOptionFields">
+        <label>Site ID</label>
+        <input id="siteId" value="savoury" />
+
+        <label>Site Name</label>
+        <input id="siteName" value="Savoury Block" />
+
+        <label>Subtitle</label>
+        <input id="siteSubtitle" value="Production and process area" />
+
+        <label>Map Image</label>
+        <input id="siteImage" value="/maps/savoury-placeholder.jpg" />
+      </div>
+
+      <!-- SCENE -->
+      <div id="sceneFields" class="hidden">
+        <label>Target Tour Variable</label>
+        <input id="targetTourForScene" value="savouryProductTour" />
+
+        <label>Scene ID</label>
+        <input id="sceneId" value="ProductEntrance" />
+
+        <label>Title</label>
+        <input id="sceneTitle" value="Product Entrance" />
+
+        <label>Label</label>
+        <input id="sceneLabel" value="Entrance" />
+
+        <label>Panorama Path</label>
+        <input id="scenePanorama" value="/panos/drone.jpg" />
+
+        <div class="grid-2">
+          <div>
+            <label>Map X</label>
+            <input id="sceneX" value="50" />
+          </div>
+
+          <div>
+            <label>Map Y</label>
+            <input id="sceneY" value="80" />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label>Initial Yaw</label>
+            <input id="sceneYaw" value="0" />
+          </div>
+
+          <div>
+            <label>Initial Pitch</label>
+            <input id="scenePitch" value="0" />
+          </div>
+        </div>
+
+        <label>Initial HFOV</label>
+        <input id="sceneHfov" value="110" />
+      </div>
+
+      <!-- CONNECTION -->
+      <div id="connectionFields" class="hidden">
+        <label>Target Tour Variable</label>
+        <input id="targetTourForConnection" value="savouryProductTour" />
+
+        <label>Connection ID</label>
+        <input id="connectionId" value="product-middle-to-entrance" />
+
+        <div class="grid-2">
+          <div>
+            <label>From Scene</label>
+            <input id="connectionFrom" value="ProductMiddle" />
+          </div>
+
+          <div>
+            <label>To Scene</label>
+            <input id="connectionTo" value="ProductEntrance" />
+          </div>
+        </div>
+
+        <label>Label</label>
+        <input id="connectionLabel" value="Go Back" />
+
+        <div class="grid-2">
+          <div>
+            <label>Yaw</label>
+            <input id="connectionYaw" value="180" />
+          </div>
+
+          <div>
+            <label>Pitch</label>
+            <input id="connectionPitch" value="-8" />
+          </div>
+        </div>
+
+        <label>Icon</label>
+        <input id="connectionIcon" value="↓" />
+      </div>
+
+      <!-- SINGLE SCENE TOUR -->
+      <div id="singleSceneTourFields" class="hidden">
+        <label>Tour Variable Name</label>
+        <input id="singleTourVar" value="savouryEngineeringTour" />
+
+        <label>Tour ID</label>
+        <input id="singleTourId" value="savoury-engineering-tour" />
+
+        <label>Tour Name</label>
+        <input id="singleTourName" value="Savoury Engineering Tour" />
+
+        <label>Scene ID</label>
+        <input id="singleSceneId" value="SavouryEngineering" />
+
+        <label>Scene Title</label>
+        <input id="singleSceneTitle" value="Savoury Engineering Area" />
+
+        <label>Panorama Path</label>
+        <input id="singlePanorama" value="/panos/room.jpg" />
+      </div>
+
+      <div class="actions">
+        <button onclick="copySnippet()">Copy Snippet</button>
+        <button class="green" onclick="applyToMapData()">Update mapData.js</button>
+        <button class="dark" onclick="copyUpdatedFile()">Copy Updated File</button>
+        <button class="red" onclick="clearMapData()">Clear mapData</button>
+      </div>
+
+      <div class="note">
+        Paste your current <strong>mapData.js</strong> on the right. Then click
+        <strong>Update mapData.js</strong>. For scenes and connections, make sure
+        the target tour variable is correct.
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <section>
+        <div class="box-title">
+          <h2>Generated Snippet</h2>
+          <span id="copyNote" class="copy-note">Copied.</span>
+        </div>
+
+        <textarea id="snippetOutput" class="code-box" readonly></textarea>
+      </section>
+
+      <section>
+        <div class="box-title">
+          <h2>Paste Current mapData.js Here</h2>
+        </div>
+
+        <textarea id="mapDataInput" class="file-box" placeholder="Paste your current mapData.js here..."></textarea>
+      </section>
+
+      <section>
+        <div class="box-title">
+          <h2>Updated mapData.js</h2>
+        </div>
+
+        <textarea id="updatedOutput" class="file-box" readonly></textarea>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const mode = document.getElementById("mode");
+    const snippetOutput = document.getElementById("snippetOutput");
+    const mapDataInput = document.getElementById("mapDataInput");
+    const updatedOutput = document.getElementById("updatedOutput");
+    const copyNote = document.getElementById("copyNote");
+
+    const fieldGroups = {
+      siteOption: document.getElementById("siteOptionFields"),
+      scene: document.getElementById("sceneFields"),
+      connection: document.getElementById("connectionFields"),
+      singleSceneTour: document.getElementById("singleSceneTourFields"),
+    };
+
+    function get(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function num(id, fallback = 0) {
+      const value = Number(get(id));
+      return Number.isFinite(value) ? value : fallback;
+    }
+
+    function showCurrentFields() {
+      Object.entries(fieldGroups).forEach(([key, element]) => {
+        element.classList.toggle("hidden", key !== mode.value);
+      });
+
+      generateSnippet();
+    }
+
+    function generateSiteOption() {
+      return `  {
+    id: "${get("siteId")}",
+    name: "${get("siteName")}",
+    subtitle: "${get("siteSubtitle")}",
+    image: "${get("siteImage")}",
+  },`;
+    }
+
+    function generateScene() {
+      return `    ${get("sceneId")}: {
+      id: "${get("sceneId")}",
+      title: "${get("sceneTitle")}",
+      label: "${get("sceneLabel")}",
+      panorama: "${get("scenePanorama")}",
+
+      mapPoint: {
+        x: ${num("sceneX", 50)},
+        y: ${num("sceneY", 50)},
+      },
+
+      view: {
+        initialYaw: ${num("sceneYaw", 0)},
+        initialPitch: ${num("scenePitch", 0)},
+        initialHfov: ${num("sceneHfov", 110)},
+      },
+    },`;
+    }
+
+    function generateConnection() {
+      return `    {
+      id: "${get("connectionId")}",
+      from: "${get("connectionFrom")}",
+      to: "${get("connectionTo")}",
+      label: "${get("connectionLabel")}",
+      type: "move",
+      hotspot: {
+        yaw: ${num("connectionYaw", 0)},
+        pitch: ${num("connectionPitch", -8)},
+        icon: "${get("connectionIcon")}",
+      },
+    },`;
+    }
+
+    function generateSingleSceneTour() {
+      return `const ${get("singleTourVar")} = createSingleSceneTour({
+  id: "${get("singleTourId")}",
+  name: "${get("singleTourName")}",
+  sceneId: "${get("singleSceneId")}",
+  sceneTitle: "${get("singleSceneTitle")}",
+  panorama: "${get("singlePanorama")}",
+});`;
+    }
+
+    function generateSnippet() {
+      let output = "";
+
+      if (mode.value === "siteOption") {
+        output = generateSiteOption();
+      }
+
+      if (mode.value === "scene") {
+        output = generateScene();
+      }
+
+      if (mode.value === "connection") {
+        output = generateConnection();
+      }
+
+      if (mode.value === "singleSceneTour") {
+        output = generateSingleSceneTour();
+      }
+
+      snippetOutput.value = output;
+      return output;
+    }
+
+    function applyToMapData() {
+      const source = mapDataInput.value;
+      const snippet = generateSnippet();
+
+      if (!source.trim()) {
+        updatedOutput.value = snippet;
+        return;
+      }
+
+      let updated = source;
+
+      if (mode.value === "siteOption") {
+        updated = insertIntoSiteOptions(source, snippet);
+      }
+
+      if (mode.value === "scene") {
+        updated = insertIntoTourSection(
+          source,
+          get("targetTourForScene"),
+          "scenes",
+          snippet
+        );
+      }
+
+      if (mode.value === "connection") {
+        updated = insertIntoTourSection(
+          source,
+          get("targetTourForConnection"),
+          "connections",
+          snippet
+        );
+      }
+
+      if (mode.value === "singleSceneTour") {
+        updated = insertBeforeFactoryMaps(source, snippet);
+      }
+
+      updatedOutput.value = updated;
+    }
+
+    function insertIntoSiteOptions(source, snippet) {
+      const marker = "export const siteOptions = [";
+      const start = source.indexOf(marker);
+
+      if (start === -1) {
+        return `${snippet}\n\n${source}`;
+      }
+
+      const arrayStart = source.indexOf("[", start);
+      const arrayEnd = findMatchingBracket(source, arrayStart, "[", "]");
+
+      if (arrayEnd === -1) {
+        return `${snippet}\n\n${source}`;
+      }
+
+      return (
+        source.slice(0, arrayEnd).trimEnd() +
+        "\n" +
+        snippet +
+        "\n" +
+        source.slice(arrayEnd)
+      );
+    }
+
+    function insertIntoTourSection(source, tourVar, sectionName, snippet) {
+      const tourStart = source.indexOf(`const ${tourVar} = {`);
+
+      if (tourStart === -1) {
+        return `${source.trimEnd()}\n\n/* Could not find const ${tourVar} = { */\n${snippet}\n`;
+      }
+
+      const sectionStart = source.indexOf(`${sectionName}:`, tourStart);
+
+      if (sectionStart === -1) {
+        return `${source.trimEnd()}\n\n/* Could not find ${sectionName}: inside ${tourVar} */\n${snippet}\n`;
+      }
+
+      const openChar = sectionName === "scenes" ? "{" : "[";
+      const closeChar = sectionName === "scenes" ? "}" : "]";
+
+      const openIndex = source.indexOf(openChar, sectionStart);
+      const closeIndex = findMatchingBracket(source, openIndex, openChar, closeChar);
+
+      if (openIndex === -1 || closeIndex === -1) {
+        return `${source.trimEnd()}\n\n/* Could not insert into ${sectionName} */\n${snippet}\n`;
+      }
+
+      return (
+        source.slice(0, closeIndex).trimEnd() +
+        "\n\n" +
+        snippet +
+        "\n" +
+        source.slice(closeIndex)
+      );
+    }
+
+    function insertBeforeFactoryMaps(source, snippet) {
+      const marker = "/* ================= FACTORY MAPS ================= */";
+      const index = source.indexOf(marker);
+
+      if (index === -1) {
+        return `${source.trimEnd()}\n\n${snippet}\n`;
+      }
+
+      return `${source.slice(0, index).trimEnd()}\n\n${snippet}\n\n${source.slice(index)}`;
+    }
+
+    function findMatchingBracket(text, openIndex, openChar, closeChar) {
+      if (openIndex < 0) return -1;
+
+      let depth = 0;
+      let inString = false;
+      let stringChar = "";
+      let escaped = false;
+
+      for (let i = openIndex; i < text.length; i++) {
+        const char = text[i];
+
+        if (escaped) {
+          escaped = false;
+          continue;
+        }
+
+        if (char === "\\") {
+          escaped = true;
+          continue;
+        }
+
+        if (inString) {
+          if (char === stringChar) {
+            inString = false;
+            stringChar = "";
+          }
+          continue;
+        }
+
+        if (char === '"' || char === "'" || char === "`") {
+          inString = true;
+          stringChar = char;
+          continue;
+        }
+
+        if (char === openChar) {
+          depth++;
+        }
+
+        if (char === closeChar) {
+          depth--;
+
+          if (depth === 0) {
+            return i;
+          }
+        }
+      }
+
+      return -1;
+    }
+
+    async function copyText(text) {
+      if (!text) return;
+
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+
+      copyNote.classList.add("show");
+
+      setTimeout(() => {
+        copyNote.classList.remove("show");
+      }, 1200);
+    }
+
+    function copySnippet() {
+      copyText(snippetOutput.value);
+    }
+
+    function copyUpdatedFile() {
+      copyText(updatedOutput.value || mapDataInput.value);
+    }
+
+    function clearMapData() {
+      mapDataInput.value = "";
+      updatedOutput.value = "";
+    }
+
+    mode.addEventListener("change", showCurrentFields);
+
+    document.querySelectorAll("input, select, textarea").forEach((element) => {
+      element.addEventListener("input", generateSnippet);
+    });
+
+    generateSnippet();
+  </script>
+</body>
+</html>
