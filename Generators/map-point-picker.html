@@ -188,22 +188,22 @@
     }
 
     .point {
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      transform: translate(-50%, -50%);
-      border-radius: 999px;
-      background: #22c55e;
-      border: 2px solid white;
-      box-shadow:
-        0 0 0 8px rgba(34, 197, 94, 0.18),
-        0 0 18px rgba(34, 197, 94, 0.9);
-      display: grid;
-      place-items: center;
-      color: white;
-      font-size: 9px;
-      font-weight: 900;
-    }
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: #22c55e;
+  border: 2px solid white;
+  box-shadow:
+    0 0 0 5px rgba(34, 197, 94, 0.18),
+    0 0 12px rgba(34, 197, 94, 0.9);
+  display: grid;
+  place-items: center;
+  color: white;
+  font-size: 7px;
+  font-weight: 900;
+}
 
     .crosshair {
       position: absolute;
@@ -327,79 +327,132 @@
     const pointsContainer = document.getElementById("points");
     const latestText = document.getElementById("latestText");
     const copyNote = document.getElementById("copyNote");
-
+    
     let points = [];
 
     function loadImage() {
       mapImage.src = imagePath.value.trim();
     }
 
-    function handleMapMove(event) {
-      const rect = mapBox.getBoundingClientRect();
+function handleMapMove(event) {
+  const rect = mapBox.getBoundingClientRect();
 
-      const mouseX = event.clientX - rect.left;
-      const mouseY = event.clientY - rect.top;
+  const mouseX = event.clientX - rect.left;
+  const mouseY = event.clientY - rect.top;
 
-      const xPercent = (mouseX / rect.width) * 100;
-      const yPercent = (mouseY / rect.height) * 100;
+  const xPercent = (mouseX / rect.width) * 100;
+  const yPercent = (mouseY / rect.height) * 100;
 
-      mapBox.style.setProperty("--mouse-x", `${xPercent}%`);
-      mapBox.style.setProperty("--mouse-y", `${yPercent}%`);
-    }
+  // Crosshair stays raw so it follows your mouse exactly.
+  mapBox.style.setProperty("--mouse-x", `${xPercent}%`);
+  mapBox.style.setProperty("--mouse-y", `${yPercent}%`);
+}
 
-    function handleMapClick(event) {
-      const rect = mapBox.getBoundingClientRect();
+const X_OFFSET = 1.33;
+const Y_OFFSET = 2.8;
 
-      const clickX = event.clientX - rect.left;
-      const clickY = event.clientY - rect.top;
+function handleMapClick(event) {
+  const rect = mapBox.getBoundingClientRect();
 
-      const x = Number(((clickX / rect.width) * 100).toFixed(2));
-      const y = Number(((clickY / rect.height) * 100).toFixed(2));
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
 
-      const point = {
-        name: `Point${points.length + 1}`,
-        x,
-        y,
-      };
+  const rawX = Number(((clickX / rect.width) * 100).toFixed(2));
+  const rawY = Number(((clickY / rect.height) * 100).toFixed(2));
 
-      points.push(point);
-      renderPoints();
-    }
+  const outputX = Number((rawX + X_OFFSET).toFixed(2));
+  const outputY = Number((rawY + Y_OFFSET).toFixed(2));
 
-    function renderPoints() {
-      pointLayer.innerHTML = "";
-      pointsContainer.innerHTML = "";
+  const point = {
+    name: `Point${points.length + 1}`,
 
-      points.forEach((point, index) => {
-        const dot = document.createElement("div");
-        dot.className = "point";
-        dot.style.left = `${point.x}%`;
-        dot.style.top = `${point.y}%`;
-        dot.textContent = index + 1;
-        pointLayer.appendChild(dot);
+    // exact visual click position in pixels
+    pixelX: clickX,
+    pixelY: clickY,
 
-        const card = document.createElement("div");
-        card.className = "point-card";
+    // corrected output for mapData.js
+    x: outputX,
+    y: outputY,
+  };
 
-        card.innerHTML = `
-          <strong>${point.name}</strong>
-          <pre>mapPoint: {
+  points.push(point);
+  renderPoints();
+}
+
+function renderPoints() {
+  pointLayer.innerHTML = "";
+  pointsContainer.innerHTML = "";
+
+  points.forEach((point, index) => {
+    const dot = document.createElement("div");
+    dot.className = "point";
+
+    // Render dot exactly where you clicked
+    dot.style.left = `${point.pixelX}px`;
+    dot.style.top = `${point.pixelY}px`;
+
+    dot.textContent = index + 1;
+    pointLayer.appendChild(dot);
+
+    const card = document.createElement("div");
+    card.className = "point-card";
+
+    card.innerHTML = `
+      <strong>${point.name}</strong>
+      <pre>mapPoint: {
   x: ${point.x},
   y: ${point.y},
 },</pre>
-        `;
+    `;
 
-        pointsContainer.prepend(card);
-      });
+    pointsContainer.prepend(card);
+  });
 
-      const latest = points[points.length - 1];
+  const latest = points[points.length - 1];
 
-      if (latest) {
-        latestText.textContent = `x: ${latest.x}, y: ${latest.y}`;
-      } else {
-        latestText.textContent = "No point selected";
-      }
-    }
+  if (latest) {
+    latestText.textContent = `x: ${latest.x}, y: ${latest.y}`;
+  } else {
+    latestText.textContent = "No point selected";
+  }
+}
+    function renderPoints() {
+  pointLayer.innerHTML = "";
+  pointsContainer.innerHTML = "";
+
+  points.forEach((point, index) => {
+    const dot = document.createElement("div");
+    dot.className = "point";
+
+    // dot appears exactly where your mouse clicked
+    dot.style.left = `${point.pixelX}px`;
+    dot.style.top = `${point.pixelY}px`;
+
+    dot.textContent = index + 1;
+    pointLayer.appendChild(dot);
+
+    const card = document.createElement("div");
+    card.className = "point-card";
+
+    card.innerHTML = `
+      <strong>${point.name}</strong>
+      <pre>mapPoint: {
+  x: ${point.x},
+  y: ${point.y},
+},</pre>
+    `;
+
+    pointsContainer.prepend(card);
+  });
+
+  const latest = points[points.length - 1];
+
+  if (latest) {
+    latestText.textContent = `x: ${latest.x}, y: ${latest.y}`;
+  } else {
+    latestText.textContent = "No point selected";
+  }
+}
 
     function getLatestText() {
       const latest = points[points.length - 1];
