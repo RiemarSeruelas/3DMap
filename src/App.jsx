@@ -3,13 +3,24 @@ import LoginPage from "./pages/LoginPage";
 import KioskPage from "./pages/KioskPage";
 import AreaMapPage from "./pages/AreaMapPage";
 import StreetViewPage from "./pages/StreetViewPage";
+import AdminPage from "./pages/AdminPage";
+import AdminAreaConfigPage from "./pages/AdminAreaConfigPage";
+import "./styles/admin.css";
 
-
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children, role }) {
   const isLoggedIn = sessionStorage.getItem("streetViewAuth") === "true";
+  const userRole = sessionStorage.getItem("streetViewRole");
 
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (userRole === "admin") {
+    return children;
+  }
+
+  if (role && userRole !== role) {
+    return <Navigate to="/" replace />;
   }
 
   return children;
@@ -23,7 +34,7 @@ function App() {
       <Route
         path="/"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute role="user">
             <KioskPage />
           </ProtectedRoute>
         }
@@ -32,7 +43,7 @@ function App() {
       <Route
         path="/map/:siteId"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute role="user">
             <AreaMapPage />
           </ProtectedRoute>
         }
@@ -41,13 +52,31 @@ function App() {
       <Route
         path="/viewer/:siteId/:areaId"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute role="user">
             <StreetViewPage />
           </ProtectedRoute>
         }
       />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute role="admin">
+            <AdminPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/config/:siteId/:areaId"
+        element={
+          <ProtectedRoute role="admin">
+            <AdminAreaConfigPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

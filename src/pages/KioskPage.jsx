@@ -1,10 +1,22 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { siteOptions } from "../data/mapData";
+import { getEffectiveFactoryMaps } from "../utils/streetViewAdminStorage";
 
 function KioskPage() {
   const navigate = useNavigate();
   const [selectedSite, setSelectedSite] = useState(null);
+  const userRole = sessionStorage.getItem("streetViewRole");
+
+  const siteOptions = useMemo(() => {
+    const effectiveFactoryMaps = getEffectiveFactoryMaps();
+
+    return Object.values(effectiveFactoryMaps).map((site) => ({
+      id: site.id,
+      name: site.name,
+      subtitle: site.subtitle || `${site.areas?.length || 0} mapped areas`,
+      image: site.image || site.mapImage,
+    }));
+  }, []);
 
   function openSite(site) {
     setSelectedSite(site);
@@ -16,6 +28,7 @@ function KioskPage() {
 
   function logout() {
     sessionStorage.removeItem("streetViewAuth");
+    sessionStorage.removeItem("streetViewRole");
     navigate("/login", { replace: true });
   }
 
@@ -24,6 +37,12 @@ function KioskPage() {
       <button className="floating-logout-btn" onClick={logout}>
         Logout
       </button>
+
+      {userRole === "admin" && (
+        <button className="floating-admin-btn" onClick={() => navigate("/admin")}>
+          Admin
+        </button>
+      )}
 
       <main className="clean-kiosk-body">
         <section className="clean-kiosk-hero">

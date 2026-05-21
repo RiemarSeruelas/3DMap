@@ -1,0 +1,943 @@
+/* =========================
+   ADMIN SPLIT PAGE SYSTEM
+   ========================= */
+
+.admin-split-page {
+  min-height: 100vh;
+  padding: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.16), transparent 34%),
+    #edf3ff;
+  color: #111827;
+}
+
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+  border-radius: 28px;
+  color: white;
+  background: linear-gradient(135deg, #0f172a, #1d4ed8 58%, #2563eb);
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.25);
+}
+
+.admin-topbar h1 {
+  margin: 4px 0 6px;
+  font-size: 34px;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.admin-topbar p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-weight: 650;
+}
+
+.admin-eyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.admin-topbar-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.admin-topbar button,
+.admin-left-panel button,
+.location-toolbar button,
+.next-location-controls button,
+.connection-item button,
+.mapped-area-actions button {
+  border: 0;
+  border-radius: 14px;
+  padding: 11px 14px;
+  font-weight: 950;
+  cursor: pointer;
+  background: white;
+  color: #0f172a;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+}
+
+button.primary,
+.admin-left-panel button.primary,
+.location-toolbar button.primary {
+  background: #2563eb;
+  color: white;
+}
+
+button.danger-soft,
+.admin-left-panel button.danger-soft {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.admin-split-layout {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.admin-left-panel,
+.config-left-panel,
+.admin-map-workspace,
+.config-main-panel {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(203, 213, 225, 0.85);
+  border-radius: 28px;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.12);
+}
+
+.admin-left-panel {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 18px;
+}
+
+.admin-panel-section,
+.area-editor-card {
+  padding: 16px;
+  border-radius: 22px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.admin-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.admin-section-head.compact {
+  align-items: flex-start;
+}
+
+.admin-section-head h2,
+.map-workspace-header h2,
+.location-editor-card h2,
+.factory-map-point-card h3,
+.next-location-card h3,
+.panorama-editor-card h3 {
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+
+.admin-section-head p,
+.map-workspace-header p,
+.card-title-row p,
+.next-location-card p {
+  margin: 3px 0 0;
+  color: #64748b;
+  font-weight: 650;
+  font-size: 13px;
+}
+
+.admin-field-label {
+  display: block;
+  margin: 0 0 7px;
+  font-size: 11px;
+  font-weight: 950;
+  color: #64748b;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-left-panel input,
+.admin-left-panel select,
+.config-main-panel input,
+.config-main-panel select,
+.next-location-controls select {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 12px 13px;
+  background: white;
+  color: #0f172a;
+  font-weight: 800;
+  outline: none;
+}
+
+.mapped-area-list,
+.location-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 52vh;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.mapped-area-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 18px;
+  background: white;
+  border: 1px solid #dbeafe;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.mapped-area-card:hover {
+  transform: translateY(-1px);
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.mapped-area-card.active {
+  border-color: #2563eb;
+  box-shadow: inset 4px 0 0 #2563eb;
+}
+
+.mapped-area-main {
+  min-width: 0;
+}
+
+.mapped-area-main strong,
+.location-card span {
+  display: block;
+  font-size: 14px;
+  font-weight: 950;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.mapped-area-main span {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 750;
+}
+
+.mapped-area-actions {
+  display: flex;
+  gap: 7px;
+}
+
+.mapped-area-actions button {
+  padding: 8px 10px;
+  font-size: 12px;
+  box-shadow: none;
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.point-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  margin: 14px 0;
+  border-radius: 18px;
+  background: white;
+  border: 1px dashed #93c5fd;
+}
+
+.point-summary strong {
+  font-size: 28px;
+  color: #2563eb;
+}
+
+.point-summary span {
+  color: #64748b;
+  font-weight: 850;
+}
+
+.editor-button-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.editor-button-grid.bottom {
+  margin-top: 16px;
+}
+
+.active-map-btn,
+.admin-left-panel .active-map-btn {
+  background: #f97316 !important;
+  color: white !important;
+}
+
+.admin-map-workspace {
+  padding: 18px;
+}
+
+.map-workspace-header,
+.card-title-row,
+.location-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.mapping-status-pill,
+.start-badge,
+.card-title-row span {
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1e3a8a;
+  font-size: 12px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.admin-map-canvas,
+.mini-map-canvas,
+.panorama-click-canvas {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #020617;
+  border: 1px solid #cbd5e1;
+}
+
+.admin-map-canvas {
+  min-height: 70vh;
+  cursor: pointer;
+}
+
+.admin-map-canvas.is-mapping {
+  cursor: crosshair;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.22);
+}
+
+.admin-map-canvas img,
+.mini-map-canvas img,
+.panorama-click-canvas img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.admin-map-svg,
+.mini-map-canvas svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.admin-area-shape {
+  fill: rgba(37, 99, 235, 0.18);
+  stroke: rgba(37, 99, 235, 0.9);
+  stroke-width: 0.45;
+  cursor: pointer;
+  transition: fill 0.15s ease;
+}
+
+.admin-area-shape:hover,
+.admin-area-shape.selected {
+  fill: rgba(37, 99, 235, 0.34);
+}
+
+.admin-draft-line {
+  fill: none;
+  stroke: #f97316;
+  stroke-width: 0.5;
+  stroke-dasharray: 1 1;
+}
+
+.admin-draft-shape {
+  fill: rgba(249, 115, 22, 0.23);
+  stroke: #f97316;
+  stroke-width: 0.55;
+}
+
+.admin-draft-dot {
+  fill: #f97316;
+  stroke: white;
+  stroke-width: 0.35;
+}
+
+/* =========================
+   CONFIG PAGE
+   ========================= */
+
+.config-page-layout {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.config-left-panel {
+  padding: 18px;
+  position: sticky;
+  top: 18px;
+}
+
+.upload-location-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px;
+  margin-bottom: 16px;
+  border-radius: 22px;
+  border: 2px dashed #93c5fd;
+  background: #eff6ff;
+  cursor: pointer;
+}
+
+.upload-location-card input {
+  display: none;
+}
+
+.upload-location-card strong {
+  font-size: 16px;
+  color: #1d4ed8;
+}
+
+.upload-location-card span,
+.location-list-title,
+.empty-small {
+  color: #64748b;
+  font-weight: 750;
+  font-size: 13px;
+}
+
+.location-list-title {
+  margin: 6px 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.location-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  padding: 13px;
+  background: white;
+  color: #0f172a;
+  text-align: left;
+  cursor: pointer;
+}
+
+.location-card.active {
+  background: #dbeafe;
+  border-color: #2563eb;
+}
+
+.location-card strong,
+.start-badge {
+  font-size: 10px;
+  background: #22c55e;
+  color: white;
+}
+
+.config-main-panel {
+  padding: 18px;
+  min-height: 72vh;
+}
+
+.friendly-empty-state {
+  min-height: 56vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #64748b;
+}
+
+.friendly-empty-state h2 {
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.location-editor-card,
+.factory-map-point-card,
+.next-location-card,
+.panorama-editor-card {
+  padding: 18px;
+  border-radius: 24px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+}
+
+.location-editor-head .admin-eyebrow {
+  color: #64748b;
+}
+
+.location-form-grid.friendly {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.location-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.location-toolbar button {
+  box-shadow: none;
+  background: white;
+}
+
+.config-two-column {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.95fr) minmax(320px, 1.05fr);
+  gap: 16px;
+}
+
+.mini-map-canvas {
+  height: 280px;
+  cursor: default;
+}
+
+.mini-map-canvas.placing {
+  cursor: crosshair;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.22);
+}
+
+.mini-area-shape {
+  fill: rgba(37, 99, 235, 0.16);
+  stroke: rgba(37, 99, 235, 0.95);
+  stroke-width: 0.55;
+}
+
+.mini-scene-point {
+  fill: #64748b;
+  stroke: white;
+  stroke-width: 0.45;
+}
+
+.mini-scene-point.active {
+  fill: #f97316;
+}
+
+.next-location-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.next-location-controls button {
+  box-shadow: none;
+  background: #2563eb;
+  color: white;
+}
+
+.friendly-warning {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  font-weight: 850;
+}
+
+.connection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.connection-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  font-weight: 850;
+}
+
+.connection-item button {
+  padding: 8px 10px;
+  box-shadow: none;
+}
+
+.panorama-click-canvas {
+  min-height: 420px;
+  cursor: default;
+}
+
+.panorama-click-canvas.picking {
+  cursor: crosshair;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.22);
+}
+
+.panorama-click-canvas img {
+  max-height: 620px;
+}
+
+.panorama-arrow {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #2563eb;
+  color: white;
+  border: 3px solid white;
+  font-size: 24px;
+  font-weight: 950;
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+  pointer-events: none;
+}
+
+.panorama-click-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.88);
+  color: white;
+  font-weight: 950;
+}
+
+@media (max-width: 1100px) {
+  .admin-split-layout,
+  .config-page-layout,
+  .config-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-left-panel,
+  .config-left-panel {
+    position: static;
+  }
+
+  .admin-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* =========================
+   CLEAN FIX OVERRIDES
+   - consistent coordinates
+   - cleaner admin layout
+   - friendlier config page
+   ========================= */
+
+.admin-split-page {
+  padding: 18px;
+  background: #eef4ff;
+}
+
+.admin-topbar {
+  min-height: auto;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #111827, #1e40af);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.18);
+}
+
+.admin-topbar h1 {
+  font-size: 28px;
+  margin: 3px 0 4px;
+  letter-spacing: -0.03em;
+}
+
+.admin-topbar p {
+  max-width: 760px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.admin-eyebrow {
+  font-size: 10px;
+}
+
+.admin-topbar-actions button,
+.admin-left-panel button,
+.location-toolbar button,
+.next-location-controls button,
+.connection-item button,
+.mapped-area-actions button {
+  border-radius: 12px;
+  padding: 10px 13px;
+  box-shadow: none;
+}
+
+.admin-save-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.16);
+  color: #dcfce7;
+  border: 1px solid rgba(187, 247, 208, 0.35);
+  font-weight: 950;
+  font-size: 12px;
+}
+
+.admin-split-layout {
+  grid-template-columns: 335px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.admin-left-panel,
+.config-left-panel,
+.admin-map-workspace,
+.config-main-panel {
+  border-radius: 22px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.09);
+}
+
+.admin-left-panel,
+.config-left-panel {
+  padding: 14px;
+}
+
+.admin-panel-section,
+.area-editor-card,
+.location-editor-card,
+.factory-map-point-card,
+.next-location-card,
+.panorama-editor-card {
+  border-radius: 18px;
+}
+
+.admin-section-head h2,
+.map-workspace-header h2,
+.location-editor-card h2,
+.factory-map-point-card h3,
+.next-location-card h3,
+.panorama-editor-card h3 {
+  font-size: 20px;
+}
+
+.mapped-area-card {
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.mapped-area-card.active,
+.mapped-area-card:hover {
+  transform: none;
+}
+
+.mapped-area-main strong {
+  font-size: 15px;
+}
+
+.mapped-area-actions button {
+  padding: 7px 9px;
+  font-size: 11px;
+}
+
+/* IMPORTANT: one normalized coordinate container for every map. 
+   The image and SVG are both stretched to exactly the same 0-100 coordinate box.
+   This makes 1,10 mean the same visual location on all map screens regardless of page size. */
+.admin-map-canvas,
+.mini-map-canvas {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: calc(100vh - 210px);
+  border-radius: 18px;
+  background: #f8fafc;
+}
+
+.admin-map-canvas img,
+.mini-map-canvas img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill !important;
+}
+
+.admin-map-svg,
+.mini-map-canvas svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.admin-area-shape {
+  fill: rgba(37, 99, 235, 0.2);
+  stroke: #1d4ed8;
+  stroke-width: 0.35;
+}
+
+.admin-area-shape:hover,
+.admin-area-shape.selected {
+  fill: rgba(249, 115, 22, 0.24);
+  stroke: #f97316;
+}
+
+.admin-draft-line,
+.admin-draft-shape {
+  stroke-width: 0.38;
+}
+
+.admin-draft-dot {
+  r: 0.8;
+}
+
+.map-workspace-header {
+  margin-bottom: 10px;
+}
+
+.mapping-status-pill,
+.start-badge,
+.card-title-row span {
+  padding: 7px 10px;
+  font-size: 11px;
+}
+
+/* Config page cleanup */
+.config-page-layout {
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.config-main-panel {
+  padding: 14px;
+}
+
+.upload-location-card {
+  border-radius: 18px;
+  padding: 16px;
+  background: linear-gradient(180deg, #eff6ff, #ffffff);
+}
+
+.location-card {
+  border-radius: 14px;
+  padding: 11px 12px;
+}
+
+.location-editor-card {
+  background: white;
+}
+
+.location-editor-head {
+  align-items: flex-start;
+}
+
+.location-editor-head h2 {
+  max-width: 680px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.location-form-grid.friendly {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.location-toolbar {
+  padding-top: 4px;
+}
+
+.config-two-column {
+  grid-template-columns: minmax(280px, 0.9fr) minmax(340px, 1.1fr);
+  gap: 14px;
+}
+
+.mini-map-canvas {
+  max-height: 260px;
+}
+
+.panorama-click-canvas {
+  width: 100%;
+  aspect-ratio: 16 / 8;
+  min-height: 0 !important;
+  max-height: 520px;
+  border-radius: 18px;
+  background: #020617;
+}
+
+.panorama-click-canvas img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important;
+}
+
+.panorama-editor-card {
+  background: white;
+}
+
+.panorama-arrow {
+  width: 38px;
+  height: 38px;
+  font-size: 22px;
+}
+
+.next-location-controls {
+  grid-template-columns: 1fr;
+}
+
+.connection-item {
+  border-radius: 12px;
+}
+
+.friendly-warning {
+  border-radius: 14px;
+}
+
+@media (max-width: 1280px) {
+  .admin-split-layout,
+  .config-page-layout,
+  .config-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-left-panel,
+  .config-left-panel {
+    position: static;
+  }
+
+  .admin-map-canvas,
+  .mini-map-canvas {
+    max-height: none;
+  }
+}

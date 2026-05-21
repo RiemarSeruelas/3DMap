@@ -11,8 +11,19 @@ function LoginPage() {
   function handleLogin(event) {
     event.preventDefault();
 
-    if (username === "admin" && password === "engineering2026") {
+    const isAdmin = username === "admin" && password === "engineering2026";
+    const isUser = username === "viewer" && password === "viewer2026";
+
+    if (isAdmin) {
       sessionStorage.setItem("streetViewAuth", "true");
+      sessionStorage.setItem("streetViewRole", "admin");
+      navigate("/admin", { replace: true });
+      return;
+    }
+
+    if (isUser) {
+      sessionStorage.setItem("streetViewAuth", "true");
+      sessionStorage.setItem("streetViewRole", "user");
       navigate("/", { replace: true });
       return;
     }
@@ -36,7 +47,7 @@ function LoginPage() {
             <input
               value={username}
               onChange={(event) => setUsername(event.target.value)}
-              placeholder="admin"
+              placeholder="admin or viewer"
             />
           </div>
 
@@ -46,7 +57,7 @@ function LoginPage() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               type="password"
-              placeholder="engineering2026"
+              placeholder="Enter password"
             />
           </div>
 
@@ -56,6 +67,15 @@ function LoginPage() {
             Log In
           </button>
         </form>
+
+        <div className="login-hint">
+          <p>
+            <strong>Admin:</strong> admin / engineering2026
+          </p>
+          <p>
+            <strong>Viewer:</strong> viewer / viewer2026
+          </p>
+        </div>
       </div>
     </div>
   );

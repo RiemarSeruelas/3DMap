@@ -1,13 +1,14 @@
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { factoryMaps } from "../data/mapData";
 import StreetViewer from "../components/StreetViewer";
+import { getMergedArea, getMergedSite } from "../utils/streetViewAdminStorage";
 
 function StreetViewPage() {
   const navigate = useNavigate();
   const { siteId, areaId } = useParams();
 
-  const site = factoryMaps[siteId];
-  const area = site?.areas.find((item) => item.id === areaId);
+  const site = getMergedSite(factoryMaps, siteId);
+  const area = getMergedArea(factoryMaps, siteId, areaId);
 
   if (!site) {
     return <Navigate to="/" replace />;
@@ -24,7 +25,8 @@ function StreetViewPage() {
           <h1>No tour found</h1>
           <p>
             The selected area exists, but it does not have a <code>tour</code>{" "}
-            assigned in <code>mapData.js</code>.
+            assigned yet. Go to Admin, open this area, and configure its 360
+            locations.
           </p>
 
           <button onClick={() => navigate(`/map/${siteId}`)}>

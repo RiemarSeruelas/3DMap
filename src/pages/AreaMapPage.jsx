@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { factoryMaps } from "../data/mapData";
+import { getMergedSite } from "../utils/streetViewAdminStorage";
 
 function AreaMapPage() {
   const navigate = useNavigate();
   const { siteId } = useParams();
 
-  const site = factoryMaps[siteId];
+  const site = getMergedSite(factoryMaps, siteId);
   const [hoveredArea, setHoveredArea] = useState(null);
   const [selectedArea, setSelectedArea] = useState(null);
 
