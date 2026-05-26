@@ -1,53 +1,57 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { factoryMaps } from "../data/mapData";
 import {
-  clone,
-  createEmptyTour,
+  createUniqueId,
+  deleteArea,
   getEffectiveFactoryMaps,
-  makeSlug,
+  getPercentPoint,
+  pointsArrayToString,
+  pointsStringToArray,
+  saveArea,
   saveFactoryMaps,
 } from "../utils/streetViewAdminStorage";
 
-function getPointFromMapClick(event) {
-  const rect = event.currentTarget.getBoundingClientRect();
-  const x = ((event.clientX - rect.left) / rect.width) * 100;
-  const y = ((event.clientY - rect.top) / rect.height) * 100;
+function createBlankDraft(site) {
+  const existingIds = site?.areas?.map((area) => area.id) || [];
+  const id = createUniqueId("new-area", existingIds);
 
-  return `${Math.max(0, Math.min(100, x)).toFixed(2)},${Math.max(0, Math.min(100, y)).toFixed(2)}`;
+  return {
+    id,
+    name: "",
+    points: [],
+    original: null,
+  };
 }
 
 function AdminPage() {
   const navigate = useNavigate();
-  const [maps, setMaps] = useState(() => getEffectiveFactoryMaps());
-  const [selectedSiteId, setSelectedSiteId] = useState(() => Object.keys(factoryMaps)[0] || "");
-  const [selectedAreaId, setSelectedAreaId] = useState(null);
-  const [draft, setDraft] = useState(null);
-  const [isMapping, setIsMapping] = useState(false);
+  const mapUploadRef = useRef(null);
 
-  const site = maps[selectedSiteId];
-  const selectedArea = site?.areas?.find((area) => area.id === selectedAreaId) || null;
-  const draftPoints = draft?.points || [];
+  const [maps, setMaps] = useState(() => getEffectiveFactoryMaps());
+  const [selectedSiteId, setSelectedSiteId] = useState("");
+  const [draftArea, setDraftArea] = useState(null);
+  const [areasModalOpen, setAreasModalOpen] = useState(false);
+  const [areaModalOpen, setAreaModalOpen] = useState(false);
+  const [isMapping, setIsMapping] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+
+  const site = selectedSiteId ? maps[selectedSiteId] : null;
+  const siteOptions = useMemo(() => Object.values(maps), [maps]);
+  const draftPolygon = draftArea?.points?.length ? pointsArrayToString(draftArea.points) : "";
 
   useEffect(() => {
-    function reloadMaps() {
+    function refresh() {
       setMaps(getEffectiveFactoryMaps());
     }
 
-    reloadMaps();
-    window.addEventListener("focus", reloadMaps);
-    window.addEventListener("streetViewAdminDataChanged", reloadMaps);
+    window.addEventListener("streetview-admin-storage-updated", refresh);
+    window.addEventListener("storage", refresh);
 
     return () => {
-      window.removeEventListener("focus", reloadMaps);
-      window.removeEventListener("streetViewAdminDataChanged", reloadMaps);
+      window.removeEventListener("streetview-admin-storage-updated", refresh);
+      window.removeEventListener("storage", refresh);
     };
   }, []);
-
-  function persist(nextMaps) {
-    setMaps(nextMaps);
-    saveFactoryMaps(nextMaps);
-  }
 
   function logout() {
     sessionStorage.removeItem("streetViewAuth");
@@ -55,256 +59,361 @@ function AdminPage() {
     navigate("/login", { replace: true });
   }
 
-  function startNewArea() {
-    setSelectedAreaId(null);
-    setDraft({ id: null, name: "", points: [] });
+  function showSaved(text = "Saved") {
+    setSaveMessage(text);
+    window.clearTimeout(window.__streetViewSaveTimer);
+    window.__streetViewSaveTimer = window.setTimeout(() => setSaveMessage(""), 1600);
+  }
+
+  function selectSite(siteId) {
+    setSelectedSiteId(siteId);
+    setDraftArea(null);
+    setAreasModalOpen(false);
+    setAreaModalOpen(false);
     setIsMapping(false);
   }
 
-  function editArea(area) {
-    setSelectedAreaId(area.id);
-    setDraft({
-      id: area.id,
-      name: area.name || "",
-      points: String(area.points || "").trim().split(" ").filter(Boolean),
-    });
-    setIsMapping(false);
+  function updateSiteMapImage(imageDataUrl) {
+    if (!site) return;
+
+    const nextMaps = {
+      ...maps,
+      [site.id]: {
+        ...site,
+        mapImage: imageDataUrl,
+      },
+    };
+
+    const saved = saveFactoryMaps(nextMaps);
+    setMaps(saved);
+    showSaved("Map image saved");
   }
 
-  function cancelEdit() {
-    setDraft(null);
-    setIsMapping(false);
+  function handleMapImageUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => updateSiteMapImage(reader.result);
+    reader.readAsDataURL(file);
+    event.target.value = "";
   }
 
-  function deleteArea(areaId) {
-    const confirmed = window.confirm("Delete this mapped area and its configuration?");
-    if (!confirmed) return;
-
-    const nextMaps = clone(maps);
-    nextMaps[selectedSiteId].areas = nextMaps[selectedSiteId].areas.filter((area) => area.id !== areaId);
-    persist(nextMaps);
-
-    if (selectedAreaId === areaId) {
-      setSelectedAreaId(null);
-      setDraft(null);
-      setIsMapping(false);
+  function openNewArea() {
+    if (!site?.mapImage) {
+      alert("Add a site map image first.");
+      return;
     }
+
+    setDraftArea(createBlankDraft(site));
+    setAreasModalOpen(false);
+    setAreaModalOpen(true);
+    setIsMapping(false);
   }
 
-  function undoPoint() {
-    setDraft((prev) => {
-      if (!prev) return prev;
-      return { ...prev, points: prev.points.slice(0, -1) };
+  function openEditArea(area) {
+    setDraftArea({
+      id: area.id,
+      name: area.name,
+      points: pointsStringToArray(area.points),
+      original: area,
     });
+    setAreasModalOpen(false);
+    setAreaModalOpen(true);
+    setIsMapping(false);
+  }
+
+  function startMapping() {
+    if (!site?.mapImage) {
+      alert("Add a site map image first.");
+      return;
+    }
+
+    setAreaModalOpen(false);
+    setIsMapping(true);
+  }
+
+  function backToEdit() {
+    setIsMapping(false);
+    setAreaModalOpen(true);
   }
 
   function handleMapClick(event) {
-    if (!isMapping || !draft) return;
-    const point = getPointFromMapClick(event);
-    setDraft((prev) => ({ ...prev, points: [...prev.points, point] }));
+    if (!isMapping || !draftArea) return;
+
+    const point = getPercentPoint(event, event.currentTarget);
+    setDraftArea((current) => ({
+      ...current,
+      points: [...current.points, point],
+    }));
   }
 
-  function saveArea() {
-    if (!draft?.name?.trim()) {
-      alert("Add an area name first.");
+  function undoPoint() {
+    setDraftArea((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        points: current.points.slice(0, -1),
+      };
+    });
+  }
+
+  function saveMappedArea() {
+    if (!site || !draftArea) return;
+
+    const cleanName = draftArea.name.trim();
+
+    if (!cleanName) {
+      alert("Please enter an area name first.");
+      setAreaModalOpen(true);
+      setIsMapping(false);
       return;
     }
 
-    if ((draft.points || []).length < 3) {
-      alert("Map at least 3 points for the area.");
+    if (draftArea.points.length < 3) {
+      alert("Please map at least 3 points for the area.");
       return;
     }
 
-    const nextMaps = clone(maps);
-    const nextSite = nextMaps[selectedSiteId];
-    const points = draft.points.join(" ");
-    let areaId = draft.id;
+    const existingIds = site.areas.map((area) => area.id).filter((id) => id !== draftArea.id);
+    const safeId = draftArea.original ? draftArea.id : createUniqueId(cleanName, existingIds);
 
-    if (!areaId) {
-      const baseId = `${selectedSiteId}-${makeSlug(draft.name, "area")}`;
-      let finalId = baseId;
-      let count = 2;
+    const nextArea = {
+      ...(draftArea.original || {}),
+      id: safeId,
+      name: cleanName,
+      points: pointsArrayToString(draftArea.points),
+      tour: draftArea.original?.tour,
+    };
 
-      while (nextSite.areas.some((area) => area.id === finalId)) {
-        finalId = `${baseId}-${count}`;
-        count += 1;
-      }
-
-      areaId = finalId;
-      nextSite.areas.push({
-        id: areaId,
-        name: draft.name.trim(),
-        points,
-        tour: createEmptyTour({ areaId, areaName: draft.name.trim() }),
-      });
-    } else {
-      nextSite.areas = nextSite.areas.map((area) =>
-        area.id === areaId
-          ? {
-              ...area,
-              name: draft.name.trim(),
-              points,
-              tour: area.tour || createEmptyTour({ areaId, areaName: draft.name.trim() }),
-            }
-          : area
-      );
-    }
-
-    persist(nextMaps);
-    setSelectedAreaId(areaId);
-    setDraft(null);
+    const nextMaps = saveArea(site.id, nextArea);
+    setMaps(nextMaps);
+    setDraftArea(null);
+    setAreaModalOpen(false);
     setIsMapping(false);
+    setAreasModalOpen(true);
+    showSaved("Mapped area saved");
   }
 
-  function openConfiguration(area) {
-    if (isMapping || draft) return;
-    navigate(`/admin/config/${selectedSiteId}/${area.id}`);
+  function handleDeleteArea(area) {
+    const ok = window.confirm(`Delete ${area.name}?`);
+    if (!ok) return;
+
+    const nextMaps = deleteArea(site.id, area.id);
+    setMaps(nextMaps);
+    setAreasModalOpen(true);
+    showSaved("Mapped area deleted");
+  }
+
+  if (!selectedSiteId) {
+    return (
+      <div className="admin-site-start-page">
+        <div className="admin-start-card">
+          <div className="admin-start-logo">360</div>
+          <p className="admin-eyebrow">STREET VIEW ADMIN</p>
+          <h1>Choose Site</h1>
+          <p>Pick a factory block first. After that, you can add or change its map image and create mapped areas.</p>
+
+          <div className="admin-start-grid">
+            {siteOptions.map((siteOption) => (
+              <button key={siteOption.id} className="admin-start-site-card" onClick={() => selectSite(siteOption.id)}>
+                <span>{siteOption.name}</span>
+                <small>{siteOption.mapImage ? "Map image available" : "No map image yet"}</small>
+              </button>
+            ))}
+          </div>
+
+          <div className="admin-start-actions">
+            <button onClick={() => navigate("/")}>Open Viewer</button>
+            <button className="danger" onClick={logout}>Logout</button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="admin-split-page">
-      <header className="admin-topbar">
-        <div>
-          <p className="admin-eyebrow">360 Street View Admin</p>
-          <h1>Area Mapping</h1>
-          <p>Draw parent areas. Click a saved area card to configure its panorama locations.</p>
+    <div className="admin-page admin-map-only-page admin-side-nav-page">
+      <aside className="admin-side-navbar">
+        <div className="admin-side-brand">
+          <div className="admin-nav-logo">360</div>
+          <div>
+            <p className="admin-eyebrow">STREET VIEW ADMIN</p>
+            <h1>{site?.name || "Area Mapping"}</h1>
+          </div>
         </div>
 
-        <div className="admin-topbar-actions">
+        {saveMessage && <span className="admin-save-pill side-save-pill">{saveMessage}</span>}
+
+        {isMapping && draftArea && (
+          <div className="admin-side-map-status">
+            <p className="admin-eyebrow">Mapping Mode</p>
+            <strong>{draftArea.name || "Unnamed Area"}</strong>
+            <span>{draftArea.points.length} point(s)</span>
+            <button onClick={undoPoint} disabled={draftArea.points.length === 0}>Undo Point</button>
+            <button onClick={backToEdit}>Back to Edit</button>
+            <button className="primary" onClick={saveMappedArea}>Save Area</button>
+          </div>
+        )}
+
+        <nav className="admin-side-nav-actions">
+          <input ref={mapUploadRef} type="file" accept="image/*" hidden onChange={handleMapImageUpload} />
+          <button onClick={() => mapUploadRef.current?.click()}>
+            {site?.mapImage ? "Change Map" : "Add Map"}
+          </button>
+          <button className="primary" onClick={() => setAreasModalOpen(true)}>Mapped Areas</button>
+          <button onClick={() => setSelectedSiteId("")}>Change Site</button>
           <button onClick={() => navigate("/")}>Open Viewer</button>
-          <button className="danger-soft" onClick={logout}>Logout</button>
+          <button className="danger" onClick={logout}>Logout</button>
+        </nav>
+      </aside>
+
+      <main className="admin-side-map-stage">
+        <div className="admin-map-main-full">
+          {!site?.mapImage && (
+            <div className="admin-big-empty-map">
+              <h2>Add a map image first</h2>
+              <p>This area will show the site map once uploaded. After that, use Add Area to draw parent areas.</p>
+              <button className="admin-primary-btn" onClick={() => mapUploadRef.current?.click()}>+ Add Map Image</button>
+            </div>
+          )}
+
+          {site?.mapImage && (
+            <div className={`admin-fixed-map-canvas ${isMapping ? "is-mapping" : ""}`} onClick={handleMapClick}>
+              <img src={site.mapImage} alt={site.name} />
+
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                {site.areas.map((area) => (
+                  <polygon
+                    key={area.id}
+                    points={area.points}
+                    className={`admin-existing-polygon ${!isMapping ? "is-clickable" : ""}`}
+                    onClick={(event) => {
+                      if (isMapping) return;
+                      event.stopPropagation();
+                      navigate(`/admin/config/${site.id}/${area.id}`);
+                    }}
+                  />
+                ))}
+
+                {draftPolygon && <polygon points={draftPolygon} className="admin-draft-polygon" />}
+
+                {draftArea?.points?.map((point, index) => (
+                  <circle key={`${point.x}-${point.y}-${index}`} cx={point.x} cy={point.y} r="0.85" className="admin-point-dot" />
+                ))}
+              </svg>
+
+              {isMapping && (
+                <div className="admin-map-instruction-pill">
+                  Click the map to add polygon points. Use the side bar to undo, go back, or save.
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      </header>
+      </main>
 
-      <main className="admin-split-layout">
-        <aside className="admin-left-panel">
-          <section className="admin-panel-section">
-            <label className="admin-field-label">Site</label>
-            <select
-              value={selectedSiteId}
-              onChange={(event) => {
-                setSelectedSiteId(event.target.value);
-                setSelectedAreaId(null);
-                setDraft(null);
-                setIsMapping(false);
-              }}
-            >
-              {Object.values(maps).map((item) => (
-                <option key={item.id} value={item.id}>{item.name}</option>
-              ))}
-            </select>
-          </section>
-
-          <section className="admin-panel-section">
-            <div className="admin-section-head">
+      {areasModalOpen && (
+        <div className="admin-modal-layer area-list-modal-layer">
+          <div className="admin-modal mapped-areas-modal">
+            <div className="admin-modal-header">
               <div>
+                <p className="admin-eyebrow">Parent Areas</p>
                 <h2>Mapped Areas</h2>
-                <p>Click a card to configure locations.</p>
+                <p className="admin-modal-subtitle">These are the clickable parent areas on the site map.</p>
               </div>
-              <button className="primary" onClick={startNewArea}>+ Add Area</button>
+              <button className="admin-close-btn" onClick={() => setAreasModalOpen(false)}>×</button>
             </div>
 
-            <div className="mapped-area-list">
-              {site?.areas?.map((area) => (
-                <div
+            <div className="mapped-areas-modal-top">
+              <div className="mapped-areas-count">
+                <strong>{site?.areas?.length || 0}</strong>
+                <span>area(s) mapped</span>
+              </div>
+              <button className="admin-primary-btn" onClick={openNewArea}>+ Add Area</button>
+            </div>
+
+            <div className="mapped-areas-popup-list">
+              {!site?.areas?.length && (
+                <div className="admin-empty-line large">
+                  <strong>No mapped areas yet.</strong>
+                  <span>Click + Add Area to start drawing parent areas.</span>
+                </div>
+              )}
+
+              {site?.areas?.map((area, index) => (
+                <article
                   key={area.id}
-                  className={`mapped-area-card ${selectedAreaId === area.id ? "active" : ""}`}
-                  onClick={() => openConfiguration(area)}
+                  className="mapped-area-card-popup is-config-link"
+                  onClick={() => navigate(`/admin/config/${site.id}/${area.id}`)}
                 >
+                  <div className="mapped-area-index">{String(index + 1).padStart(2, "0")}</div>
+
                   <div className="mapped-area-main">
                     <strong>{area.name}</strong>
-                    <span>{Object.keys(area.tour?.scenes || {}).length} panorama location(s)</span>
+                    <small>Click to configure panorama locations</small>
+                    <code>{area.points || "No points"}</code>
                   </div>
 
-                  <div className="mapped-area-actions" onClick={(event) => event.stopPropagation()}>
-                    <button onClick={() => editArea(area)}>Edit</button>
-                    <button className="danger-soft" onClick={() => deleteArea(area.id)}>Delete</button>
+                  <div className="mapped-area-card-actions">
+                    <button
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openEditArea(area);
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="danger"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDeleteArea(area);
+                      }}
+                    >
+                      Delete
+                    </button>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
-          </section>
+          </div>
+        </div>
+      )}
 
-          {draft && (
-            <section className="area-editor-card">
-              <div className="admin-section-head compact">
-                <div>
-                  <h2>{draft.id ? "Edit Mapped Area" : "New Mapped Area"}</h2>
-                  <p>This section is only for polygon mapping.</p>
-                </div>
+      {areaModalOpen && draftArea && (
+        <div className="admin-modal-layer">
+          <div className="admin-modal small-modal clean-area-modal">
+            <div className="admin-modal-header">
+              <div>
+                <p className="admin-eyebrow">Mapped Area</p>
+                <h2>{draftArea.original ? "Edit Area" : "Add Area"}</h2>
               </div>
-
-              <label className="admin-field-label">Area Name</label>
-              <input
-                value={draft.name}
-                onChange={(event) => setDraft((prev) => ({ ...prev, name: event.target.value }))}
-                placeholder="Example: Packing Area"
-              />
-
-              <div className="point-summary">
-                <strong>{draftPoints.length}</strong>
-                <span>points mapped</span>
-              </div>
-
-              <div className="editor-button-grid">
-                <button className={isMapping ? "active-map-btn" : ""} onClick={() => setIsMapping((value) => !value)}>
-                  {isMapping ? "Stop Mapping" : "Map Area"}
-                </button>
-                <button onClick={undoPoint} disabled={draftPoints.length === 0}>Undo Point</button>
-              </div>
-
-              <div className="editor-button-grid bottom">
-                <button onClick={cancelEdit}>Cancel</button>
-                <button className="primary" onClick={saveArea}>Save Area</button>
-              </div>
-            </section>
-          )}
-        </aside>
-
-        <section className="admin-map-workspace">
-          <div className="map-workspace-header">
-            <div>
-              <h2>{site?.name}</h2>
-              <p>{isMapping ? "Click the map to add polygon points." : "Click a saved area to configure panorama locations."}</p>
+              <button className="admin-close-btn" onClick={() => setAreaModalOpen(false)}>×</button>
             </div>
-            {draft && (
-              <div className="mapping-status-pill">
-                {isMapping ? "Mapping active" : "Editing area"} · {draftPoints.length} point(s)
-              </div>
-            )}
+
+            <label className="admin-label">Area Name</label>
+            <input
+              className="admin-input"
+              value={draftArea.name}
+              onChange={(event) => setDraftArea((current) => ({ ...current, name: event.target.value }))}
+              placeholder="Example: Admin, Process, QA"
+            />
+
+            <div className="admin-points-box">
+              <span>{draftArea.points.length} point(s) mapped</span>
+              <code>{draftPolygon || "No points yet"}</code>
+            </div>
+
+            <div className="admin-modal-actions">
+              <button className="admin-secondary-btn" onClick={startMapping}>Map Area</button>
+              <button className="admin-secondary-btn" onClick={undoPoint} disabled={draftArea.points.length === 0}>Undo Point</button>
+              <button className="admin-primary-btn" onClick={saveMappedArea}>Save Area</button>
+            </div>
           </div>
+        </div>
+      )}
 
-          <div className={`admin-map-canvas ${isMapping ? "is-mapping" : ""}`} onClick={handleMapClick}>
-            {site?.mapImage && <img src={site.mapImage} alt={site.name} />}
-
-            <svg className="admin-map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-              {site?.areas?.map((area) => (
-                <polygon
-                  key={area.id}
-                  points={area.points}
-                  className={`admin-area-shape ${selectedAreaId === area.id ? "selected" : ""}`}
-                  onClick={(event) => {
-                    if (isMapping || draft) return;
-                    event.stopPropagation();
-                    openConfiguration(area);
-                  }}
-                />
-              ))}
-
-              {draftPoints.length > 0 && (
-                <>
-                  <polyline points={draftPoints.join(" ")} className="admin-draft-line" />
-                  {draftPoints.length >= 3 && <polygon points={draftPoints.join(" ")} className="admin-draft-shape" />}
-                  {draftPoints.map((point, index) => {
-                    const [x, y] = point.split(",");
-                    return <circle key={`${point}-${index}`} cx={x} cy={y} r="1.1" className="admin-draft-dot" />;
-                  })}
-                </>
-              )}
-            </svg>
-          </div>
-        </section>
-      </main>
     </div>
   );
 }

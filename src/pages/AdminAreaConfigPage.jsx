@@ -1,461 +1,552 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import {
-  clone,
-  createConnection,
-  createEmptyTour,
-  createSceneFromUpload,
-  getEffectiveFactoryMaps,
-  makeSlug,
-  saveFactoryMaps,
+  createUniqueId,
+  getEffectiveTour,
+  getMergedArea,
+  getMergedSite,
+  getPercentPoint,
+  updateAreaTour,
 } from "../utils/streetViewAdminStorage";
 
-function pointFromClick(event) {
-  const rect = event.currentTarget.getBoundingClientRect();
-  const x = ((event.clientX - rect.left) / rect.width) * 100;
-  const y = ((event.clientY - rect.top) / rect.height) * 100;
+function createEmptyScene(title, existingIds) {
+  const id = createUniqueId(title || "location", existingIds);
 
   return {
-    x: Number(Math.max(0, Math.min(100, x)).toFixed(2)),
-    y: Number(Math.max(0, Math.min(100, y)).toFixed(2)),
+    id,
+    title: title || "Untitled Location",
+    label: title || "Location",
+    panorama: "",
+    mapPoint: null,
+    view: {
+      initialYaw: 0,
+      initialPitch: 0,
+      initialHfov: 110,
+    },
   };
 }
 
-function normalizeTour(area) {
-  return area?.tour || createEmptyTour({ areaId: area?.id || "area", areaName: area?.name || "Area" });
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 function AdminAreaConfigPage() {
   const navigate = useNavigate();
   const { siteId, areaId } = useParams();
 
-  const [maps, setMaps] = useState(() => getEffectiveFactoryMaps());
-  const [selectedSceneId, setSelectedSceneId] = useState(null);
-  const [sceneDraft, setSceneDraft] = useState({ title: "", label: "" });
-  const [placingMapSceneId, setPlacingMapSceneId] = useState(null);
+  const site = getMergedSite(siteId);
+  const area = getMergedArea(siteId, areaId);
+
+  const [tour, setTour] = useState(() => getEffectiveTour(siteId, areaId));
+  const [selectedSceneId, setSelectedSceneId] = useState(() => {
+    const initialTour = getEffectiveTour(siteId, areaId);
+    return initialTour.settings.firstScene || Object.keys(initialTour.scenes || {})[0] || null;
+  });
+  const [placingMapPointFor, setPlacingMapPointFor] = useState(null);
+  const [pickingConnectionFor, setPickingConnectionFor] = useState(null);
   const [connectionTargetId, setConnectionTargetId] = useState("");
-  const [isPickingArrow, setIsPickingArrow] = useState(false);
-  const [saveNotice, setSaveNotice] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
 
-  const site = maps[siteId];
-  const area = site?.areas?.find((item) => item.id === areaId) || null;
-  const tour = normalizeTour(area);
-  const scenes = tour.scenes || {};
-  const sceneList = useMemo(() => Object.values(scenes), [scenes]);
+  const panoramaBoxRef = useRef(null);
+  const uploadInputRef = useRef(null);
+  const connectedUploadInputRef = useRef(null);
 
-  const safeSelectedSceneId = selectedSceneId || tour.settings?.firstScene || sceneList[0]?.id || null;
-  const selectedScene = safeSelectedSceneId ? scenes[safeSelectedSceneId] : null;
-
-  const outgoingConnections = (tour.connections || []).filter(
-    (connection) => connection.from === safeSelectedSceneId
-  );
-
-  useEffect(() => {
-    if (!selectedScene) return;
-    setSceneDraft({
-      title: selectedScene.title || "",
-      label: selectedScene.label || "",
-    });
-  }, [selectedScene?.id]);
+  const scenes = useMemo(() => Object.values(tour.scenes || {}), [tour]);
+  const selectedScene = selectedSceneId ? tour.scenes[selectedSceneId] : null;
+  const selectedConnections = selectedSceneId
+    ? tour.connections.filter((connection) => connection.from === selectedSceneId)
+    : [];
 
   if (!site) return <Navigate to="/admin" replace />;
   if (!area) return <Navigate to="/admin" replace />;
 
-  function persist(nextMaps) {
-    setMaps(nextMaps);
-    saveFactoryMaps(nextMaps);
+  function showSaved(text = "Saved") {
+    setSaveMessage(text);
+    setTimeout(() => setSaveMessage(""), 1500);
   }
 
-  function showSavedNotice(message = "Saved") {
-    setSaveNotice(message);
-    window.clearTimeout(window.__streetViewSaveNoticeTimer);
-    window.__streetViewSaveNoticeTimer = window.setTimeout(() => setSaveNotice(""), 1600);
-  }
-
-  function updateAreaTour(updater) {
-    const nextMaps = clone(maps);
-    const nextSite = nextMaps[siteId];
-
-    nextSite.areas = nextSite.areas.map((item) => {
-      if (item.id !== areaId) return item;
-      const currentTour = normalizeTour(item);
-      return {
-        ...item,
-        tour: updater(currentTour),
-      };
-    });
-
-    persist(nextMaps);
-  }
-
-  function selectScene(sceneId) {
-    const scene = scenes[sceneId];
-    setSelectedSceneId(sceneId);
-    setSceneDraft({
-      title: scene?.title || "",
-      label: scene?.label || "",
-    });
-    setConnectionTargetId("");
-    setIsPickingArrow(false);
-  }
-
-  function uploadLocation(event) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const rawName = file.name.replace(/\.[^/.]+$/, "");
-      const sceneId = `${makeSlug(rawName, "location")}-${Date.now()}`;
-      const newScene = createSceneFromUpload({
-        sceneId,
-        title: rawName,
-        label: rawName,
-        panorama: reader.result,
-        mapPoint: { x: 50, y: 50 },
-      });
-
-      updateAreaTour((currentTour) => ({
-        ...currentTour,
-        settings: {
-          ...(currentTour.settings || {}),
-          firstScene: currentTour.settings?.firstScene || sceneId,
-          defaultHfov: currentTour.settings?.defaultHfov || 110,
-          mobileHfov: currentTour.settings?.mobileHfov || 90,
-        },
-        scenes: {
-          ...(currentTour.scenes || {}),
-          [sceneId]: newScene,
-        },
-        connections: currentTour.connections || [],
-      }));
-
-      setSelectedSceneId(sceneId);
-      setSceneDraft({ title: rawName, label: rawName });
-      showSavedNotice("Location uploaded and saved");
+  function saveTour(nextTour, message = "Saved") {
+    const cleanTour = {
+      ...nextTour,
+      settings: {
+        firstScene: nextTour.settings?.firstScene || Object.keys(nextTour.scenes || {})[0] || null,
+        defaultHfov: nextTour.settings?.defaultHfov || 110,
+        mobileHfov: nextTour.settings?.mobileHfov || 90,
+        ...(nextTour.settings || {}),
+      },
+      scenes: nextTour.scenes || {},
+      connections: Array.isArray(nextTour.connections) ? nextTour.connections : [],
     };
 
-    reader.readAsDataURL(file);
+    setTour(cleanTour);
+    updateAreaTour(siteId, areaId, cleanTour);
+    showSaved(message);
+  }
+
+  async function addLocationFile(file, options = {}) {
+    if (!file) return;
+
+    const { selectNew = true } = options;
+    const previousSelectedSceneId = selectedSceneId;
+    const existingIds = Object.keys(tour.scenes || {});
+    const cleanTitle = file.name.replace(/\.[^/.]+$/, "");
+    const newScene = createEmptyScene(cleanTitle, existingIds);
+    const image = await fileToBase64(file);
+
+    const sceneWithImage = {
+      ...newScene,
+      panorama: image,
+    };
+
+    const nextTour = {
+      ...tour,
+      settings: {
+        ...tour.settings,
+        firstScene: tour.settings.firstScene || sceneWithImage.id,
+      },
+      scenes: {
+        ...tour.scenes,
+        [sceneWithImage.id]: sceneWithImage,
+      },
+      connections: tour.connections || [],
+    };
+
+    setSelectedSceneId(selectNew ? sceneWithImage.id : previousSelectedSceneId || sceneWithImage.id);
+    saveTour(nextTour, "Location added");
+  }
+
+  async function addLocationFromFile(event) {
+    const file = event.target.files?.[0];
+    await addLocationFile(file, { selectNew: true });
     event.target.value = "";
   }
 
-  function saveLocation() {
-    if (!safeSelectedSceneId || !selectedScene) return;
+  async function addConnectedLocationFromFile(event) {
+    const file = event.target.files?.[0];
+    await addLocationFile(file, { selectNew: false });
+    event.target.value = "";
+  }
 
-    updateAreaTour((currentTour) => ({
-      ...currentTour,
+  function updateSelectedScene(field, value) {
+    if (!selectedScene) return;
+
+    const nextTour = {
+      ...tour,
       scenes: {
-        ...(currentTour.scenes || {}),
-        [safeSelectedSceneId]: {
-          ...currentTour.scenes[safeSelectedSceneId],
-          title: sceneDraft.title.trim() || "Untitled Location",
-          label: sceneDraft.label.trim() || sceneDraft.title.trim() || "Location",
+        ...tour.scenes,
+        [selectedScene.id]: {
+          ...selectedScene,
+          [field]: value,
         },
       },
-    }));
+    };
 
-    showSavedNotice("Location saved");
+    setTour(nextTour);
   }
 
-  function setAsStart() {
-    if (!safeSelectedSceneId) return;
+  function saveSelectedLocation() {
+    if (!selectedScene) return;
 
-    updateAreaTour((currentTour) => ({
-      ...currentTour,
-      settings: {
-        ...(currentTour.settings || {}),
-        firstScene: safeSelectedSceneId,
+    const nextTitle = selectedScene.title?.trim() || "Untitled Location";
+    const nextLabel = selectedScene.label?.trim() || nextTitle;
+
+    const nextTour = {
+      ...tour,
+      scenes: {
+        ...tour.scenes,
+        [selectedScene.id]: {
+          ...selectedScene,
+          title: nextTitle,
+          label: nextLabel,
+        },
       },
-    }));
+    };
 
-    showSavedNotice("Start location saved");
+    saveTour(nextTour, "Location saved");
   }
 
-  function deleteLocation() {
-    if (!safeSelectedSceneId) return;
-    const confirmed = window.confirm("Delete this panorama location?");
-    if (!confirmed) return;
-
-    let nextSelectedId = null;
-
-    updateAreaTour((currentTour) => {
-      const nextScenes = { ...(currentTour.scenes || {}) };
-      delete nextScenes[safeSelectedSceneId];
-
-      const remainingIds = Object.keys(nextScenes);
-      nextSelectedId = remainingIds[0] || null;
-
-      return {
-        ...currentTour,
+  function setAsStart(sceneId) {
+    saveTour(
+      {
+        ...tour,
         settings: {
-          ...(currentTour.settings || {}),
-          firstScene:
-            currentTour.settings?.firstScene === safeSelectedSceneId
-              ? nextSelectedId
-              : currentTour.settings?.firstScene || nextSelectedId,
-        },
-        scenes: nextScenes,
-        connections: (currentTour.connections || []).filter(
-          (connection) => connection.from !== safeSelectedSceneId && connection.to !== safeSelectedSceneId
-        ),
-      };
-    });
-
-    setSelectedSceneId(nextSelectedId);
-    if (nextSelectedId && scenes[nextSelectedId]) {
-      setSceneDraft({ title: scenes[nextSelectedId].title || "", label: scenes[nextSelectedId].label || "" });
-    } else {
-      setSceneDraft({ title: "", label: "" });
-    }
-  }
-
-  function startPlaceOnFactoryMap() {
-    if (!safeSelectedSceneId) return;
-    setPlacingMapSceneId(safeSelectedSceneId);
-  }
-
-  function handleFactoryMapClick(event) {
-    if (!placingMapSceneId) return;
-    const point = pointFromClick(event);
-
-    updateAreaTour((currentTour) => ({
-      ...currentTour,
-      scenes: {
-        ...(currentTour.scenes || {}),
-        [placingMapSceneId]: {
-          ...currentTour.scenes[placingMapSceneId],
-          mapPoint: point,
+          ...tour.settings,
+          firstScene: sceneId,
         },
       },
-    }));
-
-    setPlacingMapSceneId(null);
-    showSavedNotice("Map point saved");
+      "Start saved"
+    );
   }
 
-  function startPickArrow() {
-    if (!connectionTargetId) {
-      alert("Choose a next location first.");
+  function deleteScene(sceneId) {
+    const ok = window.confirm("Delete this location?");
+    if (!ok) return;
+
+    const nextScenes = { ...tour.scenes };
+    delete nextScenes[sceneId];
+
+    const nextConnections = tour.connections.filter(
+      (connection) => connection.from !== sceneId && connection.to !== sceneId
+    );
+
+    const nextFirstScene =
+      tour.settings.firstScene === sceneId
+        ? Object.keys(nextScenes)[0] || null
+        : tour.settings.firstScene;
+
+    const nextTour = {
+      ...tour,
+      settings: {
+        ...tour.settings,
+        firstScene: nextFirstScene,
+      },
+      scenes: nextScenes,
+      connections: nextConnections,
+    };
+
+    setSelectedSceneId(nextFirstScene);
+    saveTour(nextTour, "Location deleted");
+  }
+
+  function handleMiniMapClick(event) {
+    if (!placingMapPointFor) return;
+
+    const point = getPercentPoint(event, event.currentTarget);
+    const scene = tour.scenes[placingMapPointFor];
+    if (!scene) return;
+
+    const nextTour = {
+      ...tour,
+      scenes: {
+        ...tour.scenes,
+        [placingMapPointFor]: {
+          ...scene,
+          mapPoint: point,
+          minimap: point,
+        },
+      },
+    };
+
+    setPlacingMapPointFor(null);
+    saveTour(nextTour, "Map point saved");
+  }
+
+  function beginPickConnectionTo(targetSceneId) {
+    if (!selectedScene || !targetSceneId) {
+      alert("Choose a location first.");
       return;
     }
-    setIsPickingArrow(true);
+
+    setPickingConnectionFor({ from: selectedScene.id, to: targetSceneId });
   }
 
   function handlePanoramaClick(event) {
-    if (!isPickingArrow || !safeSelectedSceneId || !connectionTargetId) return;
-    const point = pointFromClick(event);
-    const targetScene = scenes[connectionTargetId];
+    if (!pickingConnectionFor || !panoramaBoxRef.current) return;
 
-    updateAreaTour((currentTour) => ({
-      ...currentTour,
-      connections: [
-        ...(currentTour.connections || []),
-        createConnection({
-          from: safeSelectedSceneId,
-          to: connectionTargetId,
-          label: targetScene?.label || targetScene?.title || "Next Location",
-          hotspot: {
-            x: point.x,
-            y: point.y,
-            icon: "→",
-          },
-        }),
-      ],
-    }));
+    const point = getPercentPoint(event, panoramaBoxRef.current);
+    const fromScene = tour.scenes[pickingConnectionFor.from];
+    const toScene = tour.scenes[pickingConnectionFor.to];
+    if (!fromScene || !toScene) return;
 
-    setIsPickingArrow(false);
+    const connectionId = createUniqueId(
+      `${pickingConnectionFor.from}-to-${pickingConnectionFor.to}`,
+      tour.connections.map((connection) => connection.id)
+    );
+
+    const nextConnection = {
+      id: connectionId,
+      from: pickingConnectionFor.from,
+      to: pickingConnectionFor.to,
+      label: `Go to ${toScene.label || toScene.title}`,
+      type: "move",
+      hotspot: {
+        x: point.x,
+        y: point.y,
+        icon: "↑",
+        yaw: 0,
+        pitch: -8,
+      },
+    };
+
+    const existingIndex = tour.connections.findIndex(
+      (connection) =>
+        connection.from === pickingConnectionFor.from &&
+        connection.to === pickingConnectionFor.to
+    );
+
+    const nextConnections =
+      existingIndex >= 0
+        ? tour.connections.map((connection, index) =>
+            index === existingIndex
+              ? {
+                  ...connection,
+                  label: nextConnection.label,
+                  hotspot: nextConnection.hotspot,
+                }
+              : connection
+          )
+        : [...tour.connections, nextConnection];
+
+    const nextTour = {
+      ...tour,
+      connections: nextConnections,
+    };
+
+    setPickingConnectionFor(null);
     setConnectionTargetId("");
-    showSavedNotice("Next-location arrow saved");
+    saveTour(nextTour, existingIndex >= 0 ? "Arrow position updated" : "Next location saved");
   }
 
   function deleteConnection(connectionId) {
-    updateAreaTour((currentTour) => ({
-      ...currentTour,
-      connections: (currentTour.connections || []).filter((connection) => connection.id !== connectionId),
-    }));
-    showSavedNotice("Connection deleted");
+    const nextTour = {
+      ...tour,
+      connections: tour.connections.filter((connection) => connection.id !== connectionId),
+    };
+
+    saveTour(nextTour, "Connection deleted");
   }
 
+  function logout() {
+    sessionStorage.removeItem("streetViewAuth");
+    sessionStorage.removeItem("streetViewRole");
+    navigate("/login", { replace: true });
+  }
+
+  const otherScenes = selectedScene
+    ? scenes.filter((scene) => scene.id !== selectedScene.id)
+    : [];
+
+  const currentMapPoint = selectedScene?.mapPoint || selectedScene?.minimap || null;
+
   return (
-    <div className="admin-split-page config-page">
-      <header className="admin-topbar">
-        <div>
-          <p className="admin-eyebrow">Area Configuration</p>
-          <h1>{area.name}</h1>
-          <p>Add panorama locations, set the start location, and place next-location arrows on the 360 image.</p>
+    <div className="admin-config-page">
+      <aside className="admin-config-sidebar">
+        <div className="admin-config-brand">
+          <div className="admin-config-logo">360</div>
+          <div>
+            <span>Street View Admin</span>
+            <strong>{area.name}</strong>
+          </div>
         </div>
 
-        <div className="admin-topbar-actions">
-          {saveNotice && <span className="admin-save-pill">{saveNotice}</span>}
-          <button onClick={() => navigate("/admin")}>← Back to Area Mapping</button>
+        {saveMessage && <div className="admin-config-save-pill">✓ {saveMessage}</div>}
+
+        <div className="admin-config-nav-group">
+          <button onClick={() => navigate("/admin")}>Open Map</button>
           <button onClick={() => navigate(`/viewer/${siteId}/${areaId}`)}>Open Viewer</button>
+          <button className="danger" onClick={logout}>Logout</button>
         </div>
-      </header>
 
-      <main className="config-page-layout">
-        <aside className="config-left-panel">
-          <label className="upload-location-card">
-            <input type="file" accept="image/*" onChange={uploadLocation} />
-            <strong>+ Upload 360 Image</strong>
-            <span>This creates a new location inside this mapped area.</span>
+        <div className="admin-config-section">
+          <div className="admin-config-section-title">Location Upload</div>
+          <label className="admin-config-upload-btn">
+            + Upload 360 Image
+            <input ref={uploadInputRef} type="file" accept="image/*" onChange={addLocationFromFile} hidden />
           </label>
+          <input ref={connectedUploadInputRef} type="file" accept="image/*" onChange={addConnectedLocationFromFile} hidden />
+        </div>
 
-          <div className="location-list-title">Locations</div>
-          <div className="location-list">
-            {sceneList.length === 0 && (
-              <div className="empty-small">No locations yet. Upload your first 360 image.</div>
-            )}
-
-            {sceneList.map((scene) => (
+        <div className="admin-config-section grow">
+          <div className="admin-config-section-title">Locations</div>
+          <div className="admin-config-location-list">
+            {scenes.length === 0 && <p>No locations yet. Upload a 360 image first.</p>}
+            {scenes.map((scene) => (
               <button
                 key={scene.id}
-                className={`location-card ${safeSelectedSceneId === scene.id ? "active" : ""}`}
-                onClick={() => selectScene(scene.id)}
+                className={`admin-config-location-item ${selectedSceneId === scene.id ? "active" : ""}`}
+                onClick={() => setSelectedSceneId(scene.id)}
               >
-                <span>{scene.title || scene.label || scene.id}</span>
-                {tour.settings?.firstScene === scene.id && <strong>START</strong>}
+                <span>{scene.title || "Untitled"}</span>
+                {tour.settings.firstScene === scene.id && <small>START</small>}
               </button>
             ))}
           </div>
-        </aside>
+        </div>
 
-        <section className="config-main-panel">
-          {!selectedScene && (
-            <div className="friendly-empty-state">
-              <h2>No location selected</h2>
-              <p>Upload a 360 image to create the first location for this area.</p>
+        <div className="admin-config-section">
+          <div className="admin-config-section-title">Selected Location</div>
+          <label className="admin-config-field">
+            <span>Title</span>
+            <input
+              disabled={!selectedScene}
+              value={selectedScene?.title || ""}
+              onChange={(event) => updateSelectedScene("title", event.target.value)}
+              placeholder="Location title"
+            />
+          </label>
+
+          <label className="admin-config-field">
+            <span>Label</span>
+            <input
+              disabled={!selectedScene}
+              value={selectedScene?.label || ""}
+              onChange={(event) => updateSelectedScene("label", event.target.value)}
+              placeholder="Map label"
+            />
+          </label>
+
+          <div className="admin-config-action-grid">
+            <button disabled={!selectedScene} onClick={saveSelectedLocation}>Save</button>
+            <button disabled={!selectedScene} onClick={() => selectedScene && setAsStart(selectedScene.id)}>Set Start</button>
+            <button disabled={!selectedScene} onClick={() => selectedScene && setPlacingMapPointFor(selectedScene.id)}>Set Map</button>
+            <button disabled={!selectedScene} className="danger" onClick={() => selectedScene && deleteScene(selectedScene.id)}>Delete</button>
+          </div>
+        </div>
+
+      </aside>
+
+      <main className="admin-config-main">
+        <section className="admin-config-connected-card">
+          <div className="admin-config-card-title">
+            <div>
+              <span>Connected Locations</span>
+              <strong>Click a location card, then click the 360 image to place or adjust its arrow.</strong>
             </div>
-          )}
+          </div>
 
-          {selectedScene && (
-            <>
-              <section className="location-editor-card">
-                <div className="location-editor-head">
-                  <div>
-                    <p className="admin-eyebrow">Selected Location</p>
-                    <h2>{selectedScene.title || "Untitled Location"}</h2>
-                  </div>
-                  {tour.settings?.firstScene === selectedScene.id && <span className="start-badge">START LOCATION</span>}
-                </div>
+          <div className="admin-config-connected-row">
+            <button
+              type="button"
+              className="admin-config-add-link-card"
+              onClick={() => connectedUploadInputRef.current?.click()}
+            >
+              <b>+</b>
+              <span>Add</span>
+            </button>
 
-                <div className="location-form-grid friendly">
-                  <div>
-                    <label className="admin-field-label">Title</label>
-                    <input
-                      value={sceneDraft.title}
-                      onChange={(event) => setSceneDraft((prev) => ({ ...prev, title: event.target.value }))}
-                      placeholder="Example: Product Entrance"
-                    />
-                  </div>
-                  <div>
-                    <label className="admin-field-label">Label</label>
-                    <input
-                      value={sceneDraft.label}
-                      onChange={(event) => setSceneDraft((prev) => ({ ...prev, label: event.target.value }))}
-                      placeholder="Example: Entrance"
-                    />
-                  </div>
-                </div>
+            {otherScenes.length === 0 && (
+              <div className="admin-config-empty-link">Upload another location to connect.</div>
+            )}
 
-                <div className="location-toolbar">
-                  <button className="primary" onClick={saveLocation}>Save Location</button>
-                  <button onClick={setAsStart}>Set as Start</button>
-                  <button onClick={startPlaceOnFactoryMap}>Set Map Point</button>
-                  <button className="danger-soft" onClick={deleteLocation}>Delete</button>
-                </div>
-              </section>
+            {otherScenes.map((scene) => {
+              const existingConnection = selectedConnections.find(
+                (connection) => connection.to === scene.id
+              );
 
-              <section className="config-two-column">
-                <div className="factory-map-point-card">
-                  <div className="card-title-row">
-                    <div>
-                      <h3>Factory Map Point</h3>
-                      <p>{placingMapSceneId ? "Click the factory map to place this location." : "Mark where this panorama belongs on the parent map."}</p>
-                    </div>
-                    {selectedScene.mapPoint && <span>x {selectedScene.mapPoint.x}, y {selectedScene.mapPoint.y}</span>}
-                  </div>
-
-                  <div className={`mini-map-canvas ${placingMapSceneId ? "placing" : ""}`} onClick={handleFactoryMapClick}>
-                    {site.mapImage && <img src={site.mapImage} alt={site.name} />}
-                    <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-                      <polygon points={area.points} className="mini-area-shape" />
-                      {sceneList.map((scene) => scene.mapPoint && (
-                        <circle
-                          key={scene.id}
-                          cx={scene.mapPoint.x}
-                          cy={scene.mapPoint.y}
-                          r={scene.id === safeSelectedSceneId ? "1.8" : "1.2"}
-                          className={scene.id === safeSelectedSceneId ? "mini-scene-point active" : "mini-scene-point"}
-                        />
-                      ))}
-                    </svg>
-                  </div>
-                </div>
-
-                <div className="next-location-card friendly-next-card">
-                  <h3>Next Locations</h3>
-                  <p>Pick a target, then click the 360 image where the arrow should appear.</p>
-
-                  {sceneList.length < 2 ? (
-                    <div className="friendly-warning">Add another location first before creating a next-location arrow.</div>
-                  ) : (
-                    <div className="next-location-controls">
-                      <select value={connectionTargetId} onChange={(event) => setConnectionTargetId(event.target.value)}>
-                        <option value="">Choose next location</option>
-                        {sceneList
-                          .filter((scene) => scene.id !== safeSelectedSceneId)
-                          .map((scene) => (
-                            <option key={scene.id} value={scene.id}>{scene.title || scene.label}</option>
-                          ))}
-                      </select>
-                      <button className={isPickingArrow ? "active-map-btn" : ""} onClick={startPickArrow}>
-                        {isPickingArrow ? "Click the 360 Image" : "Pick Arrow Position"}
-                      </button>
-                    </div>
+              return (
+                <div
+                  key={scene.id}
+                  className={`admin-config-link-card ${existingConnection ? "is-connected" : ""}`}
+                  onClick={() => beginPickConnectionTo(scene.id)}
+                  title="Click to place or adjust arrow on the 360 image"
+                >
+                  {scene.panorama ? <img src={scene.panorama} alt={scene.title} /> : <span>360</span>}
+                  <strong>{scene.label || scene.title}</strong>
+                  {existingConnection && <em>CONNECTED</em>}
+                  {existingConnection && (
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        deleteConnection(existingConnection.id);
+                      }}
+                    >
+                      ×
+                    </button>
                   )}
-
-                  <div className="connection-list">
-                    {outgoingConnections.map((connection) => (
-                      <div key={connection.id} className="connection-item">
-                        <span>→ {scenes[connection.to]?.title || connection.to}</span>
-                        <button className="danger-soft" onClick={() => deleteConnection(connection.id)}>Delete</button>
-                      </div>
-                    ))}
-                  </div>
                 </div>
-              </section>
+              );
+            })}
+          </div>
+        </section>
 
-              <section className="panorama-editor-card">
-                <div className="card-title-row">
-                  <div>
-                    <h3>360 Image</h3>
-                    <p>{isPickingArrow ? "Click the image to place the next-location arrow." : "Next-location arrows appear on this image."}</p>
-                  </div>
-                </div>
+        <section className="admin-config-stage-card">
+          <div className="admin-config-card-title">
+            <div>
+              <span>Location Placement</span>
+              <strong>{pickingConnectionFor ? "Click the 360 image to place the next-location arrow" : placingMapPointFor ? "Click the map preview to place the location pin" : "Preview and configure this location"}</strong>
+            </div>
+          </div>
 
-                <div className={`panorama-click-canvas ${isPickingArrow ? "picking" : ""}`} onClick={handlePanoramaClick}>
-                  {selectedScene.panorama && <img src={selectedScene.panorama} alt={selectedScene.title} />}
-
-                  {outgoingConnections.map((connection) => (
-                    connection.hotspot?.x != null && connection.hotspot?.y != null ? (
-                      <div
-                        key={connection.id}
-                        className="panorama-arrow"
-                        style={{ left: `${connection.hotspot.x}%`, top: `${connection.hotspot.y}%` }}
-                        title={connection.label}
-                      >
-                        →
-                      </div>
-                    ) : null
+          <div className="admin-config-stage-layout">
+            <div
+              ref={panoramaBoxRef}
+              className={`admin-config-panorama ${pickingConnectionFor ? "is-picking" : ""}`}
+              onClick={handlePanoramaClick}
+            >
+              {selectedScene?.panorama ? (
+                <>
+                  <img src={selectedScene.panorama} alt={selectedScene.title} />
+                  {selectedConnections.map((connection) => (
+                    <div
+                      key={connection.id}
+                      className="admin-config-next-arrow"
+                      style={{
+                        left: `${connection.hotspot?.x ?? 50}%`,
+                        top: `${connection.hotspot?.y ?? 50}%`,
+                      }}
+                    >
+                      ↑
+                    </div>
                   ))}
+                </>
+              ) : (
+                <div className="admin-config-empty-stage">Upload/select a 360 image</div>
+              )}
+            </div>
 
-                  {isPickingArrow && <div className="panorama-click-hint">Click where the arrow should be</div>}
-                </div>
-              </section>
-            </>
-          )}
+            <div
+              className={`admin-config-map-preview ${placingMapPointFor ? "is-placing" : ""}`}
+              onClick={handleMiniMapClick}
+            >
+              <img src={site.mapImage} alt={site.name} />
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                <polygon points={area.points} className="admin-config-parent-area" />
+                {scenes.map((scene) => {
+                  const point = scene.mapPoint || scene.minimap;
+                  if (!point) return null;
+                  return (
+                    <g key={scene.id}>
+                      <circle cx={point.x} cy={point.y} r="1.65" className="admin-config-map-dot" />
+                      <text x={point.x + 1.8} y={point.y} className="admin-config-map-label">
+                        {scene.label || scene.title}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+          </div>
         </section>
       </main>
+
+      {placingMapPointFor && (
+        <div className="admin-map-placement-modal-layer">
+          <div className="admin-map-placement-modal">
+            <div className="admin-map-placement-header">
+              <div>
+                <span>Map Location Pin</span>
+                <strong>Click the area map where this 360 location belongs.</strong>
+              </div>
+              <button type="button" onClick={() => setPlacingMapPointFor(null)}>Cancel</button>
+            </div>
+
+            <div className="admin-map-placement-canvas" onClick={handleMiniMapClick}>
+              <img src={site.mapImage} alt={site.name} />
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                <polygon points={area.points} className="admin-config-parent-area" />
+                {scenes.map((scene) => {
+                  const point = scene.mapPoint || scene.minimap;
+                  if (!point) return null;
+                  return (
+                    <g key={scene.id}>
+                      <circle cx={point.x} cy={point.y} r="1.65" className="admin-config-map-dot" />
+                      <text x={point.x + 1.8} y={point.y} className="admin-config-map-label">
+                        {scene.label || scene.title}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

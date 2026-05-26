@@ -1,14 +1,14 @@
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { factoryMaps } from "../data/mapData";
 import StreetViewer from "../components/StreetViewer";
-import { getMergedArea, getMergedSite } from "../utils/streetViewAdminStorage";
+import { getMergedArea, getMergedSite, getEffectiveTour } from "../utils/streetViewAdminStorage";
 
 function StreetViewPage() {
   const navigate = useNavigate();
   const { siteId, areaId } = useParams();
 
-  const site = getMergedSite(factoryMaps, siteId);
-  const area = getMergedArea(factoryMaps, siteId, areaId);
+  const site = getMergedSite(siteId);
+  const area = getMergedArea(siteId, areaId);
+  const tour = getEffectiveTour(siteId, areaId);
 
   if (!site) {
     return <Navigate to="/" replace />;
@@ -18,20 +18,15 @@ function StreetViewPage() {
     return <Navigate to={`/map/${siteId}`} replace />;
   }
 
-  if (!area.tour) {
+  const hasScenes = tour?.scenes && Object.keys(tour.scenes).length > 0;
+
+  if (!hasScenes) {
     return (
       <div className="viewer-error-page">
         <div className="viewer-error-card">
-          <h1>No tour found</h1>
-          <p>
-            The selected area exists, but it does not have a <code>tour</code>{" "}
-            assigned yet. Go to Admin, open this area, and configure its 360
-            locations.
-          </p>
-
-          <button onClick={() => navigate(`/map/${siteId}`)}>
-            ← Back to Map
-          </button>
+          <h1>No locations configured</h1>
+          <p>This mapped area exists, but it does not have panorama locations yet.</p>
+          <button onClick={() => navigate(`/map/${siteId}`)}>← Back to Map</button>
         </div>
       </div>
     );
@@ -39,12 +34,7 @@ function StreetViewPage() {
 
   return (
     <div className="viewer-page clean-viewer-page">
-      <button
-        className="floating-back-btn"
-        onClick={() => navigate(`/map/${siteId}`)}
-      >
-        ← Map
-      </button>
+      <button className="floating-back-btn" onClick={() => navigate(`/map/${siteId}`)}>← Map</button>
 
       <div className="viewer-area-pill">
         <span>{site.name}</span>
@@ -52,7 +42,7 @@ function StreetViewPage() {
       </div>
 
       <main className="clean-viewer-body">
-        <StreetViewer mapData={area.tour} />
+        <StreetViewer mapData={tour} />
       </main>
     </div>
   );

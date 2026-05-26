@@ -1,183 +1,55 @@
 import { factoryMaps } from "../data/mapData";
 
-export const ADMIN_STORAGE_KEY = "streetViewAdminData";
-export const LEGACY_FACTORY_MAPS_KEY = "streetViewAdminFactoryMaps";
+export const STORAGE_KEY = "streetViewAdminFactoryMaps";
 
-export function deepClone(value) {
+function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-export function clone(value) {
-  return deepClone(value);
-}
-
-function safeParse(value, fallback) {
+function safeParse(value) {
   try {
-    return value ? JSON.parse(value) : fallback;
+    return value ? JSON.parse(value) : null;
   } catch {
-    return fallback;
+    return null;
   }
 }
 
-export function makeSlug(text, fallback = "item") {
-  const slug = String(text || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+function normalizeMaps(maps) {
+  const next = clone(maps || factoryMaps);
 
-  return slug || `${fallback}-${Date.now()}`;
+  Object.values(next).forEach((site) => {
+    site.areas = Array.isArray(site.areas) ? site.areas : [];
+    site.areas = site.areas.map((area) => ({
+      ...area,
+      points: area.points || "",
+      tour: ensureTour(area.tour, area),
+    }));
+  });
+
+  return next;
 }
 
-export function getAdminData() {
-  const data = safeParse(localStorage.getItem(ADMIN_STORAGE_KEY), null);
+export function ensureTour(tour, area = {}) {
+  const areaSlug = area.id || `area-${Date.now()}`;
 
-  if (data && typeof data === "object") {
+  if (tour?.scenes && tour?.settings) {
     return {
-      version: data.version || 1,
-      sites: data.sites || {},
+      ...tour,
+      version: tour.version || 1,
+      settings: {
+        firstScene: tour.settings.firstScene || Object.keys(tour.scenes)[0] || null,
+        defaultHfov: tour.settings.defaultHfov || 110,
+        mobileHfov: tour.settings.mobileHfov || 90,
+        ...tour.settings,
+      },
+      scenes: tour.scenes || {},
+      connections: Array.isArray(tour.connections) ? tour.connections : [],
     };
   }
 
-  return { version: 1, sites: {} };
-}
-
-export function saveAdminData(nextData) {
-  localStorage.setItem(
-    ADMIN_STORAGE_KEY,
-    JSON.stringify(
-      {
-        version: 1,
-        sites: nextData?.sites || {},
-      },
-      null,
-      2
-    )
-  );
-
-  window.dispatchEvent(new Event("streetViewAdminDataChanged"));
-}
-
-export function resetAdminData() {
-  localStorage.removeItem(ADMIN_STORAGE_KEY);
-  localStorage.removeItem(LEGACY_FACTORY_MAPS_KEY);
-  localStorage.removeItem("streetViewAdminTours");
-  localStorage.removeItem("streetViewAdminMapData");
-  window.dispatchEvent(new Event("streetViewAdminDataChanged"));
-}
-
-function getLegacyFullFactoryMaps() {
-  return safeParse(localStorage.getItem(LEGACY_FACTORY_MAPS_KEY), null);
-}
-
-function getLegacyTour(siteId, areaId) {
-  const legacyKeys = ["streetViewAdminTours", "streetViewAdminMapData"];
-
-  for (const key of legacyKeys) {
-    const data = safeParse(localStorage.getItem(key), null);
-    if (!data) continue;
-
-    const keyedTour = data[`${siteId}:${areaId}`];
-    if (keyedTour) return keyedTour;
-
-    const siteTour = data?.sites?.[siteId]?.areas?.find?.((area) => area.id === areaId)?.tour;
-    if (siteTour) return siteTour;
-  }
-
-  return null;
-}
-
-export function getMergedSite(sourceFactoryMaps = factoryMaps, siteId) {
-  const legacyFactoryMaps = getLegacyFullFactoryMaps();
-  const baseSource = legacyFactoryMaps || sourceFactoryMaps || factoryMaps;
-  const baseSite = baseSource?.[siteId];
-
-  if (!baseSite) return null;
-
-  const mergedSite = deepClone(baseSite);
-  const adminData = getAdminData();
-  const savedSite = adminData.sites?.[siteId];
-
-  if (savedSite) {
-    mergedSite.id = savedSite.id || mergedSite.id;
-    mergedSite.name = savedSite.name || mergedSite.name;
-    mergedSite.subtitle = savedSite.subtitle || mergedSite.subtitle;
-    mergedSite.image = savedSite.image || mergedSite.image;
-    mergedSite.mapImage = savedSite.mapImage || mergedSite.mapImage;
-
-    if (Array.isArray(savedSite.areas)) {
-      mergedSite.areas = savedSite.areas;
-    }
-  }
-
-  mergedSite.areas = Array.isArray(mergedSite.areas) ? mergedSite.areas : [];
-
-  mergedSite.areas = mergedSite.areas.map((area) => {
-    const legacyTour = getLegacyTour(siteId, area.id);
-    return legacyTour ? { ...area, tour: legacyTour } : area;
-  });
-
-  return mergedSite;
-}
-
-export function getMergedFactoryMaps(sourceFactoryMaps = factoryMaps) {
-  const legacyFactoryMaps = getLegacyFullFactoryMaps();
-  const baseSource = legacyFactoryMaps || sourceFactoryMaps || factoryMaps;
-  const result = deepClone(baseSource);
-
-  Object.keys(result).forEach((siteId) => {
-    const mergedSite = getMergedSite(baseSource, siteId);
-    if (mergedSite) result[siteId] = mergedSite;
-  });
-
-  return result;
-}
-
-export function getMergedArea(sourceFactoryMaps = factoryMaps, siteId, areaId) {
-  const site = getMergedSite(sourceFactoryMaps, siteId);
-  return site?.areas?.find((area) => area.id === areaId) || null;
-}
-
-export function getSavedFactoryMaps() {
-  return getMergedFactoryMaps(factoryMaps);
-}
-
-export function saveFactoryMaps(nextFactoryMaps) {
-  if (!nextFactoryMaps || typeof nextFactoryMaps !== "object") return false;
-
-  const nextData = { version: 1, sites: {} };
-  Object.keys(nextFactoryMaps).forEach((siteId) => {
-    nextData.sites[siteId] = nextFactoryMaps[siteId];
-  });
-
-  saveAdminData(nextData);
-  return true;
-}
-
-export function clearSavedFactoryMaps() {
-  resetAdminData();
-}
-
-export function getEffectiveFactoryMaps() {
-  return getMergedFactoryMaps(factoryMaps);
-}
-
-export function getEffectiveSite(siteId) {
-  return getMergedSite(factoryMaps, siteId);
-}
-
-export function getEffectiveArea(siteId, areaId) {
-  return getMergedArea(factoryMaps, siteId, areaId);
-}
-
-export function getEffectiveTour(siteId, areaId) {
-  return getEffectiveArea(siteId, areaId)?.tour || null;
-}
-
-export function createEmptyTour({ areaId, areaName }) {
   return {
-    id: `${areaId}-tour`,
-    name: `${areaName} Tour`,
+    id: `${areaSlug}-tour`,
+    name: `${area.name || "Area"} Tour`,
     version: 1,
     settings: {
       firstScene: null,
@@ -189,32 +61,144 @@ export function createEmptyTour({ areaId, areaName }) {
   };
 }
 
-export function createSceneFromUpload({ sceneId, title, label, panorama, mapPoint }) {
-  return {
-    id: sceneId,
-    title,
-    label,
-    panorama,
-    mapPoint: mapPoint || { x: 50, y: 50 },
-    view: {
-      initialYaw: 0,
-      initialPitch: 0,
-      initialHfov: 110,
-    },
-  };
+export function getSavedFactoryMaps() {
+  const saved = safeParse(localStorage.getItem(STORAGE_KEY));
+  return saved ? normalizeMaps(saved) : null;
 }
 
-export function createConnection({ from, to, label, hotspot }) {
+export function saveFactoryMaps(nextMaps) {
+  const normalized = normalizeMaps(nextMaps);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+  window.dispatchEvent(new Event("streetview-admin-storage-updated"));
+  return normalized;
+}
+
+export function resetSavedFactoryMaps() {
+  localStorage.removeItem(STORAGE_KEY);
+  window.dispatchEvent(new Event("streetview-admin-storage-updated"));
+}
+
+export function getEffectiveFactoryMaps() {
+  return getSavedFactoryMaps() || normalizeMaps(factoryMaps);
+}
+
+export function getMergedSite(siteId) {
+  return getEffectiveFactoryMaps()[siteId] || null;
+}
+
+export function getEffectiveSite(siteId) {
+  return getMergedSite(siteId);
+}
+
+export function getMergedArea(siteId, areaId) {
+  const site = getMergedSite(siteId);
+  return site?.areas?.find((area) => area.id === areaId) || null;
+}
+
+export function getEffectiveArea(siteId, areaId) {
+  return getMergedArea(siteId, areaId);
+}
+
+export function getEffectiveTour(siteId, areaId) {
+  const area = getMergedArea(siteId, areaId);
+  return ensureTour(area?.tour, area);
+}
+
+export function saveArea(siteId, area) {
+  const maps = getEffectiveFactoryMaps();
+  const site = maps[siteId];
+
+  if (!site) return maps;
+
+  const cleanArea = {
+    ...area,
+    id: area.id || createId(area.name || "area"),
+    name: area.name || "Untitled Area",
+    points: area.points || "",
+    tour: ensureTour(area.tour, area),
+  };
+
+  const exists = site.areas.some((item) => item.id === cleanArea.id);
+
+  site.areas = exists
+    ? site.areas.map((item) => (item.id === cleanArea.id ? cleanArea : item))
+    : [...site.areas, cleanArea];
+
+  return saveFactoryMaps(maps);
+}
+
+export function deleteArea(siteId, areaId) {
+  const maps = getEffectiveFactoryMaps();
+  const site = maps[siteId];
+
+  if (!site) return maps;
+
+  site.areas = site.areas.filter((area) => area.id !== areaId);
+  return saveFactoryMaps(maps);
+}
+
+export function updateAreaTour(siteId, areaId, nextTour) {
+  const maps = getEffectiveFactoryMaps();
+  const site = maps[siteId];
+
+  if (!site) return maps;
+
+  site.areas = site.areas.map((area) =>
+    area.id === areaId
+      ? {
+          ...area,
+          tour: ensureTour(nextTour, area),
+        }
+      : area
+  );
+
+  return saveFactoryMaps(maps);
+}
+
+export function createId(text = "item") {
+  return text
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || `item-${Date.now()}`;
+}
+
+export function createUniqueId(base, existingIds = []) {
+  const cleanBase = createId(base || "item");
+  let candidate = cleanBase;
+  let index = 2;
+
+  while (existingIds.includes(candidate)) {
+    candidate = `${cleanBase}-${index}`;
+    index += 1;
+  }
+
+  return candidate;
+}
+
+export function pointsArrayToString(points) {
+  return points.map((point) => `${point.x},${point.y}`).join(" ");
+}
+
+export function pointsStringToArray(points = "") {
+  return points
+    .trim()
+    .split(/\s+/)
+    .map((pair) => {
+      const [x, y] = pair.split(",").map(Number);
+      return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
+    })
+    .filter(Boolean);
+}
+
+export function getPercentPoint(event, element) {
+  const rect = element.getBoundingClientRect();
+  const x = ((event.clientX - rect.left) / rect.width) * 100;
+  const y = ((event.clientY - rect.top) / rect.height) * 100;
+
   return {
-    id: `${from}-to-${to}-${Date.now()}`,
-    from,
-    to,
-    label: label || "Next Location",
-    type: "move",
-    hotspot: hotspot || {
-      x: 50,
-      y: 50,
-      icon: "→",
-    },
+    x: Number(Math.max(0, Math.min(100, x)).toFixed(2)),
+    y: Number(Math.max(0, Math.min(100, y)).toFixed(2)),
   };
 }

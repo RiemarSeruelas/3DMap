@@ -15,10 +15,12 @@ function ProtectedRoute({ children, role }) {
     return <Navigate to="/login" replace />;
   }
 
+  // Admin can access both admin and viewer pages.
   if (userRole === "admin") {
     return children;
   }
 
+  // Viewer/user cannot access admin pages.
   if (role && userRole !== role) {
     return <Navigate to="/" replace />;
   }
