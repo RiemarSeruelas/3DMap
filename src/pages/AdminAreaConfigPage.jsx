@@ -1,4 +1,7 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import "pannellum/build/pannellum.css";
+import "pannellum";
+import "../styles/admin.css";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import {
   createUniqueId,
@@ -9,6 +12,56 @@ import {
   updateAreaTour,
   uploadAdminImage,
 } from "../utils/streetViewAdminStorage";
+
+function normalizeNumber(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function labelForScene(scene, fallback = "Location") {
+  return scene?.label || scene?.title || scene?.name || fallback;
+}
+
+function hotspotToPannellumPoint(hotspot = {}) {
+  const hasYawPitch = Number.isFinite(Number(hotspot.yaw)) && Number.isFinite(Number(hotspot.pitch));
+  const hasXY = Number.isFinite(Number(hotspot.x)) && Number.isFinite(Number(hotspot.y));
+
+  if (hotspot.coordinateMode === "pannellum" && hasYawPitch) {
+    return {
+      yaw: normalizeNumber(hotspot.yaw, 0),
+      pitch: clamp(normalizeNumber(hotspot.pitch, -8), -85, 85),
+    };
+  }
+
+  if (hasYawPitch && !hasXY) {
+    return {
+      yaw: normalizeNumber(hotspot.yaw, 0),
+      pitch: clamp(normalizeNumber(hotspot.pitch, -8), -85, 85),
+    };
+  }
+
+  if (hasXY) {
+    const x = normalizeNumber(hotspot.x, 50);
+    const y = normalizeNumber(hotspot.y, 50);
+    return {
+      yaw: (x / 100) * 360 - 180,
+      pitch: clamp(90 - (y / 100) * 180, -85, 85),
+    };
+  }
+
+  return { yaw: 0, pitch: -8 };
+}
+
+function pannellumPointToPercent({ yaw, pitch }) {
+  return {
+    x: Number((((normalizeNumber(yaw, 0) + 180) / 360) * 100).toFixed(2)),
+    y: Number((((90 - clamp(normalizeNumber(pitch, 0), -85, 85)) / 180) * 100).toFixed(2)),
+  };
+}
 
 function createEmptyScene(title, existingIds) {
   const id = createUniqueId(title || "location", existingIds);
@@ -45,6 +98,8 @@ function AdminAreaConfigPage() {
   const [saveMessage, setSaveMessage] = useState("");
 
   const panoramaBoxRef = useRef(null);
+  const placementViewerRef = useRef(null);
+  const placementPannellumInstanceRef = useRef(null);
   const connectedUploadInputRef = useRef(null);
 
   const scenes = useMemo(() => Object.values(tour.scenes || {}), [tour]);
@@ -52,6 +107,21 @@ function AdminAreaConfigPage() {
   const selectedConnections = selectedSceneId
     ? tour.connections.filter((connection) => connection.from === selectedSceneId)
     : [];
+
+  const selectedConnectionsKey = useMemo(
+    () => JSON.stringify(
+      selectedConnections.map((connection) => ({
+        id: connection.id,
+        from: connection.from,
+        to: connection.to,
+        yaw: connection.hotspot?.yaw,
+        pitch: connection.hotspot?.pitch,
+        x: connection.hotspot?.x,
+        y: connection.hotspot?.y,
+      }))
+    ),
+    [selectedConnections]
+  );
 
   if (!site) return <Navigate to="/admin" replace />;
   if (!area) return <Navigate to="/admin" replace />;
@@ -199,6 +269,9 @@ function AdminAreaConfigPage() {
   }
 
   function handleMiniMapClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
     if (!placingMapPointFor) return;
 
     const point = getPercentPoint(event, event.currentTarget);
@@ -227,17 +300,36 @@ function AdminAreaConfigPage() {
       return;
     }
 
+    setPlacingMapPointFor(null);
     setPickingConnectionFor({ from: selectedScene.id, to: targetSceneId });
   }
 
   function handlePanoramaClick(event) {
-    if (!pickingConnectionFor || !panoramaBoxRef.current) return;
+    event.preventDefault();
+    event.stopPropagation();
 
-    const point = getPercentPoint(event, panoramaBoxRef.current);
+    if (!pickingConnectionFor) return;
+
     const fromScene = tour.scenes[pickingConnectionFor.from];
     const toScene = tour.scenes[pickingConnectionFor.to];
     if (!fromScene || !toScene) return;
 
+    const viewer = placementPannellumInstanceRef.current;
+    let yaw = 0;
+    let pitch = -8;
+
+    if (viewer?.mouseEventToCoords) {
+      const coords = viewer.mouseEventToCoords(event);
+      // Pannellum returns [pitch, yaw].
+      pitch = clamp(normalizeNumber(coords?.[0], -8), -85, 85);
+      yaw = normalizeNumber(coords?.[1], 0);
+    } else if (panoramaBoxRef.current) {
+      const point = getPercentPoint(event, panoramaBoxRef.current);
+      yaw = (point.x / 100) * 360 - 180;
+      pitch = clamp(90 - (point.y / 100) * 180, -85, 85);
+    }
+
+    const percentPoint = pannellumPointToPercent({ yaw, pitch });
     const connectionId = `${pickingConnectionFor.from}-to-${pickingConnectionFor.to}`;
 
     const nextConnection = {
@@ -247,8 +339,11 @@ function AdminAreaConfigPage() {
       label: `Go to ${toScene.label || toScene.title}`,
       type: "move",
       hotspot: {
-        x: point.x,
-        y: point.y,
+        coordinateMode: "pannellum",
+        yaw: Number(yaw.toFixed(2)),
+        pitch: Number(pitch.toFixed(2)),
+        x: percentPoint.x,
+        y: percentPoint.y,
         icon: "↑",
       },
     };
@@ -303,6 +398,92 @@ function AdminAreaConfigPage() {
 
   const currentMapPoint = selectedScene?.mapPoint || selectedScene?.minimap || null;
 
+  useEffect(() => {
+    if (!placementViewerRef.current || !selectedScene?.panorama) return;
+
+    const pannellumGlobal = window.pannellum;
+    if (!pannellumGlobal?.viewer) return;
+
+    if (placementPannellumInstanceRef.current) {
+      try {
+        placementPannellumInstanceRef.current.destroy();
+      } catch {
+        // ignore cleanup errors
+      }
+      placementPannellumInstanceRef.current = null;
+    }
+
+    // Hard-clear the old Pannellum DOM/hotspots. This prevents the first location's
+    // arrow from getting visually stuck when switching locations or re-placing arrows.
+    placementViewerRef.current.innerHTML = "";
+
+    const viewer = pannellumGlobal.viewer(placementViewerRef.current, {
+      type: "equirectangular",
+      panorama: selectedScene.panorama,
+      autoLoad: true,
+      showControls: true,
+      showFullscreenCtrl: false,
+      compass: false,
+      draggable: true,
+      mouseZoom: true,
+      keyboardZoom: true,
+      hfov: normalizeNumber(selectedScene?.view?.initialHfov, 110),
+      yaw: normalizeNumber(selectedScene?.view?.initialYaw, 0),
+      pitch: normalizeNumber(selectedScene?.view?.initialPitch, 0),
+      hotSpots: selectedConnections
+        .filter((connection) => tour.scenes?.[connection.to])
+        .map((connection) => {
+          const point = hotspotToPannellumPoint(connection.hotspot || {});
+          const targetScene = tour.scenes?.[connection.to];
+
+          return {
+            id: connection.id || `${connection.from}-to-${connection.to}`,
+            pitch: point.pitch,
+            yaw: point.yaw,
+            type: "custom",
+            cssClass: "pnlm-admin-arrow-hotspot",
+            createTooltipFunc: (hotSpotDiv) => {
+              hotSpotDiv.innerHTML = `
+                <button class="admin-pannellum-arrow-dot" type="button" title="${labelForScene(targetScene, connection.to)}">
+                  <span>➜</span>
+                </button>
+              `;
+            },
+          };
+        }),
+    });
+
+    placementPannellumInstanceRef.current = viewer;
+
+    return () => {
+      if (placementPannellumInstanceRef.current) {
+        try {
+          placementPannellumInstanceRef.current.destroy();
+        } catch {
+          // ignore cleanup errors
+        }
+        placementPannellumInstanceRef.current = null;
+      }
+
+      if (placementViewerRef.current) {
+        placementViewerRef.current.innerHTML = "";
+      }
+    };
+  }, [selectedSceneId, selectedScene?.panorama, selectedConnectionsKey, tour.scenes]);
+
+  useEffect(() => {
+    const element = placementViewerRef.current;
+    if (!element) return;
+
+    function handlePlacementClick(event) {
+      if (!pickingConnectionFor) return;
+      handlePanoramaClick(event);
+    }
+
+    element.addEventListener("click", handlePlacementClick, true);
+    return () => element.removeEventListener("click", handlePlacementClick, true);
+  }, [pickingConnectionFor, tour, selectedSceneId]);
+
   return (
     <div className="admin-config-page">
       <aside className="admin-config-sidebar">
@@ -328,7 +509,11 @@ function AdminAreaConfigPage() {
               <button
                 key={scene.id}
                 className={`admin-config-location-item ${selectedSceneId === scene.id ? "active" : ""}`}
-                onClick={() => setSelectedSceneId(scene.id)}
+                onClick={() => {
+                  setPickingConnectionFor(null);
+                  setPlacingMapPointFor(null);
+                  setSelectedSceneId(scene.id);
+                }}
               >
                 <span>{scene.title || "Untitled"}</span>
                 {tour.settings.firstScene === scene.id && <small>START</small>}
@@ -362,7 +547,16 @@ function AdminAreaConfigPage() {
           <div className="admin-config-action-grid">
             <button disabled={!selectedScene} onClick={saveSelectedLocation}>Save</button>
             <button disabled={!selectedScene} onClick={() => selectedScene && setAsStart(selectedScene.id)}>Set Start</button>
-            <button disabled={!selectedScene} onClick={() => selectedScene && setPlacingMapPointFor(selectedScene.id)}>Mark Mapping Area</button>
+            <button
+              disabled={!selectedScene}
+              onClick={() => {
+                if (!selectedScene) return;
+                setPickingConnectionFor(null);
+                setPlacingMapPointFor(selectedScene.id);
+              }}
+            >
+              Mark Mapping Area
+            </button>
             <button disabled={!selectedScene} className="danger" onClick={() => selectedScene && deleteScene(selectedScene.id)}>Delete</button>
           </div>
         </div>
@@ -406,7 +600,11 @@ function AdminAreaConfigPage() {
                 <div
                   key={scene.id}
                   className={`admin-config-link-card ${existingConnection ? "is-connected" : ""}`}
-                  onClick={() => setSelectedSceneId(scene.id)}
+                  onClick={() => {
+                    setPickingConnectionFor(null);
+                    setPlacingMapPointFor(null);
+                    setSelectedSceneId(scene.id);
+                  }}
                   title="Click to open this location"
                 >
                   {scene.panorama ? <img src={scene.panorama} alt={scene.title} /> : <span>360</span>}
@@ -446,32 +644,19 @@ function AdminAreaConfigPage() {
           <div className="admin-config-card-title">
             <div>
               <span>Location Placement</span>
-              <strong>{pickingConnectionFor ? "Click the 360 image to place the next-location arrow" : placingMapPointFor ? "Click the map preview to place the location pin" : "Preview and configure this location"}</strong>
+              {(pickingConnectionFor || placingMapPointFor) && (
+                <strong>{pickingConnectionFor ? "Click the 360 image to place the next-location arrow" : "Click the map preview to place the location pin"}</strong>
+              )}
             </div>
           </div>
 
           <div className="admin-config-stage-layout">
             <div
               ref={panoramaBoxRef}
-              className={`admin-config-panorama ${pickingConnectionFor ? "is-picking" : ""}`}
-              onClick={handlePanoramaClick}
+              className={`admin-config-panorama admin-config-panorama-360 ${pickingConnectionFor ? "is-picking" : ""}`}
             >
               {selectedScene?.panorama ? (
-                <>
-                  <img src={selectedScene.panorama} alt={selectedScene.title} />
-                  {selectedConnections.map((connection) => (
-                    <div
-                      key={connection.id}
-                      className="admin-config-next-arrow"
-                      style={{
-                        left: `${connection.hotspot?.x ?? 50}%`,
-                        top: `${connection.hotspot?.y ?? 50}%`,
-                      }}
-                    >
-                      ↑
-                    </div>
-                  ))}
-                </>
+                <div ref={placementViewerRef} className="admin-config-pannellum-placement" />
               ) : (
                 <div className="admin-config-empty-stage">Upload/select a 360 image</div>
               )}

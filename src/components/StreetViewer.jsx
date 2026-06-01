@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "pannellum/build/pannellum.css";
 import "pannellum";
-import "../styles/viewer360.css";
 
 const MAP_WORLD_WIDTH = 520;
 const MAP_WORLD_HEIGHT = 292.5;
@@ -32,10 +31,28 @@ function clamp(value, min, max) {
 }
 
 function xyToYawPitch(hotspot = {}) {
-  // IMPORTANT: admin currently stores arrow placement as 0-100 x/y from the 360 image.
-  // Prefer x/y even if old records also have yaw/pitch:0/-8, because those old yaw/pitch
-  // values were just defaults and made every arrow appear in the same spot.
-  if (Number.isFinite(Number(hotspot.x)) && Number.isFinite(Number(hotspot.y))) {
+  const hasYawPitch = Number.isFinite(Number(hotspot.yaw)) && Number.isFinite(Number(hotspot.pitch));
+  const hasXY = Number.isFinite(Number(hotspot.x)) && Number.isFinite(Number(hotspot.y));
+
+  // New admin records are saved from Pannellum itself. These are the most accurate
+  // because they are not affected by CSS image scaling or object-fit.
+  if (hotspot.coordinateMode === "pannellum" && hasYawPitch) {
+    return {
+      yaw: normalizeNumber(hotspot.yaw, 0),
+      pitch: clamp(normalizeNumber(hotspot.pitch, -8), -85, 85),
+    };
+  }
+
+  // If a record only has yaw/pitch, respect it.
+  if (hasYawPitch && !hasXY) {
+    return {
+      yaw: normalizeNumber(hotspot.yaw, 0),
+      pitch: clamp(normalizeNumber(hotspot.pitch, -8), -85, 85),
+    };
+  }
+
+  // Legacy admin records saved flat 0-100 image x/y. Convert those to panorama coords.
+  if (hasXY) {
     const x = normalizeNumber(hotspot.x, 50);
     const y = normalizeNumber(hotspot.y, 50);
 
@@ -45,10 +62,10 @@ function xyToYawPitch(hotspot = {}) {
     };
   }
 
-  if (Number.isFinite(Number(hotspot.yaw)) && Number.isFinite(Number(hotspot.pitch))) {
+  if (hasYawPitch) {
     return {
       yaw: normalizeNumber(hotspot.yaw, 0),
-      pitch: normalizeNumber(hotspot.pitch, -8),
+      pitch: clamp(normalizeNumber(hotspot.pitch, -8), -85, 85),
     };
   }
 
