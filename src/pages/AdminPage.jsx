@@ -9,6 +9,7 @@ import {
   pointsStringToArray,
   saveArea,
   saveFactoryMaps,
+  uploadAdminImage,
 } from "../utils/streetViewAdminStorage";
 
 function createBlankDraft(site) {
@@ -73,14 +74,14 @@ function AdminPage() {
     setIsMapping(false);
   }
 
-  function updateSiteMapImage(imageDataUrl) {
+  function updateSiteMapImage(imagePath) {
     if (!site) return;
 
     const nextMaps = {
       ...maps,
       [site.id]: {
         ...site,
-        mapImage: imageDataUrl,
+        mapImage: imagePath,
       },
     };
 
@@ -89,14 +90,17 @@ function AdminPage() {
     showSaved("Map image saved");
   }
 
-  function handleMapImageUpload(event) {
+  async function handleMapImageUpload(event) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => updateSiteMapImage(reader.result);
-    reader.readAsDataURL(file);
-    event.target.value = "";
+    try {
+      showSaved("Uploading map...");
+      const imagePath = await uploadAdminImage(file, "maps");
+      updateSiteMapImage(imagePath);
+    } finally {
+      event.target.value = "";
+    }
   }
 
   function openNewArea() {

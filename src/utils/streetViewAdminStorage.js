@@ -2,6 +2,9 @@ import { factoryMaps } from "../data/mapData";
 
 export const STORAGE_KEY = "streetViewAdminFactoryMaps";
 
+let memoryFactoryMaps = null;
+let publicJsonHydrated = false;
+
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -14,8 +17,118 @@ function safeParse(value) {
   }
 }
 
+function hasUsableMaps(value) {
+  return value && typeof value === "object" && Object.keys(value).length > 0;
+}
+
+function getBaseFactoryMaps() {
+  return factoryMaps;
+}
+
+export async function hydrateFactoryMapsFromPublicJson({ force = false } = {}) {
+  if (publicJsonHydrated && !force) return getEffectiveFactoryMaps();
+
+  try {
+    const response = await fetch(`/data/streetview-data.json?_=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const payload = await response.json();
+    const maps = payload?.factoryMaps || payload;
+
+    if (hasUsableMaps(maps)) {
+      memoryFactoryMaps = normalizeMaps(maps);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryFactoryMaps));
+      } catch {
+        // Saved JSON is the source of truth if localStorage is unavailable.
+      }
+      window.dispatchEvent(new Event("streetview-admin-storage-updated"));
+    }
+  } catch {
+    // It is okay if the JSON file is empty or missing; app will use mapData.js.
+  } finally {
+    publicJsonHydrated = true;
+  }
+
+  return getEffectiveFactoryMaps();
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function uploadAdminImage(file, kind = "panos") {
+  if (!file) return "";
+
+  const dataUrl = await fileToDataUrl(file);
+
+  try {
+    const response = await fetch("http://localhost:3010/api/admin/upload-asset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filename: file.name,
+        kind,
+        dataUrl,
+      }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      throw new Error(text || `Upload server responded ${response.status}`);
+    }
+
+    const payload = await response.json();
+    return payload.publicPath || dataUrl;
+  } catch (error) {
+    console.warn("[streetview-admin] Image upload server unavailable. Falling back to temporary Base64.", error);
+    return dataUrl;
+  }
+}
+
+async function syncMapsToDataFile(nextMaps) {
+  try {
+    const response = await fetch("http://localhost:3010/api/admin/save-mapdata", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ factoryMaps: nextMaps }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      throw new Error(text || `Save server responded ${response.status}`);
+    }
+
+    const payload = await response.json().catch(() => ({}));
+    if (hasUsableMaps(payload.factoryMaps)) {
+      memoryFactoryMaps = normalizeMaps(payload.factoryMaps);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryFactoryMaps));
+      } catch {}
+    }
+
+    window.dispatchEvent(
+      new CustomEvent("streetview-admin-js-save-status", {
+        detail: { ok: true, savedTo: payload.savedTo },
+      })
+    );
+  } catch (error) {
+    window.dispatchEvent(
+      new CustomEvent("streetview-admin-js-save-status", {
+        detail: { ok: false, error: error.message },
+      })
+    );
+  }
+}
+
 function normalizeMaps(maps) {
-  const next = clone(maps || factoryMaps);
+  const source = hasUsableMaps(maps) ? maps : getBaseFactoryMaps();
+  const next = clone(source);
 
   Object.values(next).forEach((site) => {
     site.areas = Array.isArray(site.areas) ? site.areas : [];
@@ -35,9 +148,12 @@ export function ensureTour(tour, area = {}) {
   if (tour?.scenes && tour?.settings) {
     return {
       ...tour,
+      id: tour.id || `${areaSlug}-tour`,
+      name: tour.name || `${area.name || "Area"} Tour`,
       version: tour.version || 1,
+      mapImage: tour.mapImage || undefined,
       settings: {
-        firstScene: tour.settings.firstScene || Object.keys(tour.scenes)[0] || null,
+        firstScene: tour.settings.firstScene || Object.keys(tour.scenes || {})[0] || null,
         defaultHfov: tour.settings.defaultHfov || 110,
         mobileHfov: tour.settings.mobileHfov || 90,
         ...tour.settings,
@@ -62,24 +178,52 @@ export function ensureTour(tour, area = {}) {
 }
 
 export function getSavedFactoryMaps() {
+  if (hasUsableMaps(memoryFactoryMaps)) {
+    return normalizeMaps(memoryFactoryMaps);
+  }
+
   const saved = safeParse(localStorage.getItem(STORAGE_KEY));
-  return saved ? normalizeMaps(saved) : null;
+  return hasUsableMaps(saved) ? normalizeMaps(saved) : null;
 }
 
 export function saveFactoryMaps(nextMaps) {
   const normalized = normalizeMaps(nextMaps);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+
+  // Always keep an in-memory copy so route changes never become blank,
+  // even if localStorage quota fails because of large Base64 panorama images.
+  memoryFactoryMaps = normalized;
+
+  // Persist to public/data/streetview-data.json through the local save server.
+  // Uploaded images should already be file paths, not Base64.
+  syncMapsToDataFile(normalized);
+
+  // Best-effort browser save. This may fail when panorama Base64 is too large.
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+  } catch (error) {
+    console.warn(
+      "[streetview-admin] localStorage save failed. The JSON save server is required for persistence.",
+      error
+    );
+  }
+
   window.dispatchEvent(new Event("streetview-admin-storage-updated"));
   return normalized;
 }
 
 export function resetSavedFactoryMaps() {
+  memoryFactoryMaps = null;
   localStorage.removeItem(STORAGE_KEY);
   window.dispatchEvent(new Event("streetview-admin-storage-updated"));
 }
 
+
+export async function getEffectiveFactoryMapsAsync({ force = false } = {}) {
+  return hydrateFactoryMapsFromPublicJson({ force });
+}
+
 export function getEffectiveFactoryMaps() {
-  return getSavedFactoryMaps() || normalizeMaps(factoryMaps);
+  return getSavedFactoryMaps() || normalizeMaps(getBaseFactoryMaps());
 }
 
 export function getMergedSite(siteId) {
@@ -156,12 +300,14 @@ export function updateAreaTour(siteId, areaId, nextTour) {
 }
 
 export function createId(text = "item") {
-  return text
-    .toString()
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "") || `item-${Date.now()}`;
+  return (
+    text
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || `item-${Date.now()}`
+  );
 }
 
 export function createUniqueId(base, existingIds = []) {

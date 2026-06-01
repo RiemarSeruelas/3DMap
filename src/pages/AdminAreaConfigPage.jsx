@@ -7,6 +7,7 @@ import {
   getMergedSite,
   getPercentPoint,
   updateAreaTour,
+  uploadAdminImage,
 } from "../utils/streetViewAdminStorage";
 
 function createEmptyScene(title, existingIds) {
@@ -24,15 +25,6 @@ function createEmptyScene(title, existingIds) {
       initialHfov: 110,
     },
   };
-}
-
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 }
 
 function AdminAreaConfigPage() {
@@ -53,7 +45,6 @@ function AdminAreaConfigPage() {
   const [saveMessage, setSaveMessage] = useState("");
 
   const panoramaBoxRef = useRef(null);
-  const uploadInputRef = useRef(null);
   const connectedUploadInputRef = useRef(null);
 
   const scenes = useMemo(() => Object.values(tour.scenes || {}), [tour]);
@@ -96,7 +87,7 @@ function AdminAreaConfigPage() {
     const existingIds = Object.keys(tour.scenes || {});
     const cleanTitle = file.name.replace(/\.[^/.]+$/, "");
     const newScene = createEmptyScene(cleanTitle, existingIds);
-    const image = await fileToBase64(file);
+    const image = await uploadAdminImage(file, "panos");
 
     const sceneWithImage = {
       ...newScene,
@@ -118,12 +109,6 @@ function AdminAreaConfigPage() {
 
     setSelectedSceneId(selectNew ? sceneWithImage.id : previousSelectedSceneId || sceneWithImage.id);
     saveTour(nextTour, "Location added");
-  }
-
-  async function addLocationFromFile(event) {
-    const file = event.target.files?.[0];
-    await addLocationFile(file, { selectNew: true });
-    event.target.value = "";
   }
 
   async function addConnectedLocationFromFile(event) {
@@ -253,10 +238,7 @@ function AdminAreaConfigPage() {
     const toScene = tour.scenes[pickingConnectionFor.to];
     if (!fromScene || !toScene) return;
 
-    const connectionId = createUniqueId(
-      `${pickingConnectionFor.from}-to-${pickingConnectionFor.to}`,
-      tour.connections.map((connection) => connection.id)
-    );
+    const connectionId = `${pickingConnectionFor.from}-to-${pickingConnectionFor.to}`;
 
     const nextConnection = {
       id: connectionId,
@@ -268,8 +250,6 @@ function AdminAreaConfigPage() {
         x: point.x,
         y: point.y,
         icon: "↑",
-        yaw: 0,
-        pitch: -8,
       },
     };
 
@@ -326,30 +306,19 @@ function AdminAreaConfigPage() {
   return (
     <div className="admin-config-page">
       <aside className="admin-config-sidebar">
-        <div className="admin-config-brand">
-          <div className="admin-config-logo">360</div>
-          <div>
-            <span>Street View Admin</span>
-            <strong>{area.name}</strong>
+        <div className="admin-config-sidebar-top">
+          <div className="admin-config-brand">
+            <div className="admin-config-logo">360</div>
+            <div>
+              <span>Street View Admin</span>
+              <strong>{area.name}</strong>
+            </div>
           </div>
+
+          {saveMessage && <div className="admin-config-save-pill">✓ {saveMessage}</div>}
         </div>
 
-        {saveMessage && <div className="admin-config-save-pill">✓ {saveMessage}</div>}
-
-        <div className="admin-config-nav-group">
-          <button onClick={() => navigate("/admin")}>Open Map</button>
-          <button onClick={() => navigate(`/viewer/${siteId}/${areaId}`)}>Open Viewer</button>
-          <button className="danger" onClick={logout}>Logout</button>
-        </div>
-
-        <div className="admin-config-section">
-          <div className="admin-config-section-title">Location Upload</div>
-          <label className="admin-config-upload-btn">
-            + Upload 360 Image
-            <input ref={uploadInputRef} type="file" accept="image/*" onChange={addLocationFromFile} hidden />
-          </label>
-          <input ref={connectedUploadInputRef} type="file" accept="image/*" onChange={addConnectedLocationFromFile} hidden />
-        </div>
+        <input ref={connectedUploadInputRef} type="file" accept="image/*" onChange={addConnectedLocationFromFile} hidden />
 
         <div className="admin-config-section grow">
           <div className="admin-config-section-title">Locations</div>
@@ -393,11 +362,16 @@ function AdminAreaConfigPage() {
           <div className="admin-config-action-grid">
             <button disabled={!selectedScene} onClick={saveSelectedLocation}>Save</button>
             <button disabled={!selectedScene} onClick={() => selectedScene && setAsStart(selectedScene.id)}>Set Start</button>
-            <button disabled={!selectedScene} onClick={() => selectedScene && setPlacingMapPointFor(selectedScene.id)}>Set Map</button>
+            <button disabled={!selectedScene} onClick={() => selectedScene && setPlacingMapPointFor(selectedScene.id)}>Mark Mapping Area</button>
             <button disabled={!selectedScene} className="danger" onClick={() => selectedScene && deleteScene(selectedScene.id)}>Delete</button>
           </div>
         </div>
 
+        <div className="admin-config-bottom-nav">
+          <button onClick={() => navigate("/admin")}>Open Map</button>
+          <button onClick={() => navigate(`/viewer/${siteId}/${areaId}`)}>Open Viewer</button>
+          <button className="danger" onClick={logout}>Logout</button>
+        </div>
       </aside>
 
       <main className="admin-config-main">
@@ -405,7 +379,7 @@ function AdminAreaConfigPage() {
           <div className="admin-config-card-title">
             <div>
               <span>Connected Locations</span>
-              <strong>Click a location card, then click the 360 image to place or adjust its arrow.</strong>
+              <strong>Click a location card to open it. Use the arrow button to place the next-location arrow.</strong>
             </div>
           </div>
 
@@ -432,15 +406,28 @@ function AdminAreaConfigPage() {
                 <div
                   key={scene.id}
                   className={`admin-config-link-card ${existingConnection ? "is-connected" : ""}`}
-                  onClick={() => beginPickConnectionTo(scene.id)}
-                  title="Click to place or adjust arrow on the 360 image"
+                  onClick={() => setSelectedSceneId(scene.id)}
+                  title="Click to open this location"
                 >
                   {scene.panorama ? <img src={scene.panorama} alt={scene.title} /> : <span>360</span>}
                   <strong>{scene.label || scene.title}</strong>
                   {existingConnection && <em>CONNECTED</em>}
+
+                  <button
+                    type="button"
+                    className="admin-config-mark-arrow-btn"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      beginPickConnectionTo(scene.id);
+                    }}
+                  >
+                    ↗
+                  </button>
+
                   {existingConnection && (
                     <button
                       type="button"
+                      className="admin-config-delete-link-btn"
                       onClick={(event) => {
                         event.stopPropagation();
                         deleteConnection(existingConnection.id);
@@ -488,28 +475,6 @@ function AdminAreaConfigPage() {
               ) : (
                 <div className="admin-config-empty-stage">Upload/select a 360 image</div>
               )}
-            </div>
-
-            <div
-              className={`admin-config-map-preview ${placingMapPointFor ? "is-placing" : ""}`}
-              onClick={handleMiniMapClick}
-            >
-              <img src={site.mapImage} alt={site.name} />
-              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-                <polygon points={area.points} className="admin-config-parent-area" />
-                {scenes.map((scene) => {
-                  const point = scene.mapPoint || scene.minimap;
-                  if (!point) return null;
-                  return (
-                    <g key={scene.id}>
-                      <circle cx={point.x} cy={point.y} r="1.65" className="admin-config-map-dot" />
-                      <text x={point.x + 1.8} y={point.y} className="admin-config-map-label">
-                        {scene.label || scene.title}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
             </div>
           </div>
         </section>

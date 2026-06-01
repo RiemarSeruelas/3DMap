@@ -4,10 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/dev-with-save.cjs",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:old": "vite",
+    "dev:vite": "vite --host 0.0.0.0",
+    "dev:save": "node scripts/save-mapdata-server.cjs"
   },
   "dependencies": {
     "pannellum": "^2.5.7",

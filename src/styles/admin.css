@@ -4604,3 +4604,127 @@ button:disabled {
     font-size: 18px;
   }
 }
+
+/* =========================================================
+   PATCH: CONFIG PAGE - SIDEBAR NAV BOTTOM + PANORAMA ONLY
+   ========================================================= */
+.admin-config-sidebar {
+  overflow: hidden;
+}
+
+.admin-config-sidebar-top {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-config-bottom-nav {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-config-bottom-nav button {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #172554;
+  font-size: 14px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.admin-config-bottom-nav button:hover {
+  transform: translateY(-1px);
+  background: white;
+}
+
+.admin-config-bottom-nav button.danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.admin-config-main {
+  grid-template-rows: 174px minmax(0, 1fr) !important;
+}
+
+.admin-config-stage-layout {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.admin-config-map-preview {
+  display: none !important;
+}
+
+.admin-config-panorama {
+  min-height: 0;
+  height: 100%;
+}
+
+.admin-config-action-grid button:nth-child(3) {
+  grid-column: span 2;
+}
+
+.admin-config-link-card {
+  isolation: isolate;
+}
+
+.admin-config-link-card strong {
+  padding-right: 28px !important;
+}
+
+.admin-config-link-card .admin-config-mark-arrow-btn,
+.admin-config-link-card .admin-config-delete-link-btn {
+  position: absolute;
+  z-index: 4;
+  border: 0;
+  display: grid;
+  place-items: center;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.admin-config-link-card .admin-config-mark-arrow-btn {
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.94);
+  color: white;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+}
+
+.admin-config-link-card .admin-config-delete-link-btn {
+  top: 38px;
+  right: 7px;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(254, 226, 226, 0.96);
+  color: #991b1b;
+}
+
+.admin-config-link-card:hover .admin-config-mark-arrow-btn {
+  transform: scale(1.05);
+}
+
+.admin-config-connected-card {
+  overflow: hidden !important;
+}
+
+@media (max-height: 760px) {
+  .admin-config-main {
+    grid-template-rows: 150px minmax(0, 1fr) !important;
+  }
+
+  .admin-config-action-grid button:nth-child(3) {
+    grid-column: auto;
+  }
+}

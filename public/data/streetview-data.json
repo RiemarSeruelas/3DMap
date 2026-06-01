@@ -1,0 +1,493 @@
+{
+  "savedAt": "2026-06-01T01:32:57.325Z",
+  "factoryMaps": {
+    "savoury": {
+      "id": "savoury",
+      "name": "Savoury Block",
+      "mapImage": "/maps/savoury-placeholder.jpg",
+      "areas": [
+        {
+          "id": "admin",
+          "name": "Admin",
+          "points": "1.32,4.65 60.53,3.1 61.03,19.62 2.53,20.65",
+          "tour": {
+            "id": "admin-tour",
+            "name": "Admin Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": "heaven",
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {
+              "heaven": {
+                "id": "heaven",
+                "title": "heaven",
+                "label": "heaven",
+                "panorama": "/uploads/panos/heaven-20260601011114-d56b334b.jpg",
+                "mapPoint": {
+                  "x": 12.06,
+                  "y": 15.9
+                },
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                },
+                "minimap": {
+                  "x": 12.06,
+                  "y": 15.9
+                }
+              },
+              "room": {
+                "id": "room",
+                "title": "room",
+                "label": "room",
+                "panorama": "/uploads/panos/room-20260601011118-245aa13c.jpg",
+                "mapPoint": {
+                  "x": 29.35,
+                  "y": 10.31
+                },
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                },
+                "minimap": {
+                  "x": 29.35,
+                  "y": 10.31
+                }
+              },
+              "drone": {
+                "id": "drone",
+                "title": "drone",
+                "label": "drone",
+                "panorama": "/uploads/panos/drone-20260601011121-c4d6f6de.jpg",
+                "mapPoint": {
+                  "x": 10.09,
+                  "y": 7.03
+                },
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                },
+                "minimap": {
+                  "x": 10.09,
+                  "y": 7.03
+                }
+              }
+            },
+            "connections": [
+              {
+                "id": "heaven-to-room",
+                "from": "heaven",
+                "to": "room",
+                "label": "Go to room",
+                "type": "move",
+                "hotspot": {
+                  "x": 6.62,
+                  "y": 49.12,
+                  "icon": "↑",
+                  "yaw": 0,
+                  "pitch": -8
+                }
+              },
+              {
+                "id": "heaven-to-drone",
+                "from": "heaven",
+                "to": "drone",
+                "label": "Go to drone",
+                "type": "move",
+                "hotspot": {
+                  "x": 88.04,
+                  "y": 53.88,
+                  "icon": "↑",
+                  "yaw": 0,
+                  "pitch": -8
+                }
+              },
+              {
+                "id": "room-to-heaven",
+                "from": "room",
+                "to": "heaven",
+                "label": "Go to heaven",
+                "type": "move",
+                "hotspot": {
+                  "x": 6.92,
+                  "y": 44.86,
+                  "icon": "↑",
+                  "yaw": 0,
+                  "pitch": -8
+                }
+              },
+              {
+                "id": "room-to-drone",
+                "from": "room",
+                "to": "drone",
+                "label": "Go to drone",
+                "type": "move",
+                "hotspot": {
+                  "x": 89.62,
+                  "y": 51.63,
+                  "icon": "↑",
+                  "yaw": 0,
+                  "pitch": -8
+                }
+              },
+              {
+                "id": "drone-to-heaven",
+                "from": "drone",
+                "to": "heaven",
+                "label": "Go to heaven",
+                "type": "move",
+                "hotspot": {
+                  "x": 8.3,
+                  "y": 53.38,
+                  "icon": "↑",
+                  "yaw": 0,
+                  "pitch": -8
+                }
+              },
+              {
+                "id": "drone-to-room",
+                "from": "drone",
+                "to": "room",
+                "label": "Go to room",
+                "type": "move",
+                "hotspot": {
+                  "x": 85.28,
+                  "y": 57.39,
+                  "icon": "↑",
+                  "yaw": 0,
+                  "pitch": -8
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "logistics",
+          "name": "Logistics",
+          "points": "66.3,83.99 83.3,84.17 83.3,89.16 66.9,89.16",
+          "tour": {
+            "id": "logistics-tour",
+            "name": "Logistics Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": null,
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {},
+            "connections": []
+          }
+        }
+      ]
+    },
+    "dressings": {
+      "id": "dressings",
+      "name": "Dressings",
+      "mapImage": "/maps/dressings-placeholder.jpg",
+      "areas": [
+        {
+          "id": "dressings-relishes",
+          "name": "Dressings Relishes Area",
+          "points": "12.2,14.9 20.5,14.8 20.8,24.7 13,24.7",
+          "tour": {
+            "id": "dressings-main-tour",
+            "name": "Dressings Main Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": "DressingsMain",
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {
+              "DressingsMain": {
+                "id": "DressingsMain",
+                "title": "Dressings Main Area",
+                "label": "Dressings Main Area",
+                "panorama": "/panos/dressings/main.jpg",
+                "minimap": {
+                  "x": 50,
+                  "y": 50
+                },
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                }
+              }
+            },
+            "connections": []
+          }
+        },
+        {
+          "id": "dressings-prodhalal",
+          "name": "Dressings Production (Halal) Area",
+          "points": "36.3, 34 54,34 54,39.6 36.3,39.6",
+          "tour": {
+            "id": "dressings-main-tour",
+            "name": "Dressings Main Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": "DressingsMain",
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {
+              "DressingsMain": {
+                "id": "DressingsMain",
+                "title": "Dressings Main Area",
+                "label": "Dressings Main Area",
+                "panorama": "/panos/dressings/main.jpg",
+                "minimap": {
+                  "x": 50,
+                  "y": 50
+                },
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                }
+              }
+            },
+            "connections": []
+          }
+        },
+        {
+          "id": "dressings-logistics",
+          "name": "Dressings Logistics Area",
+          "points": "15.3,56 27.4,56 27.4,61 15.3,61",
+          "tour": {
+            "id": "dressings-main-tour",
+            "name": "Dressings Main Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": "DressingsMain",
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {
+              "DressingsMain": {
+                "id": "DressingsMain",
+                "title": "Dressings Main Area",
+                "label": "Dressings Main Area",
+                "panorama": "/panos/dressings/main.jpg",
+                "minimap": {
+                  "x": 50,
+                  "y": 50
+                },
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                }
+              }
+            },
+            "connections": []
+          }
+        },
+        {
+          "id": "dressings-engineering",
+          "name": "Dressings Engineering Area",
+          "points": "34,48 44,48 44,53 34,53",
+          "tour": {
+            "id": "dressings-main-tour",
+            "name": "Dressings Main Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": "DressingsMain",
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {
+              "DressingsMain": {
+                "id": "DressingsMain",
+                "title": "Dressings Main Area",
+                "label": "Dressings Main Area",
+                "panorama": "/panos/dressings/main.jpg",
+                "minimap": {
+                  "x": 50,
+                  "y": 50
+                },
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                }
+              }
+            },
+            "connections": []
+          }
+        },
+        {
+          "id": "dressings-qa",
+          "name": "Dressings Quality Assurance Area",
+          "points": "45.8, 48.5 54.5,48.5 54.5,45.3 54.5,45.3 56.5,45.3 56.5, 53.4 45.8, 53.4",
+          "tour": {
+            "id": "dressings-main-tour",
+            "name": "Dressings Main Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": "DressingsMain",
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {
+              "DressingsMain": {
+                "id": "DressingsMain",
+                "title": "Dressings Main Area",
+                "label": "Dressings Main Area",
+                "panorama": "/panos/dressings/main.jpg",
+                "minimap": {
+                  "x": 50,
+                  "y": 50
+                },
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                }
+              }
+            },
+            "connections": []
+          }
+        },
+        {
+          "id": "dressings-palletshed",
+          "name": "Dressings Pallet Shipment Area",
+          "points": "23.6, 78 30.8,78 30.8,84 23.6,84",
+          "tour": {
+            "id": "dressings-main-tour",
+            "name": "Dressings Main Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": "DressingsMain",
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {
+              "DressingsMain": {
+                "id": "DressingsMain",
+                "title": "Dressings Main Area",
+                "label": "Dressings Main Area",
+                "panorama": "/panos/dressings/main.jpg",
+                "minimap": {
+                  "x": 50,
+                  "y": 50
+                },
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                }
+              }
+            },
+            "connections": []
+          }
+        },
+        {
+          "id": "dressings-fgloading",
+          "name": "Dressings Finished Goods Loading Area",
+          "points": "35, 77 53,77 53,85 35,85",
+          "tour": {
+            "id": "dressings-main-tour",
+            "name": "Dressings Main Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": "DressingsMain",
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {
+              "DressingsMain": {
+                "id": "DressingsMain",
+                "title": "Dressings Main Area",
+                "label": "Dressings Main Area",
+                "panorama": "/panos/dressings/main.jpg",
+                "minimap": {
+                  "x": 50,
+                  "y": 50
+                },
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                }
+              }
+            },
+            "connections": []
+          }
+        },
+        {
+          "id": "dressings-wastedisposal",
+          "name": "Dressings Waste Disposal Area",
+          "points": "35, 87 56,87 56,92 35,92",
+          "tour": {
+            "id": "dressings-main-tour",
+            "name": "Dressings Main Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": "DressingsMain",
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {
+              "DressingsMain": {
+                "id": "DressingsMain",
+                "title": "Dressings Main Area",
+                "label": "Dressings Main Area",
+                "panorama": "/panos/dressings/main.jpg",
+                "minimap": {
+                  "x": 50,
+                  "y": 50
+                },
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                }
+              }
+            },
+            "connections": []
+          }
+        },
+        {
+          "id": "dressings-prodnonhalal",
+          "name": "Dressings Production (Non-Halal) Area",
+          "points": "85,2.4 97.4,2.4 96.4,21.5 84,21.5",
+          "tour": {
+            "id": "dressings-main-tour",
+            "name": "Dressings Main Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": "DressingsMain",
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {
+              "DressingsMain": {
+                "id": "DressingsMain",
+                "title": "Dressings Main Area",
+                "label": "Dressings Main Area",
+                "panorama": "/panos/dressings/main.jpg",
+                "minimap": {
+                  "x": 50,
+                  "y": 50
+                },
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                }
+              }
+            },
+            "connections": []
+          }
+        }
+      ]
+    }
+  }
+}
