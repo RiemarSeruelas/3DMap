@@ -1,5 +1,5 @@
 {
-  "savedAt": "2026-06-01T03:15:52.468Z",
+  "savedAt": "2026-06-02T01:37:05.776Z",
   "factoryMaps": {
     "savoury": {
       "id": "savoury",
@@ -25,57 +25,42 @@
                 "title": "heaven",
                 "label": "heaven",
                 "panorama": "/uploads/panos/heaven-20260601011114-d56b334b.jpg",
-                "mapPoint": {
-                  "x": 12.06,
-                  "y": 15.9
-                },
+                "mapPoint": null,
                 "view": {
                   "initialYaw": 0,
                   "initialPitch": 0,
                   "initialHfov": 110
                 },
-                "minimap": {
-                  "x": 12.06,
-                  "y": 15.9
-                }
+                "minimap": null,
+                "hotspots": []
               },
               "room": {
                 "id": "room",
                 "title": "room",
                 "label": "room",
                 "panorama": "/uploads/panos/room-20260601011118-245aa13c.jpg",
-                "mapPoint": {
-                  "x": 29.35,
-                  "y": 10.31
-                },
+                "mapPoint": null,
                 "view": {
                   "initialYaw": 0,
                   "initialPitch": 0,
                   "initialHfov": 110
                 },
-                "minimap": {
-                  "x": 29.35,
-                  "y": 10.31
-                }
+                "minimap": null,
+                "hotspots": []
               },
               "drone": {
                 "id": "drone",
                 "title": "drone",
                 "label": "drone",
                 "panorama": "/uploads/panos/drone-20260601011121-c4d6f6de.jpg",
-                "mapPoint": {
-                  "x": 10.09,
-                  "y": 7.03
-                },
+                "mapPoint": null,
                 "view": {
                   "initialYaw": 0,
                   "initialPitch": 0,
                   "initialHfov": 110
                 },
-                "minimap": {
-                  "x": 10.09,
-                  "y": 7.03
-                }
+                "minimap": null,
+                "hotspots": []
               },
               "20260601-095933-328": {
                 "id": "20260601-095933-328",
@@ -87,143 +72,12 @@
                   "initialYaw": 0,
                   "initialPitch": 0,
                   "initialHfov": 110
-                }
+                },
+                "minimap": null,
+                "hotspots": []
               }
             },
-            "connections": [
-              {
-                "id": "heaven-to-room",
-                "from": "heaven",
-                "to": "room",
-                "label": "Go to room",
-                "type": "move",
-                "hotspot": {
-                  "x": 6.62,
-                  "y": 49.12,
-                  "icon": "↑",
-                  "yaw": 0,
-                  "pitch": -8
-                }
-              },
-              {
-                "id": "heaven-to-drone",
-                "from": "heaven",
-                "to": "drone",
-                "label": "Go to drone",
-                "type": "move",
-                "hotspot": {
-                  "x": 88.04,
-                  "y": 53.88,
-                  "icon": "↑",
-                  "yaw": 0,
-                  "pitch": -8
-                }
-              },
-              {
-                "id": "room-to-heaven",
-                "from": "room",
-                "to": "heaven",
-                "label": "Go to heaven",
-                "type": "move",
-                "hotspot": {
-                  "x": 6.92,
-                  "y": 44.86,
-                  "icon": "↑",
-                  "yaw": 0,
-                  "pitch": -8
-                }
-              },
-              {
-                "id": "room-to-drone",
-                "from": "room",
-                "to": "drone",
-                "label": "Go to drone",
-                "type": "move",
-                "hotspot": {
-                  "x": 89.62,
-                  "y": 51.63,
-                  "icon": "↑",
-                  "yaw": 0,
-                  "pitch": -8
-                }
-              },
-              {
-                "id": "drone-to-heaven",
-                "from": "drone",
-                "to": "heaven",
-                "label": "Go to heaven",
-                "type": "move",
-                "hotspot": {
-                  "x": 8.3,
-                  "y": 53.38,
-                  "icon": "↑",
-                  "yaw": 0,
-                  "pitch": -8
-                }
-              },
-              {
-                "id": "drone-to-room",
-                "from": "drone",
-                "to": "room",
-                "label": "Go to room",
-                "type": "move",
-                "hotspot": {
-                  "x": 85.28,
-                  "y": 57.39,
-                  "icon": "↑",
-                  "yaw": 0,
-                  "pitch": -8
-                }
-              },
-              {
-                "id": "20260601-095933-328-to-heaven",
-                "from": "20260601-095933-328",
-                "to": "heaven",
-                "label": "Go to heaven",
-                "type": "move",
-                "hotspot": {
-                  "x": 10.08,
-                  "y": 70.18,
-                  "icon": "↑"
-                }
-              },
-              {
-                "id": "20260601-095933-328-to-room",
-                "from": "20260601-095933-328",
-                "to": "room",
-                "label": "Go to room",
-                "type": "move",
-                "hotspot": {
-                  "x": 84.29,
-                  "y": 69.17,
-                  "icon": "↑"
-                }
-              },
-              {
-                "id": "20260601-095933-328-to-drone",
-                "from": "20260601-095933-328",
-                "to": "drone",
-                "label": "Go to drone",
-                "type": "move",
-                "hotspot": {
-                  "x": 44.86,
-                  "y": 42.36,
-                  "icon": "↑"
-                }
-              },
-              {
-                "id": "heaven-to-20260601-095933-328",
-                "from": "heaven",
-                "to": "20260601-095933-328",
-                "label": "Go to 20260601_095933_328",
-                "type": "move",
-                "hotspot": {
-                  "x": 47.63,
-                  "y": 40.1,
-                  "icon": "↑"
-                }
-              }
-            ]
+            "connections": []
           }
         },
         {
@@ -242,12 +96,12 @@
             "scenes": {
               "20260601-095933-328-2": {
                 "id": "20260601-095933-328-2",
-                "title": "20260601_095933_328",
+                "title": "Engineering Room",
                 "label": "20260601_095933_328",
                 "panorama": "/uploads/panos/20260601-095933-328-20260601021858-6f8e6fd6.jpg",
                 "mapPoint": {
-                  "x": 64.3,
-                  "y": 87.35
+                  "x": 76.79,
+                  "y": 87.04
                 },
                 "view": {
                   "initialYaw": 0,
@@ -255,28 +109,22 @@
                   "initialHfov": 110
                 },
                 "minimap": {
-                  "x": 64.3,
-                  "y": 87.35
-                }
-              },
-              "20260601-101112-867": {
-                "id": "20260601-101112-867",
-                "title": "20260601_101112_867",
-                "label": "20260601_101112_867",
-                "panorama": "/uploads/panos/20260601-101112-867-20260601021906-e2cfa57a.jpg",
-                "mapPoint": {
-                  "x": 71.29,
-                  "y": 78.51
+                  "x": 76.79,
+                  "y": 87.04
                 },
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                },
-                "minimap": {
-                  "x": 71.29,
-                  "y": 78.51
-                }
+                "hotspots": [
+                  {
+                    "id": "to-20260601-101105-674",
+                    "type": "scene",
+                    "targetSceneId": "20260601-101105-674",
+                    "text": "20260601_101105_674",
+                    "coordinateMode": "pannellum",
+                    "pitch": 1.57,
+                    "yaw": -29.94,
+                    "x": 41.68,
+                    "y": 49.13
+                  }
+                ]
               },
               "20260601-101105-674": {
                 "id": "20260601-101105-674",
@@ -284,8 +132,8 @@
                 "label": "20260601_101105_674",
                 "panorama": "/uploads/panos/20260601-101105-674-20260601021910-a919b82e.jpg",
                 "mapPoint": {
-                  "x": 78.81,
-                  "y": 68.2
+                  "x": 52.09,
+                  "y": 54.12
                 },
                 "view": {
                   "initialYaw": 0,
@@ -293,47 +141,61 @@
                   "initialHfov": 110
                 },
                 "minimap": {
-                  "x": 78.81,
-                  "y": 68.2
-                }
+                  "x": 52.09,
+                  "y": 54.12
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-101033-074",
+                    "type": "scene",
+                    "targetSceneId": "20260601-101033-074",
+                    "text": "20260601_101033_074",
+                    "coordinateMode": "pannellum",
+                    "pitch": 11.64,
+                    "yaw": -24.33,
+                    "x": 43.24,
+                    "y": 43.53
+                  },
+                  {
+                    "id": "to-20260601-095933-328-2",
+                    "type": "scene",
+                    "targetSceneId": "20260601-095933-328-2",
+                    "text": "Engineering Room",
+                    "coordinateMode": "pannellum",
+                    "pitch": -1.62,
+                    "yaw": 152.77,
+                    "x": 92.44,
+                    "y": 50.9
+                  }
+                ]
               },
               "20260601-101050-675": {
                 "id": "20260601-101050-675",
                 "title": "20260601_101050_675",
                 "label": "20260601_101050_675",
                 "panorama": "/uploads/panos/20260601-101050-675-20260601021913-3fdca79d.jpg",
-                "mapPoint": {
-                  "x": 70.34,
-                  "y": 61.47
-                },
+                "mapPoint": null,
                 "view": {
                   "initialYaw": 0,
                   "initialPitch": 0,
                   "initialHfov": 110
                 },
-                "minimap": {
-                  "x": 70.34,
-                  "y": 61.47
-                }
+                "minimap": null,
+                "hotspots": []
               },
               "20260601-101043-578": {
                 "id": "20260601-101043-578",
                 "title": "20260601_101043_578",
                 "label": "20260601_101043_578",
                 "panorama": "/uploads/panos/20260601-101043-578-20260601021917-dd825b2a.jpg",
-                "mapPoint": {
-                  "x": 60.7,
-                  "y": 65.68
-                },
+                "mapPoint": null,
                 "view": {
                   "initialYaw": 0,
                   "initialPitch": 0,
                   "initialHfov": 110
                 },
-                "minimap": {
-                  "x": 60.7,
-                  "y": 65.68
-                }
+                "minimap": null,
+                "hotspots": []
               },
               "20260601-101033-074": {
                 "id": "20260601-101033-074",
@@ -341,8 +203,8 @@
                 "label": "20260601_101033_074",
                 "panorama": "/uploads/panos/20260601-101033-074-20260601021919-0b367af8.jpg",
                 "mapPoint": {
-                  "x": 53.5,
-                  "y": 75.56
+                  "x": 11.85,
+                  "y": 38.09
                 },
                 "view": {
                   "initialYaw": 0,
@@ -350,163 +212,133 @@
                   "initialHfov": 110
                 },
                 "minimap": {
-                  "x": 53.5,
-                  "y": 75.56
-                }
+                  "x": 11.85,
+                  "y": 38.09
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-101105-674",
+                    "type": "scene",
+                    "targetSceneId": "20260601-101105-674",
+                    "text": "20260601_101105_674",
+                    "coordinateMode": "pannellum",
+                    "pitch": -1.14,
+                    "yaw": 91.71,
+                    "x": 75.47,
+                    "y": 50.63
+                  }
+                ]
               }
             },
             "connections": [
               {
-                "id": "20260601-095933-328-2-to-20260601-101112-867",
+                "id": "20260601-095933-328-2-to-20260601-101105-674",
                 "from": "20260601-095933-328-2",
-                "to": "20260601-101112-867",
-                "label": "Go to 20260601_101112_867",
-                "type": "move",
-                "hotspot": {
-                  "coordinateMode": "pannellum",
-                  "yaw": -37.67,
-                  "pitch": 1.8,
-                  "x": 39.54,
-                  "y": 49,
-                  "icon": "↑"
-                }
-              },
-              {
-                "id": "20260601-101105-674-to-20260601-101112-867",
-                "from": "20260601-101105-674",
-                "to": "20260601-101112-867",
-                "label": "Go to 20260601_101112_867",
-                "type": "move",
-                "hotspot": {
-                  "coordinateMode": "pannellum",
-                  "yaw": 178.15,
-                  "pitch": -22.11,
-                  "x": 99.49,
-                  "y": 62.28,
-                  "icon": "↑"
-                }
-              },
-              {
-                "id": "20260601-101105-674-to-20260601-101050-675",
-                "from": "20260601-101105-674",
-                "to": "20260601-101050-675",
-                "label": "Go to 20260601_101050_675",
-                "type": "move",
-                "hotspot": {
-                  "coordinateMode": "pannellum",
-                  "yaw": -17.98,
-                  "pitch": -17.25,
-                  "x": 45,
-                  "y": 59.58,
-                  "icon": "↑"
-                }
-              },
-              {
-                "id": "20260601-101050-675-to-20260601-101105-674",
-                "from": "20260601-101050-675",
                 "to": "20260601-101105-674",
                 "label": "Go to 20260601_101105_674",
                 "type": "move",
                 "hotspot": {
                   "coordinateMode": "pannellum",
-                  "yaw": 139.47,
-                  "pitch": -5.5,
-                  "x": 88.74,
-                  "y": 53.06,
+                  "yaw": -29.94,
+                  "pitch": 1.57,
+                  "x": 41.68,
+                  "y": 49.13,
                   "icon": "↑"
                 }
               },
               {
-                "id": "20260601-101050-675-to-20260601-101043-578",
-                "from": "20260601-101050-675",
-                "to": "20260601-101043-578",
-                "label": "Go to 20260601_101043_578",
-                "type": "move",
-                "hotspot": {
-                  "coordinateMode": "pannellum",
-                  "yaw": -86.1,
-                  "pitch": -14.63,
-                  "x": 26.08,
-                  "y": 58.13,
-                  "icon": "↑"
-                }
-              },
-              {
-                "id": "20260601-101043-578-to-20260601-101050-675",
-                "from": "20260601-101043-578",
-                "to": "20260601-101050-675",
-                "label": "Go to 20260601_101050_675",
-                "type": "move",
-                "hotspot": {
-                  "coordinateMode": "pannellum",
-                  "yaw": 93.79,
-                  "pitch": -10.25,
-                  "x": 76.05,
-                  "y": 55.69,
-                  "icon": "↑"
-                }
-              },
-              {
-                "id": "20260601-101043-578-to-20260601-101033-074",
-                "from": "20260601-101043-578",
+                "id": "20260601-101105-674-to-20260601-101033-074",
+                "from": "20260601-101105-674",
                 "to": "20260601-101033-074",
                 "label": "Go to 20260601_101033_074",
                 "type": "move",
                 "hotspot": {
                   "coordinateMode": "pannellum",
-                  "yaw": -88.42,
-                  "pitch": -17.04,
-                  "x": 25.44,
-                  "y": 59.47,
+                  "yaw": -24.33,
+                  "pitch": 11.64,
+                  "x": 43.24,
+                  "y": 43.53,
                   "icon": "↑"
                 }
               },
               {
-                "id": "20260601-101033-074-to-20260601-101043-578",
-                "from": "20260601-101033-074",
-                "to": "20260601-101043-578",
-                "label": "Go to 20260601_101043_578",
+                "id": "20260601-101105-674-to-20260601-095933-328-2",
+                "from": "20260601-101105-674",
+                "to": "20260601-095933-328-2",
+                "label": "Go to Engineering Room",
                 "type": "move",
                 "hotspot": {
                   "coordinateMode": "pannellum",
-                  "yaw": 92.51,
-                  "pitch": -4.29,
-                  "x": 75.7,
-                  "y": 52.38,
+                  "yaw": 152.77,
+                  "pitch": -1.62,
+                  "x": 92.44,
+                  "y": 50.9,
                   "icon": "↑"
                 }
               },
               {
-                "id": "20260601-101112-867-to-20260601-101105-674",
-                "from": "20260601-101112-867",
+                "id": "20260601-101033-074-to-20260601-101105-674",
+                "from": "20260601-101033-074",
                 "to": "20260601-101105-674",
                 "label": "Go to 20260601_101105_674",
                 "type": "move",
                 "hotspot": {
                   "coordinateMode": "pannellum",
-                  "yaw": -10.91,
-                  "pitch": -34.4,
-                  "x": 46.97,
-                  "y": 69.11,
-                  "icon": "↑"
-                }
-              },
-              {
-                "id": "20260601-101112-867-to-20260601-095933-328-2",
-                "from": "20260601-101112-867",
-                "to": "20260601-095933-328-2",
-                "label": "Go to 20260601_095933_328",
-                "type": "move",
-                "hotspot": {
-                  "coordinateMode": "pannellum",
-                  "yaw": 125.21,
-                  "pitch": -14.85,
-                  "x": 84.78,
-                  "y": 58.25,
+                  "yaw": 91.71,
+                  "pitch": -1.14,
+                  "x": 75.47,
+                  "y": 50.63,
                   "icon": "↑"
                 }
               }
             ]
+          }
+        },
+        {
+          "id": "engineering-room",
+          "name": "Engineering Room",
+          "points": "2.9,26.75 16.6,26.58 18.63,58.84 5.12,59.01",
+          "tour": {
+            "id": "engineering-room-tour",
+            "name": "Engineering Room Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": "savoury-1",
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {
+              "savoury-1": {
+                "id": "savoury-1",
+                "title": "Savoury-1",
+                "label": "Savoury-1",
+                "panorama": "/uploads/panos/20260601-145328-254-20260602000430-1fb668b5.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                },
+                "hotspots": []
+              },
+              "savoury-walking": {
+                "id": "savoury-walking",
+                "title": "Savoury-Walking",
+                "label": "Savoury-Walking",
+                "panorama": "/uploads/panos/20260601-145016-832-20260602000452-59db9dc5.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110
+                },
+                "hotspots": []
+              }
+            },
+            "connections": [],
+            "mapImage": "/maps/savoury-placeholder.jpg"
           }
         }
       ]
@@ -517,300 +349,21 @@
       "mapImage": "/maps/dressings-placeholder.jpg",
       "areas": [
         {
-          "id": "dressings-relishes",
-          "name": "Dressings Relishes Area",
-          "points": "12.2,14.9 20.5,14.8 20.8,24.7 13,24.7",
+          "id": "production",
+          "name": "Production",
+          "points": "64,2.38 63.03,71.19 93.44,72.05 97.39,2.38",
           "tour": {
-            "id": "dressings-main-tour",
-            "name": "Dressings Main Tour",
+            "id": "production-tour",
+            "name": "Production Tour",
             "version": 1,
             "settings": {
-              "firstScene": "DressingsMain",
+              "firstScene": null,
               "defaultHfov": 110,
               "mobileHfov": 90
             },
-            "scenes": {
-              "DressingsMain": {
-                "id": "DressingsMain",
-                "title": "Dressings Main Area",
-                "label": "Dressings Main Area",
-                "panorama": "/panos/dressings/main.jpg",
-                "minimap": {
-                  "x": 50,
-                  "y": 50
-                },
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                }
-              }
-            },
-            "connections": []
-          }
-        },
-        {
-          "id": "dressings-prodhalal",
-          "name": "Dressings Production (Halal) Area",
-          "points": "36.3, 34 54,34 54,39.6 36.3,39.6",
-          "tour": {
-            "id": "dressings-main-tour",
-            "name": "Dressings Main Tour",
-            "version": 1,
-            "settings": {
-              "firstScene": "DressingsMain",
-              "defaultHfov": 110,
-              "mobileHfov": 90
-            },
-            "scenes": {
-              "DressingsMain": {
-                "id": "DressingsMain",
-                "title": "Dressings Main Area",
-                "label": "Dressings Main Area",
-                "panorama": "/panos/dressings/main.jpg",
-                "minimap": {
-                  "x": 50,
-                  "y": 50
-                },
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                }
-              }
-            },
-            "connections": []
-          }
-        },
-        {
-          "id": "dressings-logistics",
-          "name": "Dressings Logistics Area",
-          "points": "15.3,56 27.4,56 27.4,61 15.3,61",
-          "tour": {
-            "id": "dressings-main-tour",
-            "name": "Dressings Main Tour",
-            "version": 1,
-            "settings": {
-              "firstScene": "DressingsMain",
-              "defaultHfov": 110,
-              "mobileHfov": 90
-            },
-            "scenes": {
-              "DressingsMain": {
-                "id": "DressingsMain",
-                "title": "Dressings Main Area",
-                "label": "Dressings Main Area",
-                "panorama": "/panos/dressings/main.jpg",
-                "minimap": {
-                  "x": 50,
-                  "y": 50
-                },
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                }
-              }
-            },
-            "connections": []
-          }
-        },
-        {
-          "id": "dressings-engineering",
-          "name": "Dressings Engineering Area",
-          "points": "34,48 44,48 44,53 34,53",
-          "tour": {
-            "id": "dressings-main-tour",
-            "name": "Dressings Main Tour",
-            "version": 1,
-            "settings": {
-              "firstScene": "DressingsMain",
-              "defaultHfov": 110,
-              "mobileHfov": 90
-            },
-            "scenes": {
-              "DressingsMain": {
-                "id": "DressingsMain",
-                "title": "Dressings Main Area",
-                "label": "Dressings Main Area",
-                "panorama": "/panos/dressings/main.jpg",
-                "minimap": {
-                  "x": 50,
-                  "y": 50
-                },
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                }
-              }
-            },
-            "connections": []
-          }
-        },
-        {
-          "id": "dressings-qa",
-          "name": "Dressings Quality Assurance Area",
-          "points": "45.8, 48.5 54.5,48.5 54.5,45.3 54.5,45.3 56.5,45.3 56.5, 53.4 45.8, 53.4",
-          "tour": {
-            "id": "dressings-main-tour",
-            "name": "Dressings Main Tour",
-            "version": 1,
-            "settings": {
-              "firstScene": "DressingsMain",
-              "defaultHfov": 110,
-              "mobileHfov": 90
-            },
-            "scenes": {
-              "DressingsMain": {
-                "id": "DressingsMain",
-                "title": "Dressings Main Area",
-                "label": "Dressings Main Area",
-                "panorama": "/panos/dressings/main.jpg",
-                "minimap": {
-                  "x": 50,
-                  "y": 50
-                },
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                }
-              }
-            },
-            "connections": []
-          }
-        },
-        {
-          "id": "dressings-palletshed",
-          "name": "Dressings Pallet Shipment Area",
-          "points": "23.6, 78 30.8,78 30.8,84 23.6,84",
-          "tour": {
-            "id": "dressings-main-tour",
-            "name": "Dressings Main Tour",
-            "version": 1,
-            "settings": {
-              "firstScene": "DressingsMain",
-              "defaultHfov": 110,
-              "mobileHfov": 90
-            },
-            "scenes": {
-              "DressingsMain": {
-                "id": "DressingsMain",
-                "title": "Dressings Main Area",
-                "label": "Dressings Main Area",
-                "panorama": "/panos/dressings/main.jpg",
-                "minimap": {
-                  "x": 50,
-                  "y": 50
-                },
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                }
-              }
-            },
-            "connections": []
-          }
-        },
-        {
-          "id": "dressings-fgloading",
-          "name": "Dressings Finished Goods Loading Area",
-          "points": "35, 77 53,77 53,85 35,85",
-          "tour": {
-            "id": "dressings-main-tour",
-            "name": "Dressings Main Tour",
-            "version": 1,
-            "settings": {
-              "firstScene": "DressingsMain",
-              "defaultHfov": 110,
-              "mobileHfov": 90
-            },
-            "scenes": {
-              "DressingsMain": {
-                "id": "DressingsMain",
-                "title": "Dressings Main Area",
-                "label": "Dressings Main Area",
-                "panorama": "/panos/dressings/main.jpg",
-                "minimap": {
-                  "x": 50,
-                  "y": 50
-                },
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                }
-              }
-            },
-            "connections": []
-          }
-        },
-        {
-          "id": "dressings-wastedisposal",
-          "name": "Dressings Waste Disposal Area",
-          "points": "35, 87 56,87 56,92 35,92",
-          "tour": {
-            "id": "dressings-main-tour",
-            "name": "Dressings Main Tour",
-            "version": 1,
-            "settings": {
-              "firstScene": "DressingsMain",
-              "defaultHfov": 110,
-              "mobileHfov": 90
-            },
-            "scenes": {
-              "DressingsMain": {
-                "id": "DressingsMain",
-                "title": "Dressings Main Area",
-                "label": "Dressings Main Area",
-                "panorama": "/panos/dressings/main.jpg",
-                "minimap": {
-                  "x": 50,
-                  "y": 50
-                },
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                }
-              }
-            },
-            "connections": []
-          }
-        },
-        {
-          "id": "dressings-prodnonhalal",
-          "name": "Dressings Production (Non-Halal) Area",
-          "points": "85,2.4 97.4,2.4 96.4,21.5 84,21.5",
-          "tour": {
-            "id": "dressings-main-tour",
-            "name": "Dressings Main Tour",
-            "version": 1,
-            "settings": {
-              "firstScene": "DressingsMain",
-              "defaultHfov": 110,
-              "mobileHfov": 90
-            },
-            "scenes": {
-              "DressingsMain": {
-                "id": "DressingsMain",
-                "title": "Dressings Main Area",
-                "label": "Dressings Main Area",
-                "panorama": "/panos/dressings/main.jpg",
-                "minimap": {
-                  "x": 50,
-                  "y": 50
-                },
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                }
-              }
-            },
-            "connections": []
+            "scenes": {},
+            "connections": [],
+            "mapImage": "/maps/dressings-placeholder.jpg"
           }
         }
       ]

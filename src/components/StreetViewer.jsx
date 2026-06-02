@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import "pannellum/build/pannellum.css";
 import "pannellum";
 
@@ -34,24 +35,16 @@ function xyToYawPitch(hotspot = {}) {
   const hasYawPitch = Number.isFinite(Number(hotspot.yaw)) && Number.isFinite(Number(hotspot.pitch));
   const hasXY = Number.isFinite(Number(hotspot.x)) && Number.isFinite(Number(hotspot.y));
 
-  // New admin records are saved from Pannellum itself. These are the most accurate
-  // because they are not affected by CSS image scaling or object-fit.
-  if (hotspot.coordinateMode === "pannellum" && hasYawPitch) {
+  // Admin Mark Locations saves the exact Pannellum yaw/pitch.
+  // Trust this first even if legacy x/y is also present, otherwise the final viewer
+  // can place the arrow somewhere different from the admin preview.
+  if (hasYawPitch) {
     return {
       yaw: normalizeNumber(hotspot.yaw, 0),
       pitch: clamp(normalizeNumber(hotspot.pitch, -8), -85, 85),
     };
   }
 
-  // If a record only has yaw/pitch, respect it.
-  if (hasYawPitch && !hasXY) {
-    return {
-      yaw: normalizeNumber(hotspot.yaw, 0),
-      pitch: clamp(normalizeNumber(hotspot.pitch, -8), -85, 85),
-    };
-  }
-
-  // Legacy admin records saved flat 0-100 image x/y. Convert those to panorama coords.
   if (hasXY) {
     const x = normalizeNumber(hotspot.x, 50);
     const y = normalizeNumber(hotspot.y, 50);
@@ -73,9 +66,46 @@ function xyToYawPitch(hotspot = {}) {
 }
 
 function getSceneConnections(mapData, sceneId) {
-  return (mapData?.connections || []).filter(
-    (connection) => connection?.from === sceneId && connection?.to
+  const scenes = safeScenes(mapData);
+  const currentScene = scenes[sceneId];
+
+  // IMPORTANT:
+  // The admin page now saves the latest Mark Locations buttons inside
+  // scene.hotspots. Older data may still have stale entries in tour.connections.
+  // So scene.hotspots must win for the same from -> to pair, otherwise the final
+  // viewer can show an old arrow position even though admin shows the new one.
+  const sceneHotspotConnections = (currentScene?.hotspots || [])
+    .filter((hotspot) => hotspot?.targetSceneId)
+    .map((hotspot) => ({
+      id: hotspot.id || `${sceneId}-to-${hotspot.targetSceneId}`,
+      from: sceneId,
+      to: hotspot.targetSceneId,
+      label: hotspot.text || hotspot.label,
+      hotspot,
+      source: "scene-hotspot",
+    }));
+
+  const sceneHotspotTargets = new Set(
+    sceneHotspotConnections.map((connection) => `${connection.from}->${connection.to}`)
   );
+
+  const tourConnections = (mapData?.connections || [])
+    .filter((connection) => connection?.from === sceneId && connection?.to)
+    .filter((connection) => !sceneHotspotTargets.has(`${connection.from}->${connection.to}`))
+    .map((connection) => ({
+      ...connection,
+      source: "tour-connection",
+    }));
+
+  const merged = [...sceneHotspotConnections, ...tourConnections];
+  const seen = new Set();
+
+  return merged.filter((connection) => {
+    const key = `${connection.from}->${connection.to}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function getSceneMapPoint(scene) {
@@ -108,9 +138,12 @@ function getMiniMapTransform(activePoint) {
 }
 
 function StreetViewer({ mapData, site, area }) {
+  const [searchParams] = useSearchParams();
   const viewerRef = useRef(null);
   const pannellumInstanceRef = useRef(null);
-  const [currentSceneId, setCurrentSceneId] = useState(() => getFirstSceneId(mapData));
+  const requestedSceneId = searchParams.get("scene");
+
+  const [currentSceneId, setCurrentSceneId] = useState(() => requestedSceneId || getFirstSceneId(mapData));
 
   const scenes = useMemo(() => safeScenes(mapData), [mapData]);
   const sceneList = useMemo(() => Object.values(scenes || {}).filter(Boolean), [scenes]);
@@ -124,12 +157,17 @@ function StreetViewer({ mapData, site, area }) {
   );
 
   useEffect(() => {
+    if (requestedSceneId && safeScenes(mapData)[requestedSceneId]) {
+      setCurrentSceneId(requestedSceneId);
+      return;
+    }
+
     const firstScene = getFirstSceneId(mapData);
     setCurrentSceneId((previous) => {
       if (previous && safeScenes(mapData)[previous]) return previous;
       return firstScene;
     });
-  }, [mapData]);
+  }, [mapData, requestedSceneId]);
 
   useEffect(() => {
     if (!viewerRef.current || !currentScene?.panorama) return;

@@ -21,7 +21,7 @@ function hasUsableMaps(value) {
   return value && typeof value === "object" && Object.keys(value).length > 0;
 }
 
-function getBaseFactoryMaps() {
+export function getBaseFactoryMaps() {
   return factoryMaps;
 }
 
@@ -89,6 +89,12 @@ export async function uploadAdminImage(file, kind = "panos") {
     console.warn("[streetview-admin] Image upload server unavailable. Falling back to temporary Base64.", error);
     return dataUrl;
   }
+}
+
+
+export async function uploadAssetFile(file, folder = "panos") {
+  const publicPath = await uploadAdminImage(file, folder);
+  return { url: publicPath, publicPath, fallback: publicPath?.startsWith("data:image/") || false };
 }
 
 async function syncMapsToDataFile(nextMaps) {

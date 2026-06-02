@@ -1,258 +1,437 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "pannellum/build/pannellum.css";
 import "pannellum";
-import "../styles/admin.css";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
 import {
-  createUniqueId,
-  getEffectiveTour,
-  getMergedArea,
-  getMergedSite,
-  getPercentPoint,
+  getEffectiveSite,
+  getEffectiveArea,
+  ensureTour,
   updateAreaTour,
-  uploadAdminImage,
+  uploadAssetFile,
+  createUniqueId,
 } from "../utils/streetViewAdminStorage";
+import "../styles/AdminAreaConfigPage.css";
+import "../styles/admin-map-dot-patch.css";
 
-function normalizeNumber(value, fallback = 0) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number : fallback;
+function getSceneImage(scene) {
+  return scene?.panorama || scene?.image || scene?.url || scene?.publicPath || "";
 }
 
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
+function getSceneTitle(scene, fallback = "Untitled Location") {
+  return scene?.title || scene?.name || scene?.label || fallback;
 }
 
-function labelForScene(scene, fallback = "Location") {
-  return scene?.label || scene?.title || scene?.name || fallback;
+function getSiteMapImage(site, area, tour) {
+  return (
+    site?.mapImage ||
+    site?.image ||
+    site?.map ||
+    site?.floorMap ||
+    site?.siteMap ||
+    area?.mapImage ||
+    area?.image ||
+    area?.map ||
+    tour?.mapImage ||
+    ""
+  );
 }
 
-function hotspotToPannellumPoint(hotspot = {}) {
-  const hasYawPitch = Number.isFinite(Number(hotspot.yaw)) && Number.isFinite(Number(hotspot.pitch));
-  const hasXY = Number.isFinite(Number(hotspot.x)) && Number.isFinite(Number(hotspot.y));
-
-  if (hotspot.coordinateMode === "pannellum" && hasYawPitch) {
-    return {
-      yaw: normalizeNumber(hotspot.yaw, 0),
-      pitch: clamp(normalizeNumber(hotspot.pitch, -8), -85, 85),
-    };
-  }
-
-  if (hasYawPitch && !hasXY) {
-    return {
-      yaw: normalizeNumber(hotspot.yaw, 0),
-      pitch: clamp(normalizeNumber(hotspot.pitch, -8), -85, 85),
-    };
-  }
-
-  if (hasXY) {
-    const x = normalizeNumber(hotspot.x, 50);
-    const y = normalizeNumber(hotspot.y, 50);
-    return {
-      yaw: (x / 100) * 360 - 180,
-      pitch: clamp(90 - (y / 100) * 180, -85, 85),
-    };
-  }
-
-  return { yaw: 0, pitch: -8 };
-}
-
-function pannellumPointToPercent({ yaw, pitch }) {
+function toLegacyPercentPoint(pitch, yaw) {
   return {
-    x: Number((((normalizeNumber(yaw, 0) + 180) / 360) * 100).toFixed(2)),
-    y: Number((((90 - clamp(normalizeNumber(pitch, 0), -85, 85)) / 180) * 100).toFixed(2)),
+    x: Number((((yaw + 180) / 360) * 100).toFixed(2)),
+    y: Number((((90 - pitch) / 180) * 100).toFixed(2)),
   };
 }
 
-function createEmptyScene(title, existingIds) {
-  const id = createUniqueId(title || "location", existingIds);
+function legacyPercentToPano(point = {}) {
+  const x = Number(point.x || 50);
+  const y = Number(point.y || 50);
 
   return {
-    id,
-    title: title || "Untitled Location",
-    label: title || "Location",
-    panorama: "",
-    mapPoint: null,
-    view: {
-      initialYaw: 0,
-      initialPitch: 0,
-      initialHfov: 110,
-    },
+    pitch: Number((90 - y * 1.8).toFixed(2)),
+    yaw: Number((x * 3.6 - 180).toFixed(2)),
   };
+}
+
+function normalizeHotspotPosition(hotspot) {
+  if (Number.isFinite(Number(hotspot?.pitch)) && Number.isFinite(Number(hotspot?.yaw))) {
+    return {
+      pitch: Number(hotspot.pitch),
+      yaw: Number(hotspot.yaw),
+    };
+  }
+
+  return legacyPercentToPano(hotspot);
+}
+
+function getSceneMapPoint(scene) {
+  return scene?.mapPoint || scene?.minimap || null;
+}
+
+function PannellumStage({ image, scene, scenesById, isPicking, pickLabel, onPickPoint, onGoToScene }) {
+  const mountRef = useRef(null);
+  const viewerRef = useRef(null);
+  const onGoToSceneRef = useRef(onGoToScene);
+  const onPickPointRef = useRef(onPickPoint);
+  const hotspotSignature = JSON.stringify(scene?.hotspots || []);
+
+  useEffect(() => {
+    onGoToSceneRef.current = onGoToScene;
+  }, [onGoToScene]);
+
+  useEffect(() => {
+    onPickPointRef.current = onPickPoint;
+  }, [onPickPoint]);
+
+  useEffect(() => {
+    const mount = mountRef.current;
+    if (!mount || !image || !window?.pannellum?.viewer) return;
+
+    mount.innerHTML = "";
+
+    const hotSpots = (scene?.hotspots || [])
+      .filter((hotspot) => hotspot?.targetSceneId)
+      .map((hotspot) => {
+        const position = normalizeHotspotPosition(hotspot);
+        const targetScene = scenesById?.[hotspot.targetSceneId];
+
+        return {
+          pitch: position.pitch,
+          yaw: position.yaw,
+          cssClass: "admin-config-pnlm-hotspot-shell-v2",
+          createTooltipFunc: (hotSpotDiv, args) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "admin-config-pnlm-hotspot-button-v2";
+            button.innerHTML = "➜";
+            button.title = args.title;
+            button.addEventListener("click", (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onGoToSceneRef.current?.(args.targetSceneId);
+            });
+            hotSpotDiv.appendChild(button);
+          },
+          createTooltipArgs: {
+            title: targetScene ? `Go to ${getSceneTitle(targetScene)}` : "Go to location",
+            targetSceneId: hotspot.targetSceneId,
+          },
+        };
+      });
+
+    viewerRef.current = window.pannellum.viewer(mount, {
+      type: "equirectangular",
+      panorama: image,
+      autoLoad: true,
+      showControls: false,
+      compass: false,
+      keyboardZoom: true,
+      mouseZoom: true,
+      hfov: 105,
+      hotSpots,
+    });
+
+    return () => {
+      try {
+        viewerRef.current?.destroy?.();
+      } catch {
+        // Pannellum destroy can fail during route changes; safe to ignore.
+      }
+      viewerRef.current = null;
+    };
+  }, [image, scene?.id, hotspotSignature, scenesById]);
+
+  useEffect(() => {
+    const mount = mountRef.current;
+    if (!mount) return;
+
+    function handleClick(event) {
+      if (!isPicking) return;
+      if (event.target.closest(".admin-config-pnlm-hotspot-button-v2")) return;
+
+      if (viewerRef.current?.mouseEventToCoords) {
+        const coords = viewerRef.current.mouseEventToCoords(event);
+        if (Array.isArray(coords) && coords.length >= 2) {
+          onPickPointRef.current?.({
+            pitch: Number(coords[0].toFixed(2)),
+            yaw: Number(coords[1].toFixed(2)),
+          });
+        }
+      }
+    }
+
+    mount.addEventListener("click", handleClick);
+    return () => mount.removeEventListener("click", handleClick);
+  }, [isPicking]);
+
+  function handleFallbackClick(event) {
+    if (!isPicking) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    const point = legacyPercentToPano({ x, y });
+    onPickPointRef.current?.(point);
+  }
+
+  function zoomBy(delta) {
+    const viewer = viewerRef.current;
+    if (!viewer?.getHfov || !viewer?.setHfov) return;
+    const nextHfov = Math.max(35, Math.min(120, viewer.getHfov() + delta));
+    viewer.setHfov(nextHfov);
+  }
+
+  function toggleFullscreen() {
+    const target = mountRef.current?.parentElement;
+    if (!target) return;
+
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    } else {
+      target.requestFullscreen?.();
+    }
+  }
+
+  if (!image) {
+    return (
+      <div className="admin-config-empty-preview-v2">
+        <div>
+          <b>No 360 image selected</b>
+          <span>Add an image from the left panel.</span>
+        </div>
+      </div>
+    );
+  }
+
+  const hasPannellum = typeof window !== "undefined" && !!window?.pannellum?.viewer;
+
+  return (
+    <div
+      className={`admin-config-pannellum-wrap-v2 ${isPicking ? "is-marking" : ""}`}
+      onClick={!hasPannellum ? handleFallbackClick : undefined}
+    >
+      {hasPannellum ? (
+        <div ref={mountRef} className="admin-config-pannellum-mount-v2" />
+      ) : (
+        <img src={image} alt={getSceneTitle(scene)} className="admin-config-fallback-panorama-v2" />
+      )}
+
+      <div className="admin-config-pannellum-controls-v2" onClick={(event) => event.stopPropagation()}>
+        <button type="button" onClick={() => zoomBy(-10)} title="Zoom in">+</button>
+        <button type="button" onClick={() => zoomBy(10)} title="Zoom out">−</button>
+        <button type="button" onClick={toggleFullscreen} title="Fullscreen">⛶</button>
+      </div>
+
+      {isPicking && (
+        <div className="admin-config-picking-banner-v2">
+          {pickLabel || "Click inside the panorama to place the button"}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function AdminAreaConfigPage() {
   const navigate = useNavigate();
   const { siteId, areaId } = useParams();
+  const [searchParams] = useSearchParams();
 
-  const site = getMergedSite(siteId);
-  const area = getMergedArea(siteId, areaId);
+  const fileInputRef = useRef(null);
 
-  const [tour, setTour] = useState(() => getEffectiveTour(siteId, areaId));
-  const [selectedSceneId, setSelectedSceneId] = useState(() => {
-    const initialTour = getEffectiveTour(siteId, areaId);
-    return initialTour.settings.firstScene || Object.keys(initialTour.scenes || {})[0] || null;
-  });
-  const [placingMapPointFor, setPlacingMapPointFor] = useState(null);
-  const [pickingConnectionFor, setPickingConnectionFor] = useState(null);
-  const [connectionTargetId, setConnectionTargetId] = useState("");
+  const [site, setSite] = useState(null);
+  const [area, setArea] = useState(null);
+  const [tour, setTour] = useState(null);
+  const [selectedSceneId, setSelectedSceneId] = useState(null);
+
+  const [searchText, setSearchText] = useState("");
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [newLocationName, setNewLocationName] = useState("");
+  const [newLocationFile, setNewLocationFile] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [mode, setMode] = useState("preview");
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [pendingTargetSceneId, setPendingTargetSceneId] = useState(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editLocationName, setEditLocationName] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
 
-  const panoramaBoxRef = useRef(null);
-  const placementViewerRef = useRef(null);
-  const placementPannellumInstanceRef = useRef(null);
-  const connectedUploadInputRef = useRef(null);
+  useEffect(() => {
+    let mounted = true;
 
-  const scenes = useMemo(() => Object.values(tour.scenes || {}), [tour]);
-  const selectedScene = selectedSceneId ? tour.scenes[selectedSceneId] : null;
-  const selectedConnections = selectedSceneId
-    ? tour.connections.filter((connection) => connection.from === selectedSceneId)
-    : [];
+    async function loadData() {
+      const nextSite = await getEffectiveSite(siteId);
+      const nextArea = await getEffectiveArea(siteId, areaId);
+      const nextTour = ensureTour(nextArea?.tour, nextArea);
+      const urlSceneId = searchParams.get("scene");
 
-  const selectedConnectionsKey = useMemo(
-    () => JSON.stringify(
-      selectedConnections.map((connection) => ({
-        id: connection.id,
-        from: connection.from,
-        to: connection.to,
-        yaw: connection.hotspot?.yaw,
-        pitch: connection.hotspot?.pitch,
-        x: connection.hotspot?.x,
-        y: connection.hotspot?.y,
-      }))
-    ),
-    [selectedConnections]
-  );
+      if (!mounted) return;
 
-  if (!site) return <Navigate to="/admin" replace />;
-  if (!area) return <Navigate to="/admin" replace />;
+      setSite(nextSite);
+      setArea(nextArea);
+      setTour(nextTour);
+
+      const firstScene =
+        (urlSceneId && nextTour?.scenes?.[urlSceneId] ? urlSceneId : null) ||
+        nextTour?.settings?.firstScene ||
+        Object.keys(nextTour?.scenes || {})[0] ||
+        null;
+
+      setSelectedSceneId(firstScene);
+    }
+
+    loadData();
+
+    return () => {
+      mounted = false;
+    };
+  }, [siteId, areaId, searchParams]);
+
+  const scenes = useMemo(() => Object.values(tour?.scenes || {}), [tour]);
+  const scenesById = useMemo(() => tour?.scenes || {}, [tour]);
+
+  const filteredScenes = useMemo(() => {
+    const query = searchText.trim().toLowerCase();
+    if (!query) return scenes;
+
+    return scenes.filter((scene) => getSceneTitle(scene).toLowerCase().includes(query));
+  }, [scenes, searchText]);
+
+  const selectedScene = selectedSceneId ? tour?.scenes?.[selectedSceneId] : scenes[0];
+  const selectedImage = getSceneImage(selectedScene);
+  const pendingTargetScene = pendingTargetSceneId ? tour?.scenes?.[pendingTargetSceneId] : null;
+  const siteMapImage = getSiteMapImage(site, area, tour);
+
+  function logout() {
+    sessionStorage.removeItem("streetViewAuth");
+    sessionStorage.removeItem("streetViewRole");
+    navigate("/login", { replace: true });
+  }
 
   function showSaved(text = "Saved") {
     setSaveMessage(text);
-    setTimeout(() => setSaveMessage(""), 1500);
+    window.clearTimeout(window.__streetViewConfigSaveTimer);
+    window.__streetViewConfigSaveTimer = window.setTimeout(() => setSaveMessage(""), 1600);
   }
 
   function saveTour(nextTour, message = "Saved") {
-    const cleanTour = {
-      ...nextTour,
-      settings: {
-        firstScene: nextTour.settings?.firstScene || Object.keys(nextTour.scenes || {})[0] || null,
-        defaultHfov: nextTour.settings?.defaultHfov || 110,
-        mobileHfov: nextTour.settings?.mobileHfov || 90,
-        ...(nextTour.settings || {}),
-      },
-      scenes: nextTour.scenes || {},
-      connections: Array.isArray(nextTour.connections) ? nextTour.connections : [],
-    };
-
-    setTour(cleanTour);
-    updateAreaTour(siteId, areaId, cleanTour);
+    setTour(nextTour);
+    updateAreaTour(siteId, areaId, nextTour);
     showSaved(message);
   }
 
-  async function addLocationFile(file, options = {}) {
-    if (!file) return;
+  async function handleAddLocation(event) {
+    event.preventDefault();
 
-    const { selectNew = true } = options;
-    const previousSelectedSceneId = selectedSceneId;
-    const existingIds = Object.keys(tour.scenes || {});
-    const cleanTitle = file.name.replace(/\.[^/.]+$/, "");
-    const newScene = createEmptyScene(cleanTitle, existingIds);
-    const image = await uploadAdminImage(file, "panos");
+    if (!newLocationFile) {
+      alert("Please choose a 360 image first.");
+      return;
+    }
 
-    const sceneWithImage = {
-      ...newScene,
-      panorama: image,
-    };
+    setIsSaving(true);
 
-    const nextTour = {
-      ...tour,
-      settings: {
-        ...tour.settings,
-        firstScene: tour.settings.firstScene || sceneWithImage.id,
-      },
-      scenes: {
-        ...tour.scenes,
-        [sceneWithImage.id]: sceneWithImage,
-      },
-      connections: tour.connections || [],
-    };
+    try {
+      const existingIds = Object.keys(tour?.scenes || {});
+      const locationTitle =
+        newLocationName.trim() ||
+        newLocationFile.name.replace(/\.[^/.]+$/, "") ||
+        "New Location";
 
-    setSelectedSceneId(selectNew ? sceneWithImage.id : previousSelectedSceneId || sceneWithImage.id);
-    saveTour(nextTour, "Location added");
-  }
+      const sceneId = createUniqueId(locationTitle, existingIds);
+      const uploaded = await uploadAssetFile(newLocationFile, "panos");
 
-  async function addConnectedLocationFromFile(event) {
-    const file = event.target.files?.[0];
-    await addLocationFile(file, { selectNew: false });
-    event.target.value = "";
-  }
+      const nextScene = {
+        id: sceneId,
+        title: locationTitle,
+        name: locationTitle,
+        label: locationTitle,
+        panorama: uploaded.publicPath || uploaded.url,
+        thumbnail: uploaded.publicPath || uploaded.url,
+        mapPoint: null,
+        minimap: null,
+        hotspots: [],
+      };
 
-  function updateSelectedScene(field, value) {
-    if (!selectedScene) return;
-
-    const nextTour = {
-      ...tour,
-      scenes: {
-        ...tour.scenes,
-        [selectedScene.id]: {
-          ...selectedScene,
-          [field]: value,
-        },
-      },
-    };
-
-    setTour(nextTour);
-  }
-
-  function saveSelectedLocation() {
-    if (!selectedScene) return;
-
-    const nextTitle = selectedScene.title?.trim() || "Untitled Location";
-    const nextLabel = selectedScene.label?.trim() || nextTitle;
-
-    const nextTour = {
-      ...tour,
-      scenes: {
-        ...tour.scenes,
-        [selectedScene.id]: {
-          ...selectedScene,
-          title: nextTitle,
-          label: nextLabel,
-        },
-      },
-    };
-
-    saveTour(nextTour, "Location saved");
-  }
-
-  function setAsStart(sceneId) {
-    saveTour(
-      {
+      const nextTour = {
         ...tour,
         settings: {
           ...tour.settings,
-          firstScene: sceneId,
+          firstScene: tour?.settings?.firstScene || sceneId,
         },
-      },
-      "Start saved"
-    );
+        scenes: {
+          ...(tour?.scenes || {}),
+          [sceneId]: nextScene,
+        },
+      };
+
+      saveTour(nextTour, "Image added");
+      setSelectedSceneId(sceneId);
+      setIsAddOpen(false);
+      setNewLocationName("");
+      setNewLocationFile(null);
+      setSearchText("");
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to add location image.");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
-  function deleteScene(sceneId) {
-    const ok = window.confirm("Delete this location?");
+  function openEditName() {
+    if (!selectedScene?.id) return;
+    setEditLocationName(getSceneTitle(selectedScene));
+    setIsEditOpen(true);
+  }
+
+  function saveEditedName(event) {
+    event.preventDefault();
+    if (!selectedScene?.id) return;
+
+    const cleanName = editLocationName.trim();
+    if (!cleanName) {
+      alert("Location name cannot be blank.");
+      return;
+    }
+
+    const nextScene = {
+      ...selectedScene,
+      title: cleanName,
+      name: cleanName,
+      label: cleanName,
+    };
+
+    const nextTour = {
+      ...tour,
+      scenes: {
+        ...tour.scenes,
+        [selectedScene.id]: nextScene,
+      },
+    };
+
+    saveTour(nextTour, "Name saved");
+    setIsEditOpen(false);
+  }
+
+  function deleteSelectedLocation() {
+    if (!selectedScene?.id) return;
+
+    const ok = confirm(`Delete "${getSceneTitle(selectedScene)}"?`);
     if (!ok) return;
 
-    const nextScenes = { ...tour.scenes };
-    delete nextScenes[sceneId];
+    const nextScenes = { ...(tour?.scenes || {}) };
+    delete nextScenes[selectedScene.id];
 
-    const nextConnections = tour.connections.filter(
-      (connection) => connection.from !== sceneId && connection.to !== sceneId
-    );
-
+    const remainingIds = Object.keys(nextScenes);
     const nextFirstScene =
-      tour.settings.firstScene === sceneId
-        ? Object.keys(nextScenes)[0] || null
-        : tour.settings.firstScene;
+      tour?.settings?.firstScene === selectedScene.id
+        ? remainingIds[0] || null
+        : tour?.settings?.firstScene || remainingIds[0] || null;
 
     const nextTour = {
       ...tour,
@@ -261,440 +440,459 @@ function AdminAreaConfigPage() {
         firstScene: nextFirstScene,
       },
       scenes: nextScenes,
-      connections: nextConnections,
     };
 
+    saveTour(nextTour, "Image deleted");
     setSelectedSceneId(nextFirstScene);
-    saveTour(nextTour, "Location deleted");
+    setMode("preview");
   }
 
-  function handleMiniMapClick(event) {
-    event.preventDefault();
-    event.stopPropagation();
+  function openMarkLocationPicker() {
+    if (!selectedScene?.id) return;
 
-    if (!placingMapPointFor) return;
+    if (scenes.length < 2) {
+      alert("Add another 360 image first, then connect this image to it.");
+      return;
+    }
 
-    const point = getPercentPoint(event, event.currentTarget);
-    const scene = tour.scenes[placingMapPointFor];
-    if (!scene) return;
+    setMode("preview");
+    setPendingTargetSceneId(null);
+    setIsLinkModalOpen(true);
+  }
+
+  function chooseTargetScene(targetSceneId) {
+    setPendingTargetSceneId(targetSceneId);
+    setIsLinkModalOpen(false);
+    setMode("mark-location");
+  }
+
+  const handlePanoPick = useCallback((point) => {
+    if (!selectedScene?.id) return;
+
+    if (mode === "mark-location" && pendingTargetSceneId) {
+      const targetScene = tour?.scenes?.[pendingTargetSceneId];
+      const currentHotspots = selectedScene.hotspots || [];
+      const existingHotspot = currentHotspots.find(
+        (hotspot) => hotspot?.targetSceneId === pendingTargetSceneId
+      );
+      const legacyPoint = toLegacyPercentPoint(point.pitch, point.yaw);
+
+      const nextHotspot = {
+        ...(existingHotspot || {}),
+        id: existingHotspot?.id || createUniqueId(`to-${pendingTargetSceneId}`, currentHotspots.map((hotspot) => hotspot.id)),
+        type: "scene",
+        targetSceneId: pendingTargetSceneId,
+        text: targetScene ? getSceneTitle(targetScene) : "Go to location",
+        coordinateMode: "pannellum",
+        pitch: point.pitch,
+        yaw: point.yaw,
+        x: legacyPoint.x,
+        y: legacyPoint.y,
+      };
+
+      const nextScene = {
+        ...selectedScene,
+        hotspots: existingHotspot
+          ? currentHotspots.map((hotspot) =>
+              hotspot.id === existingHotspot.id ? nextHotspot : hotspot
+            )
+          : [...currentHotspots, nextHotspot],
+      };
+
+      const nextConnection = {
+        id: `${selectedScene.id}-to-${pendingTargetSceneId}`,
+        from: selectedScene.id,
+        to: pendingTargetSceneId,
+        label: targetScene ? `Go to ${getSceneTitle(targetScene)}` : "Go to location",
+        type: "move",
+        hotspot: {
+          coordinateMode: "pannellum",
+          yaw: point.yaw,
+          pitch: point.pitch,
+          x: legacyPoint.x,
+          y: legacyPoint.y,
+          icon: "↑",
+        },
+      };
+
+      const otherConnections = (tour?.connections || []).filter(
+        (connection) => !(connection?.from === selectedScene.id && connection?.to === pendingTargetSceneId)
+      );
+
+      const nextTour = {
+        ...tour,
+        scenes: {
+          ...tour.scenes,
+          [selectedScene.id]: nextScene,
+        },
+        connections: [...otherConnections, nextConnection],
+      };
+
+      saveTour(nextTour, existingHotspot ? "Location button relocated" : "Location button added");
+      setPendingTargetSceneId(null);
+      setMode("preview");
+    }
+  }, [mode, pendingTargetSceneId, selectedScene, tour]);
+
+  const goToScene = useCallback((targetSceneId) => {
+    if (!tour?.scenes?.[targetSceneId]) return;
+    setSelectedSceneId(targetSceneId);
+    setMode("preview");
+    setPendingTargetSceneId(null);
+  }, [tour]);
+
+  function handleMapPlacementClick(event) {
+    if (!selectedScene?.id) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = Number((((event.clientX - rect.left) / rect.width) * 100).toFixed(2));
+    const y = Number((((event.clientY - rect.top) / rect.height) * 100).toFixed(2));
+    const point = { x, y };
+
+    const nextScene = {
+      ...selectedScene,
+      mapPoint: point,
+      minimap: point,
+    };
 
     const nextTour = {
       ...tour,
       scenes: {
         ...tour.scenes,
-        [placingMapPointFor]: {
-          ...scene,
-          mapPoint: point,
-          minimap: point,
-        },
+        [selectedScene.id]: nextScene,
       },
     };
 
-    setPlacingMapPointFor(null);
-    saveTour(nextTour, "Map point saved");
+    saveTour(nextTour, `Map dot saved at ${x}, ${y}`);
+    setIsMapModalOpen(false);
   }
-
-  function beginPickConnectionTo(targetSceneId) {
-    if (!selectedScene || !targetSceneId) {
-      alert("Choose a location first.");
-      return;
-    }
-
-    setPlacingMapPointFor(null);
-    setPickingConnectionFor({ from: selectedScene.id, to: targetSceneId });
-  }
-
-  function handlePanoramaClick(event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (!pickingConnectionFor) return;
-
-    const fromScene = tour.scenes[pickingConnectionFor.from];
-    const toScene = tour.scenes[pickingConnectionFor.to];
-    if (!fromScene || !toScene) return;
-
-    const viewer = placementPannellumInstanceRef.current;
-    let yaw = 0;
-    let pitch = -8;
-
-    if (viewer?.mouseEventToCoords) {
-      const coords = viewer.mouseEventToCoords(event);
-      // Pannellum returns [pitch, yaw].
-      pitch = clamp(normalizeNumber(coords?.[0], -8), -85, 85);
-      yaw = normalizeNumber(coords?.[1], 0);
-    } else if (panoramaBoxRef.current) {
-      const point = getPercentPoint(event, panoramaBoxRef.current);
-      yaw = (point.x / 100) * 360 - 180;
-      pitch = clamp(90 - (point.y / 100) * 180, -85, 85);
-    }
-
-    const percentPoint = pannellumPointToPercent({ yaw, pitch });
-    const connectionId = `${pickingConnectionFor.from}-to-${pickingConnectionFor.to}`;
-
-    const nextConnection = {
-      id: connectionId,
-      from: pickingConnectionFor.from,
-      to: pickingConnectionFor.to,
-      label: `Go to ${toScene.label || toScene.title}`,
-      type: "move",
-      hotspot: {
-        coordinateMode: "pannellum",
-        yaw: Number(yaw.toFixed(2)),
-        pitch: Number(pitch.toFixed(2)),
-        x: percentPoint.x,
-        y: percentPoint.y,
-        icon: "↑",
-      },
-    };
-
-    const existingIndex = tour.connections.findIndex(
-      (connection) =>
-        connection.from === pickingConnectionFor.from &&
-        connection.to === pickingConnectionFor.to
-    );
-
-    const nextConnections =
-      existingIndex >= 0
-        ? tour.connections.map((connection, index) =>
-            index === existingIndex
-              ? {
-                  ...connection,
-                  label: nextConnection.label,
-                  hotspot: nextConnection.hotspot,
-                }
-              : connection
-          )
-        : [...tour.connections, nextConnection];
-
-    const nextTour = {
-      ...tour,
-      connections: nextConnections,
-    };
-
-    setPickingConnectionFor(null);
-    setConnectionTargetId("");
-    saveTour(nextTour, existingIndex >= 0 ? "Arrow position updated" : "Next location saved");
-  }
-
-  function deleteConnection(connectionId) {
-    const nextTour = {
-      ...tour,
-      connections: tour.connections.filter((connection) => connection.id !== connectionId),
-    };
-
-    saveTour(nextTour, "Connection deleted");
-  }
-
-  function logout() {
-    sessionStorage.removeItem("streetViewAuth");
-    sessionStorage.removeItem("streetViewRole");
-    navigate("/login", { replace: true });
-  }
-
-  const otherScenes = selectedScene
-    ? scenes.filter((scene) => scene.id !== selectedScene.id)
-    : [];
-
-  const currentMapPoint = selectedScene?.mapPoint || selectedScene?.minimap || null;
-
-  useEffect(() => {
-    if (!placementViewerRef.current || !selectedScene?.panorama) return;
-
-    const pannellumGlobal = window.pannellum;
-    if (!pannellumGlobal?.viewer) return;
-
-    if (placementPannellumInstanceRef.current) {
-      try {
-        placementPannellumInstanceRef.current.destroy();
-      } catch {
-        // ignore cleanup errors
-      }
-      placementPannellumInstanceRef.current = null;
-    }
-
-    // Hard-clear the old Pannellum DOM/hotspots. This prevents the first location's
-    // arrow from getting visually stuck when switching locations or re-placing arrows.
-    placementViewerRef.current.innerHTML = "";
-
-    const viewer = pannellumGlobal.viewer(placementViewerRef.current, {
-      type: "equirectangular",
-      panorama: selectedScene.panorama,
-      autoLoad: true,
-      showControls: true,
-      showFullscreenCtrl: false,
-      compass: false,
-      draggable: true,
-      mouseZoom: true,
-      keyboardZoom: true,
-      hfov: normalizeNumber(selectedScene?.view?.initialHfov, 110),
-      yaw: normalizeNumber(selectedScene?.view?.initialYaw, 0),
-      pitch: normalizeNumber(selectedScene?.view?.initialPitch, 0),
-      hotSpots: selectedConnections
-        .filter((connection) => tour.scenes?.[connection.to])
-        .map((connection) => {
-          const point = hotspotToPannellumPoint(connection.hotspot || {});
-          const targetScene = tour.scenes?.[connection.to];
-
-          return {
-            id: connection.id || `${connection.from}-to-${connection.to}`,
-            pitch: point.pitch,
-            yaw: point.yaw,
-            type: "custom",
-            cssClass: "pnlm-admin-arrow-hotspot",
-            createTooltipFunc: (hotSpotDiv) => {
-              hotSpotDiv.innerHTML = `
-                <button class="admin-pannellum-arrow-dot" type="button" title="${labelForScene(targetScene, connection.to)}">
-                  <span>➜</span>
-                </button>
-              `;
-            },
-          };
-        }),
-    });
-
-    placementPannellumInstanceRef.current = viewer;
-
-    return () => {
-      if (placementPannellumInstanceRef.current) {
-        try {
-          placementPannellumInstanceRef.current.destroy();
-        } catch {
-          // ignore cleanup errors
-        }
-        placementPannellumInstanceRef.current = null;
-      }
-
-      if (placementViewerRef.current) {
-        placementViewerRef.current.innerHTML = "";
-      }
-    };
-  }, [selectedSceneId, selectedScene?.panorama, selectedConnectionsKey, tour.scenes]);
-
-  useEffect(() => {
-    const element = placementViewerRef.current;
-    if (!element) return;
-
-    function handlePlacementClick(event) {
-      if (!pickingConnectionFor) return;
-      handlePanoramaClick(event);
-    }
-
-    element.addEventListener("click", handlePlacementClick, true);
-    return () => element.removeEventListener("click", handlePlacementClick, true);
-  }, [pickingConnectionFor, tour, selectedSceneId]);
 
   return (
-    <div className="admin-config-page">
-      <aside className="admin-config-sidebar">
-        <div className="admin-config-sidebar-top">
-          <div className="admin-config-brand">
-            <div className="admin-config-logo">360</div>
-            <div>
-              <span>Street View Admin</span>
-              <strong>{area.name}</strong>
-            </div>
-          </div>
-
-          {saveMessage && <div className="admin-config-save-pill">✓ {saveMessage}</div>}
-        </div>
-
-        <input ref={connectedUploadInputRef} type="file" accept="image/*" onChange={addConnectedLocationFromFile} hidden />
-
-        <div className="admin-config-section grow">
-          <div className="admin-config-section-title">Locations</div>
-          <div className="admin-config-location-list">
-            {scenes.length === 0 && <p>No locations yet. Upload a 360 image first.</p>}
-            {scenes.map((scene) => (
-              <button
-                key={scene.id}
-                className={`admin-config-location-item ${selectedSceneId === scene.id ? "active" : ""}`}
-                onClick={() => {
-                  setPickingConnectionFor(null);
-                  setPlacingMapPointFor(null);
-                  setSelectedSceneId(scene.id);
-                }}
-              >
-                <span>{scene.title || "Untitled"}</span>
-                {tour.settings.firstScene === scene.id && <small>START</small>}
-              </button>
-            ))}
+    <div className="admin-config-page-v2">
+      <header className="admin-config-topbar-v2">
+        <div className="admin-config-topbar-brand-v2">
+          <div className="admin-config-logo-v2">360</div>
+          <div>
+            <span>Street View Admin</span>
+            <strong>Location Configuration</strong>
           </div>
         </div>
 
-        <div className="admin-config-section">
-          <div className="admin-config-section-title">Selected Location</div>
-          <label className="admin-config-field">
-            <span>Title</span>
+        <div className="admin-config-topbar-meta-v2">
+          <div>
+            <span>Site</span>
+            <strong>{site?.name || siteId}</strong>
+          </div>
+          <div>
+            <span>Area</span>
+            <strong>{area?.name || areaId}</strong>
+          </div>
+        </div>
+
+        <nav className="admin-config-topbar-actions-v2">
+          <button type="button" onClick={() => navigate("/admin")}>Open Map</button>
+          <button type="button" onClick={() => navigate(`/viewer/${siteId}/${areaId}${selectedScene?.id ? `?scene=${selectedScene.id}` : ""}`)}>Open Viewer</button>
+          <button type="button" className="danger" onClick={logout}>Logout</button>
+        </nav>
+      </header>
+
+      <main className="admin-config-workspace-v2">
+        <aside className="admin-config-image-rail-v2">
+          <label className="admin-config-search-v2">
+            <span>Search locations</span>
             <input
-              disabled={!selectedScene}
-              value={selectedScene?.title || ""}
-              onChange={(event) => updateSelectedScene("title", event.target.value)}
-              placeholder="Location title"
+              value={searchText}
+              onChange={(event) => setSearchText(event.target.value)}
+              placeholder="Search image name..."
             />
           </label>
 
-          <label className="admin-config-field">
-            <span>Label</span>
-            <input
-              disabled={!selectedScene}
-              value={selectedScene?.label || ""}
-              onChange={(event) => updateSelectedScene("label", event.target.value)}
-              placeholder="Map label"
-            />
-          </label>
-
-          <div className="admin-config-action-grid">
-            <button disabled={!selectedScene} onClick={saveSelectedLocation}>Save</button>
-            <button disabled={!selectedScene} onClick={() => selectedScene && setAsStart(selectedScene.id)}>Set Start</button>
-            <button
-              disabled={!selectedScene}
-              onClick={() => {
-                if (!selectedScene) return;
-                setPickingConnectionFor(null);
-                setPlacingMapPointFor(selectedScene.id);
-              }}
-            >
-              Mark Mapping Area
-            </button>
-            <button disabled={!selectedScene} className="danger" onClick={() => selectedScene && deleteScene(selectedScene.id)}>Delete</button>
-          </div>
-        </div>
-
-        <div className="admin-config-bottom-nav">
-          <button onClick={() => navigate("/admin")}>Open Map</button>
-          <button onClick={() => navigate(`/viewer/${siteId}/${areaId}`)}>Open Viewer</button>
-          <button className="danger" onClick={logout}>Logout</button>
-        </div>
-      </aside>
-
-      <main className="admin-config-main">
-        <section className="admin-config-connected-card">
-          <div className="admin-config-card-title">
+          <button
+            type="button"
+            className="admin-config-add-card-v2"
+            onClick={() => setIsAddOpen(true)}
+          >
+            <b>+</b>
             <div>
-              <span>Connected Locations</span>
-              <strong>Click a location card to open it. Use the arrow button to place the next-location arrow.</strong>
+              <strong>Add 360 Image</strong>
+              <small>Upload new panorama</small>
             </div>
+          </button>
+
+          <div className="admin-config-rail-title-v2">
+            <span>Uploaded Images</span>
+            <strong>{scenes.length}</strong>
           </div>
 
-          <div className="admin-config-connected-row">
-            <button
-              type="button"
-              className="admin-config-add-link-card"
-              onClick={() => connectedUploadInputRef.current?.click()}
-            >
-              <b>+</b>
-              <span>Add</span>
-            </button>
+          <div className="admin-config-image-list-v2">
+            {filteredScenes.length === 0 ? (
+              <div className="admin-config-empty-list-v2">
+                No image names match your search.
+              </div>
+            ) : (
+              filteredScenes.map((scene) => {
+                const image = getSceneImage(scene);
+                const isActive = selectedScene?.id === scene.id;
+                const isMapped = !!getSceneMapPoint(scene);
 
-            {otherScenes.length === 0 && (
-              <div className="admin-config-empty-link">Upload another location to connect.</div>
-            )}
-
-            {otherScenes.map((scene) => {
-              const existingConnection = selectedConnections.find(
-                (connection) => connection.to === scene.id
-              );
-
-              return (
-                <div
-                  key={scene.id}
-                  className={`admin-config-link-card ${existingConnection ? "is-connected" : ""}`}
-                  onClick={() => {
-                    setPickingConnectionFor(null);
-                    setPlacingMapPointFor(null);
-                    setSelectedSceneId(scene.id);
-                  }}
-                  title="Click to open this location"
-                >
-                  {scene.panorama ? <img src={scene.panorama} alt={scene.title} /> : <span>360</span>}
-                  <strong>{scene.label || scene.title}</strong>
-                  {existingConnection && <em>CONNECTED</em>}
-
+                return (
                   <button
+                    key={scene.id}
                     type="button"
-                    className="admin-config-mark-arrow-btn"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      beginPickConnectionTo(scene.id);
+                    className={`admin-config-image-card-v2 ${isActive ? "active" : ""}`}
+                    onClick={() => {
+                      setSelectedSceneId(scene.id);
+                      setMode("preview");
+                      setPendingTargetSceneId(null);
                     }}
                   >
-                    ↗
+                    {image ? (
+                      <img src={image} alt={getSceneTitle(scene)} />
+                    ) : (
+                      <div className="admin-config-card-no-image-v2">No Image</div>
+                    )}
+
+                    <div className="admin-config-image-card-label-v2">
+                      <strong>{getSceneTitle(scene)}</strong>
+                    </div>
+
+                    {isMapped && <em className="admin-config-map-mark-v2">MAP</em>}
                   </button>
+                );
+              })
+            )}
+          </div>
+        </aside>
 
-                  {existingConnection && (
-                    <button
-                      type="button"
-                      className="admin-config-delete-link-btn"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        deleteConnection(existingConnection.id);
-                      }}
-                    >
-                      ×
-                    </button>
-                  )}
+        <section className="admin-config-center-stage-v2">
+          <div className="admin-config-stage-header-v2">
+            <strong>{selectedScene ? getSceneTitle(selectedScene) : "No image selected"}</strong>
+
+            <div className="admin-config-stage-right-v2">
+              {saveMessage && <span className="admin-config-save-flash-v2">{saveMessage}</span>}
+              {mode !== "preview" && (
+                <div className="admin-config-mode-pill-v2 active">
+                  {mode === "mark-location" && pendingTargetScene && `Click panorama to place button to ${getSceneTitle(pendingTargetScene)}`}
                 </div>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="admin-config-stage-card">
-          <div className="admin-config-card-title">
-            <div>
-              <span>Location Placement</span>
-              {(pickingConnectionFor || placingMapPointFor) && (
-                <strong>{pickingConnectionFor ? "Click the 360 image to place the next-location arrow" : "Click the map preview to place the location pin"}</strong>
               )}
             </div>
           </div>
 
-          <div className="admin-config-stage-layout">
-            <div
-              ref={panoramaBoxRef}
-              className={`admin-config-panorama admin-config-panorama-360 ${pickingConnectionFor ? "is-picking" : ""}`}
+          <div className="admin-config-main-preview-v2">
+            <PannellumStage
+              image={selectedImage}
+              scene={selectedScene}
+              scenesById={scenesById}
+              isPicking={mode === "mark-location"}
+              pickLabel={
+                mode === "mark-location" && pendingTargetScene
+                  ? `Click where the button to ${getSceneTitle(pendingTargetScene)} should appear`
+                  : "Click inside the panorama"
+              }
+              onPickPoint={handlePanoPick}
+              onGoToScene={goToScene}
+            />
+          </div>
+
+          <div className="admin-config-preview-actions-bar-v2">
+            <button
+              type="button"
+              onClick={() => {
+                if (!siteMapImage) {
+                  alert("No site map image found for this site yet.");
+                  return;
+                }
+                setMode("preview");
+                setIsMapModalOpen(true);
+              }}
+              disabled={!selectedScene}
             >
-              {selectedScene?.panorama ? (
-                <div ref={placementViewerRef} className="admin-config-pannellum-placement" />
-              ) : (
-                <div className="admin-config-empty-stage">Upload/select a 360 image</div>
-              )}
-            </div>
+              Mark in Map
+            </button>
+
+            <button
+              type="button"
+              onClick={openMarkLocationPicker}
+              disabled={!selectedScene}
+              className={mode === "mark-location" ? "active" : ""}
+            >
+              Mark Locations
+            </button>
+
+            <button type="button" onClick={openEditName} disabled={!selectedScene}>
+              Edit
+            </button>
+
+            <button type="button" className="danger" onClick={deleteSelectedLocation} disabled={!selectedScene}>
+              Delete
+            </button>
           </div>
         </section>
       </main>
 
-      {placingMapPointFor && (
-        <div className="admin-map-placement-modal-layer">
-          <div className="admin-map-placement-modal">
-            <div className="admin-map-placement-header">
+      {isAddOpen && (
+        <div className="admin-config-modal-backdrop-v2" onMouseDown={() => setIsAddOpen(false)}>
+          <form
+            className="admin-config-add-modal-v2"
+            onMouseDown={(event) => event.stopPropagation()}
+            onSubmit={handleAddLocation}
+          >
+            <div className="admin-config-modal-header-v2">
               <div>
-                <span>Map Location Pin</span>
-                <strong>Click the area map where this 360 location belongs.</strong>
+                <span>Add Location</span>
+                <strong>Upload 360 image</strong>
               </div>
-              <button type="button" onClick={() => setPlacingMapPointFor(null)}>Cancel</button>
+
+              <button type="button" onClick={() => setIsAddOpen(false)}>×</button>
             </div>
 
-            <div className="admin-map-placement-canvas" onClick={handleMiniMapClick}>
-              <img src={site.mapImage} alt={site.name} />
-              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-                <polygon points={area.points} className="admin-config-parent-area" />
-                {scenes.map((scene) => {
-                  const point = scene.mapPoint || scene.minimap;
-                  if (!point) return null;
+            <label className="admin-config-form-field-v2">
+              <span>Location Name</span>
+              <input
+                value={newLocationName}
+                onChange={(event) => setNewLocationName(event.target.value)}
+                placeholder="Example: Filler Entrance"
+              />
+            </label>
+
+            <label className="admin-config-upload-box-v2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={(event) => setNewLocationFile(event.target.files?.[0] || null)}
+              />
+
+              <b>{newLocationFile ? newLocationFile.name : "Choose 360 Image"}</b>
+              <span>JPG, PNG, WEBP panorama image</span>
+            </label>
+
+            <div className="admin-config-modal-actions-v2">
+              <button type="button" onClick={() => setIsAddOpen(false)}>Cancel</button>
+              <button type="submit" className="primary" disabled={isSaving}>
+                {isSaving ? "Adding..." : "Add Image"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {isEditOpen && (
+        <div className="admin-config-modal-backdrop-v2" onMouseDown={() => setIsEditOpen(false)}>
+          <form
+            className="admin-config-add-modal-v2"
+            onMouseDown={(event) => event.stopPropagation()}
+            onSubmit={saveEditedName}
+          >
+            <div className="admin-config-modal-header-v2">
+              <div>
+                <span>Edit Location</span>
+                <strong>Rename 360 image</strong>
+              </div>
+
+              <button type="button" onClick={() => setIsEditOpen(false)}>×</button>
+            </div>
+
+            <label className="admin-config-form-field-v2">
+              <span>Location Name</span>
+              <input
+                value={editLocationName}
+                onChange={(event) => setEditLocationName(event.target.value)}
+                placeholder="Example: Engineering Room"
+                autoFocus
+              />
+            </label>
+
+            <div className="admin-config-modal-actions-v2">
+              <button type="button" onClick={() => setIsEditOpen(false)}>Cancel</button>
+              <button type="submit" className="primary">Save Name</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {isMapModalOpen && (
+        <div className="admin-config-modal-backdrop-v2" onMouseDown={() => setIsMapModalOpen(false)}>
+          <section className="admin-config-map-modal-v2" onMouseDown={(event) => event.stopPropagation()}>
+            <div className="admin-config-modal-header-v2">
+              <div>
+                <span>Mark in Map</span>
+                <strong>{getSceneTitle(selectedScene)}</strong>
+              </div>
+
+              <button type="button" onClick={() => setIsMapModalOpen(false)}>×</button>
+            </div>
+
+            <p className="admin-config-map-help-v2">Click the site map where this 360 location should appear. It saves as a small dot only.</p>
+
+            <div className="admin-config-map-canvas-v2" onClick={handleMapPlacementClick}>
+              <img src={siteMapImage} alt={site?.name || siteId} />
+
+              {area?.points && (
+                <svg className="admin-config-map-area-overlay-v2" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <polygon points={area.points} />
+                </svg>
+              )}
+
+              {scenes.map((scene) => {
+                const point = getSceneMapPoint(scene);
+                if (!point) return null;
+
+                const isSelected = scene.id === selectedScene?.id;
+
+                return (
+                  <span
+                    key={scene.id}
+                    className={`admin-config-site-dot-v2 ${isSelected ? "is-selected" : ""}`}
+                    style={{
+                      left: `${point.x}%`,
+                      top: `${point.y}%`,
+                    }}
+                    title={getSceneTitle(scene)}
+                  />
+                );
+              })}
+            </div>
+          </section>
+        </div>
+      )}
+
+      {isLinkModalOpen && (
+        <div className="admin-config-modal-backdrop-v2" onMouseDown={() => setIsLinkModalOpen(false)}>
+          <section className="admin-config-link-modal-v2" onMouseDown={(event) => event.stopPropagation()}>
+            <div className="admin-config-modal-header-v2">
+              <div>
+                <span>Mark Location</span>
+                <strong>Choose destination image</strong>
+              </div>
+
+              <button type="button" onClick={() => setIsLinkModalOpen(false)}>×</button>
+            </div>
+
+            <div className="admin-config-link-gallery-v2">
+              {scenes
+                .filter((scene) => scene.id !== selectedScene?.id)
+                .map((scene) => {
+                  const image = getSceneImage(scene);
+                  const alreadyMarked = (selectedScene?.hotspots || []).some(
+                    (hotspot) => hotspot?.targetSceneId === scene.id
+                  );
+
                   return (
-                    <g key={scene.id}>
-                      <circle cx={point.x} cy={point.y} r="1.65" className="admin-config-map-dot" />
-                      <text x={point.x + 1.8} y={point.y} className="admin-config-map-label">
-                        {scene.label || scene.title}
-                      </text>
-                    </g>
+                    <button
+                      key={scene.id}
+                      type="button"
+                      className="admin-config-link-target-card-v2"
+                      onClick={() => chooseTargetScene(scene.id)}
+                    >
+                      {image ? <img src={image} alt={getSceneTitle(scene)} /> : <div>No Image</div>}
+                      <strong>{getSceneTitle(scene)}</strong>
+                      {alreadyMarked && <em>Relocate existing</em>}
+                    </button>
                   );
                 })}
-              </svg>
             </div>
-          </div>
+          </section>
         </div>
       )}
     </div>

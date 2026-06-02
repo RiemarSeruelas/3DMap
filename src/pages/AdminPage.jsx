@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   createUniqueId,
   deleteArea,
+  ensureTour,
   getEffectiveFactoryMaps,
   getPercentPoint,
   pointsArrayToString,
@@ -11,6 +12,7 @@ import {
   saveFactoryMaps,
   uploadAdminImage,
 } from "../utils/streetViewAdminStorage";
+import "../styles/admin-map-dot-patch.css";
 
 function createBlankDraft(site) {
   const existingIds = site?.areas?.map((area) => area.id) || [];
@@ -22,6 +24,35 @@ function createBlankDraft(site) {
     points: [],
     original: null,
   };
+}
+
+function getSceneTitle(scene, sceneId = "Location") {
+  return scene?.title || scene?.name || scene?.label || sceneId || "Location";
+}
+
+function getSceneMapPoint(scene) {
+  return scene?.mapPoint || scene?.minimap || null;
+}
+
+function getAdminMapDots(site) {
+  return (site?.areas || []).flatMap((area) => {
+    const tour = ensureTour(area?.tour, area);
+
+    return Object.values(tour?.scenes || {})
+      .filter((scene) => getSceneMapPoint(scene))
+      .map((scene) => {
+        const point = getSceneMapPoint(scene);
+
+        return {
+          areaId: area.id,
+          areaName: area.name,
+          sceneId: scene.id,
+          sceneName: getSceneTitle(scene, scene.id),
+          x: Number(point.x || 50),
+          y: Number(point.y || 50),
+        };
+      });
+  });
 }
 
 function AdminPage() {
@@ -39,6 +70,7 @@ function AdminPage() {
   const site = selectedSiteId ? maps[selectedSiteId] : null;
   const siteOptions = useMemo(() => Object.values(maps), [maps]);
   const draftPolygon = draftArea?.points?.length ? pointsArrayToString(draftArea.points) : "";
+  const adminMapDots = useMemo(() => getAdminMapDots(site), [site]);
 
   useEffect(() => {
     function refresh() {
@@ -307,6 +339,27 @@ function AdminPage() {
                 ))}
               </svg>
 
+              {!isMapping && (
+                <div className="admin-location-dot-layer">
+                  {adminMapDots.map((dot) => (
+                    <button
+                      key={`${dot.areaId}-${dot.sceneId}`}
+                      type="button"
+                      className="admin-location-dot"
+                      style={{
+                        left: `${dot.x}%`,
+                        top: `${dot.y}%`,
+                      }}
+                      title={`${dot.sceneName} (${dot.areaName})`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        navigate(`/admin/config/${site.id}/${dot.areaId}?scene=${encodeURIComponent(dot.sceneId)}`);
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
               {isMapping && (
                 <div className="admin-map-instruction-pill">
                   Click the map to add polygon points. Use the side bar to undo, go back, or save.
@@ -417,7 +470,6 @@ function AdminPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
