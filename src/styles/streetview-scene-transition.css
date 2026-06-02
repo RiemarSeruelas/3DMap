@@ -1,0 +1,167 @@
+/* =========================================================
+   GOOGLE-MAPS-LIKE SCENE SWITCH TRANSITION
+   Import is already added inside src/components/StreetViewer.jsx.
+   ========================================================= */
+
+.street-viewer-shell {
+  background: #020617;
+}
+
+.street-pannellum-stage {
+  transition:
+    filter 360ms ease,
+    transform 360ms ease,
+    opacity 360ms ease;
+  will-change: filter, transform, opacity;
+}
+
+.street-viewer-shell.is-scene-switching .street-pannellum-stage {
+  filter: blur(10px) saturate(0.9);
+  transform: scale(1.045);
+  opacity: 0.76;
+}
+
+.street-scene-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  overflow: hidden;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  background: rgba(2, 6, 23, 0.22);
+  animation: streetSceneOverlayIn 240ms ease both;
+}
+
+.street-scene-transition-overlay.is-entering {
+  animation: streetSceneOverlayOut 520ms ease both;
+}
+
+.street-scene-transition-image {
+  position: absolute;
+  inset: -4%;
+  width: 108%;
+  height: 108%;
+  object-fit: cover;
+  filter: blur(22px) saturate(1.08) brightness(0.82);
+  transform: scale(1.08);
+  opacity: 0.72;
+  animation: streetSceneImageMove 760ms ease both;
+}
+
+.street-scene-transition-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.08), transparent 34%),
+    linear-gradient(135deg, rgba(2, 6, 23, 0.32), rgba(15, 23, 42, 0.58));
+}
+
+.street-scene-transition-card {
+  position: relative;
+  z-index: 2;
+  min-width: min(420px, 82vw);
+  max-width: 82vw;
+  padding: 18px 24px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.86);
+  color: white;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
+  backdrop-filter: blur(16px);
+  transform-origin: center;
+  animation: streetSceneCardIn 420ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.street-scene-transition-card span {
+  display: block;
+  margin-bottom: 2px;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.street-scene-transition-card strong {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: clamp(18px, 2.4vw, 26px);
+  line-height: 1.05;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+}
+
+.street-scene-transition-card i {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 8px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.street-scene-transition-card i::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 38%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #60a5fa, #22c55e);
+  animation: streetSceneProgress 760ms ease-in-out both;
+}
+
+.street-location-pill,
+.street-minimap-card,
+.floating-back-btn,
+.map-only-back-btn {
+  transition:
+    opacity 240ms ease,
+    transform 240ms ease,
+    filter 240ms ease;
+}
+
+.street-viewer-shell.is-scene-switching .street-location-pill,
+.street-viewer-shell.is-scene-switching .street-minimap-card,
+.street-viewer-shell.is-scene-switching .floating-back-btn,
+.street-viewer-shell.is-scene-switching .map-only-back-btn {
+  opacity: 0.45;
+  filter: blur(2px);
+  transform: scale(0.985);
+}
+
+@keyframes streetSceneOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes streetSceneOverlayOut {
+  0% { opacity: 1; }
+  55% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes streetSceneImageMove {
+  0% { transform: scale(1.18); opacity: 0; }
+  25% { opacity: 0.74; }
+  100% { transform: scale(1.03); opacity: 0.2; }
+}
+
+@keyframes streetSceneCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes streetSceneProgress {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(280%); }
+}

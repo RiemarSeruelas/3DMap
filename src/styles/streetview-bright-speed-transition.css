@@ -1,0 +1,144 @@
+/* =========================================================
+   STREET VIEW BRIGHT SPEED TRANSITION PATCH
+   Put this import AFTER your existing viewer/admin CSS imports.
+
+   Goal:
+   - no black / dark fade
+   - use bright white haze + fast zoom blur instead
+   - hide Pannellum loading UI so the blur effect is the loading screen
+   ========================================================= */
+
+/* Never let the transition layer become black/dark. */
+.street-transition-overlay,
+.street-view-transition-overlay,
+.streetview-transition-overlay,
+.street-speed-warp-overlay,
+.street-warp-transition-overlay,
+.viewer-transition-overlay,
+.viewer-speed-warp-overlay,
+.street-blur-transition-overlay,
+.street-transition-curtain,
+.street-transition-layer {
+  background: transparent !important;
+  background-color: transparent !important;
+  mix-blend-mode: normal !important;
+}
+
+/* Replace any dark pseudo-overlays with bright haze. */
+.street-transition-overlay::before,
+.street-transition-overlay::after,
+.street-view-transition-overlay::before,
+.street-view-transition-overlay::after,
+.streetview-transition-overlay::before,
+.streetview-transition-overlay::after,
+.street-speed-warp-overlay::before,
+.street-speed-warp-overlay::after,
+.street-warp-transition-overlay::before,
+.street-warp-transition-overlay::after,
+.viewer-transition-overlay::before,
+.viewer-transition-overlay::after,
+.viewer-speed-warp-overlay::before,
+.viewer-speed-warp-overlay::after,
+.street-blur-transition-overlay::before,
+.street-blur-transition-overlay::after,
+.street-transition-curtain::before,
+.street-transition-curtain::after,
+.street-transition-layer::before,
+.street-transition-layer::after {
+  background: radial-gradient(circle at center,
+    rgba(255,255,255,0.48) 0%,
+    rgba(255,255,255,0.24) 38%,
+    rgba(255,255,255,0.08) 70%,
+    rgba(255,255,255,0) 100%) !important;
+  background-color: transparent !important;
+  opacity: 1 !important;
+}
+
+/* Any transition snapshot/image should blur and zoom, not darken. */
+.street-transition-snapshot,
+.street-view-transition-snapshot,
+.streetview-transition-snapshot,
+.street-speed-warp-snapshot,
+.street-warp-transition-snapshot,
+.viewer-transition-snapshot,
+.viewer-speed-warp-snapshot,
+.street-blur-transition-snapshot,
+.street-transition-image,
+.street-transition-frame {
+  filter: blur(14px) brightness(1.12) saturate(1.05) !important;
+  opacity: 1 !important;
+  transform-origin: center center !important;
+  animation: streetBrightSpeedWarp 520ms cubic-bezier(0.2, 0.82, 0.22, 1) both !important;
+}
+
+/* Keep the actual viewer bright during transition. */
+.street-viewer-shell.is-transitioning,
+.street-viewer-shell.is-moving,
+.street-viewer-shell.is-warping,
+.viewer-page.is-transitioning,
+.clean-viewer-page.is-transitioning {
+  background: #f8fbff !important;
+}
+
+.street-viewer-shell.is-transitioning .street-pannellum-stage,
+.street-viewer-shell.is-moving .street-pannellum-stage,
+.street-viewer-shell.is-warping .street-pannellum-stage {
+  filter: blur(10px) brightness(1.08) saturate(1.03) !important;
+  transform: scale(1.06) !important;
+  transition: filter 180ms ease, transform 180ms ease !important;
+}
+
+/* Hide Pannellum's black/gray loading UI. The transition is the loading state. */
+.pnlm-load-box,
+.pnlm-load-button,
+.pnlm-loading,
+.pnlm-lbar,
+.pnlm-lmsg,
+.pnlm-load-box p,
+.pnlm-load-box div {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Remove dark Pannellum fallback backgrounds where possible. */
+.pnlm-container,
+.pnlm-render-container,
+.pnlm-dragfix,
+.street-pannellum-stage {
+  background-color: #f8fbff !important;
+}
+
+/* Bright speed lines / haze if your transition layer has a streak element. */
+.street-transition-streaks,
+.street-speed-lines,
+.street-warp-lines,
+.viewer-speed-lines {
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,0.34), transparent),
+    repeating-linear-gradient(90deg,
+      rgba(255,255,255,0) 0px,
+      rgba(255,255,255,0) 26px,
+      rgba(255,255,255,0.28) 28px,
+      rgba(255,255,255,0) 52px) !important;
+  opacity: 0.75 !important;
+  mix-blend-mode: screen !important;
+}
+
+@keyframes streetBrightSpeedWarp {
+  0% {
+    opacity: 1;
+    filter: blur(0px) brightness(1) saturate(1);
+    transform: scale(1);
+  }
+  45% {
+    opacity: 0.96;
+    filter: blur(18px) brightness(1.18) saturate(1.08);
+    transform: scale(1.18);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(26px) brightness(1.26) saturate(1.08);
+    transform: scale(1.32);
+  }
+}

@@ -1,6 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { getEffectiveFactoryMapsAsync } from "../utils/streetViewAdminStorage";
+import "../styles/streetview-clean-viewer-map-admin.css";
+
+function getSceneTitle(scene, fallback = "Untitled Location") {
+  return scene?.title || scene?.name || scene?.label || fallback;
+}
+
+function getAlphabeticalFirstScene(area) {
+  const scenes = Object.values(area?.tour?.scenes || {}).filter(Boolean);
+  return scenes.sort((a, b) => getSceneTitle(a, a.id).localeCompare(getSceneTitle(b, b.id), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  }))[0] || null;
+}
 
 function AreaMapPage() {
   const navigate = useNavigate();
@@ -13,7 +26,6 @@ function AreaMapPage() {
 
   useEffect(() => {
     let cancelled = false;
-
     async function loadMaps() {
       const maps = await getEffectiveFactoryMapsAsync({ force: true });
       if (!cancelled) {
@@ -21,12 +33,8 @@ function AreaMapPage() {
         setLoading(false);
       }
     }
-
     loadMaps();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   const site = factoryMaps?.[siteId];
@@ -37,18 +45,16 @@ function AreaMapPage() {
     return "Click a mapped area";
   }, [hoveredArea, selectedArea]);
 
-  if (loading) {
-    return <div className="viewer-error-page">Loading map...</div>;
-  }
-
-  if (!site) {
-    return <Navigate to="/" replace />;
-  }
+  if (loading) return <div className="viewer-error-page">Loading map...</div>;
+  if (!site) return <Navigate to="/" replace />;
 
   function openArea(area) {
     setSelectedArea(area);
+    const firstScene = getAlphabeticalFirstScene(area);
+    const sceneQuery = firstScene?.id ? `?scene=${encodeURIComponent(firstScene.id)}` : "";
+
     setTimeout(() => {
-      navigate(`/viewer/${site.id}/${area.id}`);
+      navigate(`/viewer/${site.id}/${area.id}${sceneQuery}`);
     }, 250);
   }
 
@@ -77,7 +83,6 @@ function AreaMapPage() {
 
           <div className="map-floating-info">
             <button type="button" className="map-back-btn" onClick={() => navigate("/")}>← Back</button>
-
             <div>
               <div className="map-floating-kicker">SELECT AREA</div>
               <div className="map-floating-title">{site.name}</div>

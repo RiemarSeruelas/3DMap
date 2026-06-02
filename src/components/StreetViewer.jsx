@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import "pannellum/build/pannellum.css";
 import "pannellum";
+import "../styles/streetview-clean-viewer-map-admin.css";
 
 const MAP_WORLD_WIDTH = 520;
 const MAP_WORLD_HEIGHT = 292.5;
@@ -12,14 +13,22 @@ function safeScenes(mapData) {
   return mapData?.scenes || {};
 }
 
+function labelForScene(scene, sceneId) {
+  return scene?.title || scene?.name || scene?.label || sceneId || "Location";
+}
+
+function getAlphabeticalSceneList(mapData) {
+  return Object.values(safeScenes(mapData))
+    .filter(Boolean)
+    .sort((a, b) => labelForScene(a, a.id).localeCompare(labelForScene(b, b.id), undefined, {
+      numeric: true,
+      sensitivity: "base",
+    }));
+}
+
 function getFirstSceneId(mapData) {
-  const scenes = safeScenes(mapData);
-  return (
-    mapData?.settings?.firstScene ||
-    mapData?.firstScene ||
-    Object.keys(scenes)[0] ||
-    null
-  );
+  const alphabeticalScenes = getAlphabeticalSceneList(mapData);
+  return alphabeticalScenes[0]?.id || mapData?.settings?.firstScene || mapData?.firstScene || null;
 }
 
 function normalizeNumber(value, fallback = 0) {
@@ -35,9 +44,6 @@ function xyToYawPitch(hotspot = {}) {
   const hasYawPitch = Number.isFinite(Number(hotspot.yaw)) && Number.isFinite(Number(hotspot.pitch));
   const hasXY = Number.isFinite(Number(hotspot.x)) && Number.isFinite(Number(hotspot.y));
 
-  // Admin Mark Locations saves the exact Pannellum yaw/pitch.
-  // Trust this first even if legacy x/y is also present, otherwise the final viewer
-  // can place the arrow somewhere different from the admin preview.
   if (hasYawPitch) {
     return {
       yaw: normalizeNumber(hotspot.yaw, 0),
@@ -48,17 +54,9 @@ function xyToYawPitch(hotspot = {}) {
   if (hasXY) {
     const x = normalizeNumber(hotspot.x, 50);
     const y = normalizeNumber(hotspot.y, 50);
-
     return {
       yaw: (x / 100) * 360 - 180,
       pitch: clamp(90 - (y / 100) * 180, -85, 85),
-    };
-  }
-
-  if (hasYawPitch) {
-    return {
-      yaw: normalizeNumber(hotspot.yaw, 0),
-      pitch: clamp(normalizeNumber(hotspot.pitch, -8), -85, 85),
     };
   }
 
@@ -69,11 +67,6 @@ function getSceneConnections(mapData, sceneId) {
   const scenes = safeScenes(mapData);
   const currentScene = scenes[sceneId];
 
-  // IMPORTANT:
-  // The admin page now saves the latest Mark Locations buttons inside
-  // scene.hotspots. Older data may still have stale entries in tour.connections.
-  // So scene.hotspots must win for the same from -> to pair, otherwise the final
-  // viewer can show an old arrow position even though admin shows the new one.
   const sceneHotspotConnections = (currentScene?.hotspots || [])
     .filter((hotspot) => hotspot?.targetSceneId)
     .map((hotspot) => ({
@@ -82,26 +75,20 @@ function getSceneConnections(mapData, sceneId) {
       to: hotspot.targetSceneId,
       label: hotspot.text || hotspot.label,
       hotspot,
-      source: "scene-hotspot",
+      source: "sceneHotspot",
     }));
 
-  const sceneHotspotTargets = new Set(
-    sceneHotspotConnections.map((connection) => `${connection.from}->${connection.to}`)
-  );
+  const hotspotTargets = new Set(sceneHotspotConnections.map((connection) => connection.to));
 
-  const tourConnections = (mapData?.connections || [])
+  const legacyConnections = (mapData?.connections || [])
     .filter((connection) => connection?.from === sceneId && connection?.to)
-    .filter((connection) => !sceneHotspotTargets.has(`${connection.from}->${connection.to}`))
-    .map((connection) => ({
-      ...connection,
-      source: "tour-connection",
-    }));
+    .filter((connection) => !hotspotTargets.has(connection.to));
 
-  const merged = [...sceneHotspotConnections, ...tourConnections];
+  const merged = [...sceneHotspotConnections, ...legacyConnections];
   const seen = new Set();
 
   return merged.filter((connection) => {
-    const key = `${connection.from}->${connection.to}`;
+    const key = `${connection.from}-${connection.to}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
@@ -113,40 +100,42 @@ function getSceneMapPoint(scene) {
 }
 
 function getMapImage(mapData, site, area) {
-  return (
-    site?.mapImage ||
-    area?.mapImage ||
-    mapData?.mapImage ||
-    mapData?.siteMapImage ||
-    mapData?.areaMapImage ||
-    null
-  );
-}
-
-function labelForScene(scene, sceneId) {
-  return scene?.label || scene?.title || scene?.name || sceneId || "Location";
+  return site?.mapImage || area?.mapImage || mapData?.mapImage || mapData?.siteMapImage || mapData?.areaMapImage || null;
 }
 
 function getMiniMapTransform(activePoint) {
   const x = normalizeNumber(activePoint?.x, 50);
   const y = normalizeNumber(activePoint?.y, 50);
-
   const translateX = MAP_WINDOW_WIDTH / 2 - (x / 100) * MAP_WORLD_WIDTH;
   const translateY = MAP_WINDOW_HEIGHT / 2 - (y / 100) * MAP_WORLD_HEIGHT;
-
   return `translate(${translateX}px, ${translateY}px)`;
+}
+
+function preloadImage(src) {
+  return new Promise((resolve) => {
+    if (!src) return resolve(false);
+    const image = new Image();
+    image.onload = () => resolve(true);
+    image.onerror = () => resolve(false);
+    image.src = src;
+  });
 }
 
 function StreetViewer({ mapData, site, area }) {
   const [searchParams] = useSearchParams();
+  const shellRef = useRef(null);
   const viewerRef = useRef(null);
   const pannellumInstanceRef = useRef(null);
+  const viewMemoryRef = useRef(null);
   const requestedSceneId = searchParams.get("scene");
 
-  const [currentSceneId, setCurrentSceneId] = useState(() => requestedSceneId || getFirstSceneId(mapData));
-
   const scenes = useMemo(() => safeScenes(mapData), [mapData]);
-  const sceneList = useMemo(() => Object.values(scenes || {}).filter(Boolean), [scenes]);
+  const sceneList = useMemo(() => getAlphabeticalSceneList(mapData), [mapData]);
+  const requestedSceneExists = requestedSceneId && scenes[requestedSceneId];
+
+  const [currentSceneId, setCurrentSceneId] = useState(() => requestedSceneId || getFirstSceneId(mapData));
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
   const currentScene = scenes[currentSceneId] || sceneList[0];
   const currentSceneIdResolved = currentScene?.id || currentSceneId;
   const mapImage = getMapImage(mapData, site, area);
@@ -156,54 +145,67 @@ function StreetViewer({ mapData, site, area }) {
     [mapData, currentSceneIdResolved]
   );
 
+  function rememberCurrentView() {
+    const viewer = pannellumInstanceRef.current;
+    if (!viewer) return;
+    viewMemoryRef.current = {
+      yaw: normalizeNumber(viewer.getYaw?.(), 0),
+      pitch: normalizeNumber(viewer.getPitch?.(), 0),
+      hfov: normalizeNumber(viewer.getHfov?.(), normalizeNumber(mapData?.settings?.defaultHfov, 110)),
+    };
+  }
+
+  async function switchScene(nextSceneId) {
+    if (!scenes[nextSceneId] || nextSceneId === currentSceneIdResolved) return;
+    rememberCurrentView();
+    setIsTransitioning(true);
+    await preloadImage(scenes[nextSceneId]?.panorama);
+    setCurrentSceneId(nextSceneId);
+    window.setTimeout(() => setIsTransitioning(false), 360);
+  }
+
   useEffect(() => {
-    if (requestedSceneId && safeScenes(mapData)[requestedSceneId]) {
+    if (requestedSceneExists) {
       setCurrentSceneId(requestedSceneId);
       return;
     }
 
     const firstScene = getFirstSceneId(mapData);
     setCurrentSceneId((previous) => {
-      if (previous && safeScenes(mapData)[previous]) return previous;
+      if (previous && scenes[previous]) return previous;
       return firstScene;
     });
-  }, [mapData, requestedSceneId]);
+  }, [mapData, requestedSceneId, requestedSceneExists, scenes]);
 
   useEffect(() => {
     if (!viewerRef.current || !currentScene?.panorama) return;
-
     const pannellumGlobal = window.pannellum;
-
-    if (!pannellumGlobal?.viewer) {
-      console.error("Pannellum is not available on window.pannellum");
-      return;
-    }
+    if (!pannellumGlobal?.viewer) return;
 
     if (pannellumInstanceRef.current) {
       try {
         pannellumInstanceRef.current.destroy();
-      } catch {
-        // ignore hot reload cleanup errors
-      }
+      } catch {}
       pannellumInstanceRef.current = null;
     }
 
+    const remembered = viewMemoryRef.current;
     const viewer = pannellumGlobal.viewer(viewerRef.current, {
       type: "equirectangular",
       panorama: currentScene.panorama,
       autoLoad: true,
-      showControls: true,
-      showFullscreenCtrl: true,
+      showControls: false,
+      showFullscreenCtrl: false,
       compass: false,
       draggable: true,
       mouseZoom: true,
       keyboardZoom: true,
       hfov: normalizeNumber(
-        currentScene?.view?.initialHfov,
-        normalizeNumber(mapData?.settings?.defaultHfov, 110)
+        remembered?.hfov,
+        normalizeNumber(currentScene?.view?.initialHfov, normalizeNumber(mapData?.settings?.defaultHfov, 110))
       ),
-      yaw: normalizeNumber(currentScene?.view?.initialYaw, 0),
-      pitch: normalizeNumber(currentScene?.view?.initialPitch, 0),
+      yaw: normalizeNumber(remembered?.yaw, normalizeNumber(currentScene?.view?.initialYaw, 0)),
+      pitch: normalizeNumber(remembered?.pitch, normalizeNumber(currentScene?.view?.initialPitch, 0)),
       hotSpots: sceneConnections
         .filter((connection) => scenes[connection.to])
         .map((connection) => {
@@ -223,11 +225,7 @@ function StreetViewer({ mapData, site, area }) {
                 </button>
               `;
             },
-            clickHandlerFunc: () => {
-              if (scenes[connection.to]) {
-                setCurrentSceneId(connection.to);
-              }
-            },
+            clickHandlerFunc: () => switchScene(connection.to),
           };
         }),
     });
@@ -238,13 +236,24 @@ function StreetViewer({ mapData, site, area }) {
       if (pannellumInstanceRef.current) {
         try {
           pannellumInstanceRef.current.destroy();
-        } catch {
-          // ignore cleanup errors
-        }
+        } catch {}
         pannellumInstanceRef.current = null;
       }
     };
   }, [currentSceneIdResolved, currentScene?.panorama, mapData, sceneConnections, scenes]);
+
+  function zoomBy(delta) {
+    const viewer = pannellumInstanceRef.current;
+    if (!viewer?.getHfov || !viewer?.setHfov) return;
+    viewer.setHfov(Math.max(35, Math.min(120, viewer.getHfov() + delta)));
+  }
+
+  function toggleFullscreen() {
+    const target = shellRef.current;
+    if (!target) return;
+    if (document.fullscreenElement) document.exitFullscreen?.();
+    else target.requestFullscreen?.();
+  }
 
   if (!mapData || !currentScene) {
     return (
@@ -258,7 +267,7 @@ function StreetViewer({ mapData, site, area }) {
   const activeMapPoint = getSceneMapPoint(currentScene) || { x: 50, y: 50 };
 
   return (
-    <div className="street-viewer-shell">
+    <div ref={shellRef} className={`street-viewer-shell ${isTransitioning ? "is-speed-transitioning" : ""}`}>
       <div ref={viewerRef} className="street-pannellum-stage" />
 
       <div className="street-location-pill">
@@ -266,52 +275,31 @@ function StreetViewer({ mapData, site, area }) {
         <strong>{labelForScene(currentScene, currentSceneIdResolved)}</strong>
       </div>
 
-      <div className="street-minimap-card">
-        <div className="street-minimap-header">
-          <span>Site Map</span>
-          <strong>{labelForScene(currentScene, currentSceneIdResolved)}</strong>
-        </div>
+      <div className="street-viewer-controls-clean" onClick={(event) => event.stopPropagation()}>
+        <button type="button" onClick={() => zoomBy(-10)} title="Zoom in">+</button>
+        <button type="button" onClick={() => zoomBy(10)} title="Zoom out">−</button>
+        <button type="button" onClick={toggleFullscreen} title="Fullscreen">⛶</button>
+      </div>
 
+      <div className="street-minimap-card raw-only">
         <div className="street-minimap-window">
           {mapImage ? (
-            <div
-              className="street-minimap-world"
-              style={{ transform: getMiniMapTransform(activeMapPoint) }}
-            >
+            <div className="street-minimap-world" style={{ transform: getMiniMapTransform(activeMapPoint) }}>
               <img src={mapImage} alt="Site map" className="street-minimap-image" />
 
-              {area?.points && (
-                <svg className="street-minimap-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                  <polygon points={area.points} className="street-minimap-area" />
-                </svg>
-              )}
-
-              {sceneList.map((scene) => {
-                const point = getSceneMapPoint(scene);
-                if (!point) return null;
-
-                const isActive = scene.id === currentSceneIdResolved;
-
-                return (
-                  <button
-                    key={scene.id}
-                    type="button"
-                    className={`street-minimap-dot ${isActive ? "is-active" : ""}`}
-                    style={{
-                      left: `${normalizeNumber(point.x, 50)}%`,
-                      top: `${normalizeNumber(point.y, 50)}%`,
-                    }}
-                    onClick={() => setCurrentSceneId(scene.id)}
-                    title={labelForScene(scene, scene.id)}
-                  />
-                );
-              })}
+              <button
+                type="button"
+                className="street-minimap-dot is-active"
+                style={{
+                  left: `${normalizeNumber(activeMapPoint.x, 50)}%`,
+                  top: `${normalizeNumber(activeMapPoint.y, 50)}%`,
+                }}
+                title={labelForScene(currentScene, currentSceneIdResolved)}
+              />
             </div>
           ) : (
             <div className="street-minimap-empty">No map image</div>
           )}
-
-          <div className="street-minimap-center-ring" />
         </div>
       </div>
     </div>

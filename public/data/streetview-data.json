@@ -1,5 +1,5 @@
 {
-  "savedAt": "2026-06-02T03:29:07.900Z",
+  "savedAt": "2026-06-02T06:56:51.942Z",
   "factoryMaps": {
     "savoury": {
       "id": "savoury",
@@ -79,421 +79,1505 @@
             "scenes": {
               "dressings-1": {
                 "id": "dressings-1",
-                "title": "Dressings-Mespack4",
-                "name": "Dressings-Mespack4",
-                "label": "Dressings-Mespack4",
+                "title": "Dressings_Mespack3",
+                "name": "Dressings_Mespack3",
+                "label": "Dressings_Mespack3",
                 "panorama": "/uploads/panos/20260601-145309-906-20260602032059-e1a913fb.jpg",
                 "thumbnail": "/uploads/panos/20260601-145309-906-20260602032059-e1a913fb.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 64.84,
+                  "y": 69.28
+                },
+                "minimap": {
+                  "x": 64.84,
+                  "y": 69.28
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145113-656",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145113-656",
+                    "text": "Dressings_Center5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -11.25,
+                    "yaw": 86.6,
+                    "x": 74.06,
+                    "y": 56.25
+                  }
+                ]
               },
               "20260601-145246-743": {
                 "id": "20260601-145246-743",
-                "title": "Dressing_Rideside11",
-                "name": "Dressing_Rideside11",
-                "label": "Dressing_Rideside11",
+                "title": "Dressings_Right10",
+                "name": "Dressings_Right10",
+                "label": "Dressings_Right10",
                 "panorama": "/uploads/panos/20260601-145246-743-20260602032120-84f41f33.jpg",
                 "thumbnail": "/uploads/panos/20260601-145246-743-20260602032120-84f41f33.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 58.37,
+                  "y": 70.14
+                },
+                "minimap": {
+                  "x": 58.37,
+                  "y": 70.14
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145240-894",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145240-894",
+                    "text": "Dressings_Right9",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.51,
+                    "yaw": -178.21,
+                    "x": 0.5,
+                    "y": 60.84
+                  },
+                  {
+                    "id": "to-20260601-145101-880",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145101-880",
+                    "text": "Dressings_Center3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -12.3,
+                    "yaw": -3.32,
+                    "x": 49.08,
+                    "y": 56.83
+                  }
+                ]
               },
               "20260601-145235-167": {
                 "id": "20260601-145235-167",
-                "title": "Dressing-Rideside10",
-                "name": "Dressing-Rideside10",
-                "label": "Dressing-Rideside10",
+                "title": "Dressings_Right8",
+                "name": "Dressings_Right8",
+                "label": "Dressings_Right8",
                 "panorama": "/uploads/panos/20260601-145235-167-20260602032134-dd23242c.jpg",
                 "thumbnail": "/uploads/panos/20260601-145235-167-20260602032134-dd23242c.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 49,
+                  "y": 64.73
+                },
+                "minimap": {
+                  "x": 49,
+                  "y": 64.73
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145229-267",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145229-267",
+                    "text": "Dressings_Right7",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.95,
+                    "yaw": 126.42,
+                    "x": 85.12,
+                    "y": 59.42
+                  }
+                ]
               },
               "20260601-145137-368": {
                 "id": "20260601-145137-368",
-                "title": "20260601_145137_368",
-                "name": "20260601_145137_368",
-                "label": "20260601_145137_368",
+                "title": "Dressings_Center9",
+                "name": "Dressings_Center9",
+                "label": "Dressings_Center9",
                 "panorama": "/uploads/panos/20260601-145137-368-20260602032208-3daef6c9.jpg",
                 "thumbnail": "/uploads/panos/20260601-145137-368-20260602032208-3daef6c9.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
-              },
-              "20260601-145002-544": {
-                "id": "20260601-145002-544",
-                "title": "20260601_145002_544",
-                "name": "20260601_145002_544",
-                "label": "20260601_145002_544",
-                "panorama": "/uploads/panos/20260601-145002-544-20260602032553-e2ae036e.jpg",
-                "thumbnail": "/uploads/panos/20260601-145002-544-20260602032553-e2ae036e.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 60.96,
+                  "y": 88.34
+                },
+                "minimap": {
+                  "x": 60.96,
+                  "y": 88.34
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145143-091",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145143-091",
+                    "text": "Dressings_Center10",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.07,
+                    "yaw": -85.93,
+                    "x": 26.13,
+                    "y": 58.93
+                  },
+                  {
+                    "id": "to-20260601-145131-369",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145131-369",
+                    "text": "Dressings_Center8",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.73,
+                    "yaw": 96.69,
+                    "x": 76.86,
+                    "y": 59.29
+                  },
+                  {
+                    "id": "to-20260601-145148-805",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145148-805",
+                    "text": "Dressings_Right1.5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -25.56,
+                    "yaw": 7.9,
+                    "x": 52.19,
+                    "y": 64.2
+                  }
+                ]
               },
               "20260601-145016-832": {
                 "id": "20260601-145016-832",
-                "title": "20260601_145016_832",
-                "name": "20260601_145016_832",
-                "label": "20260601_145016_832",
+                "title": "Dressings_Opening2",
+                "name": "Dressings_Opening2",
+                "label": "Dressings_Opening2",
                 "panorama": "/uploads/panos/20260601-145016-832-20260602032553-59db9dc5.jpg",
                 "thumbnail": "/uploads/panos/20260601-145016-832-20260602032553-59db9dc5.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 51,
+                  "y": 44.15
+                },
+                "minimap": {
+                  "x": 51,
+                  "y": 44.15
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145346-044",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145346-044",
+                    "text": "Dressings_Right",
+                    "coordinateMode": "pannellum",
+                    "pitch": -13.73,
+                    "yaw": 21.3,
+                    "x": 55.92,
+                    "y": 57.63
+                  },
+                  {
+                    "id": "to-20260601-145024-325",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145024-325",
+                    "text": "Dressings_Opening3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -20.49,
+                    "yaw": -89.51,
+                    "x": 25.14,
+                    "y": 61.38
+                  }
+                ]
               },
               "20260601-145034-782": {
                 "id": "20260601-145034-782",
-                "title": "20260601_145034_782",
-                "name": "20260601_145034_782",
-                "label": "20260601_145034_782",
+                "title": "Dressings_Opening4",
+                "name": "Dressings_Opening4",
+                "label": "Dressings_Opening4",
                 "panorama": "/uploads/panos/20260601-145034-782-20260602032553-981c3972.jpg",
                 "thumbnail": "/uploads/panos/20260601-145034-782-20260602032553-981c3972.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 61.85,
+                  "y": 44.15
+                },
+                "minimap": {
+                  "x": 61.85,
+                  "y": 44.15
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145043-312",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145043-312",
+                    "text": "Dressings_Opening5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -21.45,
+                    "yaw": -76.97,
+                    "x": 28.62,
+                    "y": 61.92
+                  },
+                  {
+                    "id": "to-20260601-145050-083",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145050-083",
+                    "text": "Dressings_Center1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -15.04,
+                    "yaw": 0.35,
+                    "x": 50.1,
+                    "y": 58.36
+                  },
+                  {
+                    "id": "to-20260601-145024-325",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145024-325",
+                    "text": "Dressings_Opening3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -21.15,
+                    "yaw": 93.19,
+                    "x": 75.89,
+                    "y": 61.75
+                  }
+                ]
               },
               "20260601-145010-964": {
                 "id": "20260601-145010-964",
-                "title": "20260601_145010_964",
-                "name": "20260601_145010_964",
-                "label": "20260601_145010_964",
+                "title": "ADressings_Opening1",
+                "name": "ADressings_Opening1",
+                "label": "ADressings_Opening1",
                 "panorama": "/uploads/panos/20260601-145010-964-20260602032554-b3b97251.jpg",
                 "thumbnail": "/uploads/panos/20260601-145010-964-20260602032554-b3b97251.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 49.8,
+                  "y": 44.37
+                },
+                "minimap": {
+                  "x": 49.8,
+                  "y": 44.37
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145016-832",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145016-832",
+                    "text": "Dressings_Opening2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -31.45,
+                    "yaw": -12.57,
+                    "x": 46.51,
+                    "y": 67.47
+                  }
+                ]
               },
               "20260601-145024-325": {
                 "id": "20260601-145024-325",
-                "title": "20260601_145024_325",
-                "name": "20260601_145024_325",
-                "label": "20260601_145024_325",
+                "title": "Dressings_Opening3",
+                "name": "Dressings_Opening3",
+                "label": "Dressings_Opening3",
                 "panorama": "/uploads/panos/20260601-145024-325-20260602032554-43e9e466.jpg",
                 "thumbnail": "/uploads/panos/20260601-145024-325-20260602032554-43e9e466.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 56.37,
+                  "y": 43.94
+                },
+                "minimap": {
+                  "x": 56.37,
+                  "y": 43.94
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145034-782",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145034-782",
+                    "text": "Dressings_Opening4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -18.77,
+                    "yaw": -87.49,
+                    "x": 25.7,
+                    "y": 60.43
+                  },
+                  {
+                    "id": "to-20260601-145016-832",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145016-832",
+                    "text": "Dressings_Opening2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -20.23,
+                    "yaw": 93.74,
+                    "x": 76.04,
+                    "y": 61.24
+                  }
+                ]
               },
               "20260601-145043-312": {
                 "id": "20260601-145043-312",
-                "title": "20260601_145043_312",
-                "name": "20260601_145043_312",
-                "label": "20260601_145043_312",
+                "title": "Dressings_Opening5",
+                "name": "Dressings_Opening5",
+                "label": "Dressings_Opening5",
                 "panorama": "/uploads/panos/20260601-145043-312-20260602032555-d664d30c.jpg",
                 "thumbnail": "/uploads/panos/20260601-145043-312-20260602032555-d664d30c.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 65.14,
+                  "y": 44.8
+                },
+                "minimap": {
+                  "x": 65.14,
+                  "y": 44.8
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145034-782",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145034-782",
+                    "text": "Dressings_Opening4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -23.31,
+                    "yaw": 104.21,
+                    "x": 78.95,
+                    "y": 62.95
+                  }
+                ]
               },
               "20260601-145200-118": {
                 "id": "20260601-145200-118",
-                "title": "20260601_145200_118",
-                "name": "20260601_145200_118",
-                "label": "20260601_145200_118",
+                "title": "Dressings_Right1",
+                "name": "Dressings_Right1",
+                "label": "Dressings_Right1",
                 "panorama": "/uploads/panos/20260601-145200-118-20260602032555-5da2b1d5.jpg",
                 "thumbnail": "/uploads/panos/20260601-145200-118-20260602032555-5da2b1d5.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 60.06,
+                  "y": 79.89
+                },
+                "minimap": {
+                  "x": 60.06,
+                  "y": 79.89
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145119-711",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145119-711",
+                    "text": "Dressings_Center6",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.57,
+                    "yaw": -36.52,
+                    "x": 39.86,
+                    "y": 60.87
+                  },
+                  {
+                    "id": "to-20260601-145148-805",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145148-805",
+                    "text": "Dressings_Right1.5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -22.86,
+                    "yaw": 90.25,
+                    "x": 75.07,
+                    "y": 62.7
+                  }
+                ]
               },
               "20260601-145240-894": {
                 "id": "20260601-145240-894",
-                "title": "20260601_145240_894",
-                "name": "20260601_145240_894",
-                "label": "20260601_145240_894",
+                "title": "Dressings_Right9",
+                "name": "Dressings_Right9",
+                "label": "Dressings_Right9",
                 "panorama": "/uploads/panos/20260601-145240-894-20260602032556-45251720.jpg",
                 "thumbnail": "/uploads/panos/20260601-145240-894-20260602032556-45251720.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 54.48,
+                  "y": 70.58
+                },
+                "minimap": {
+                  "x": 54.48,
+                  "y": 70.58
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145235-167",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145235-167",
+                    "text": "Dressings_Right8",
+                    "coordinateMode": "pannellum",
+                    "pitch": -20.69,
+                    "yaw": 79.51,
+                    "x": 72.09,
+                    "y": 61.49
+                  },
+                  {
+                    "id": "to-20260601-145246-743",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145246-743",
+                    "text": "Dressings_Right10",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.27,
+                    "yaw": -3.13,
+                    "x": 49.13,
+                    "y": 59.04
+                  }
+                ]
               },
               "20260601-145328-254": {
                 "id": "20260601-145328-254",
-                "title": "20260601_145328_254",
-                "name": "20260601_145328_254",
-                "label": "20260601_145328_254",
+                "title": "Dressings_Left1",
+                "name": "Dressings_Left1",
+                "label": "Dressings_Left1",
                 "panorama": "/uploads/panos/20260601-145328-254-20260602032556-1fb668b5.jpg",
                 "thumbnail": "/uploads/panos/20260601-145328-254-20260602032556-1fb668b5.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 64.74,
+                  "y": 50.22
+                },
+                "minimap": {
+                  "x": 64.74,
+                  "y": 50.22
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145056-169",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145056-169",
+                    "text": "Dressings_Center2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -11.31,
+                    "yaw": 177.76,
+                    "x": 99.38,
+                    "y": 56.28
+                  }
+                ]
               },
               "20260601-145217-386": {
                 "id": "20260601-145217-386",
-                "title": "20260601_145217_386",
-                "name": "20260601_145217_386",
-                "label": "20260601_145217_386",
+                "title": "Dressings_Right5",
+                "name": "Dressings_Right5",
+                "label": "Dressings_Right5",
                 "panorama": "/uploads/panos/20260601-145217-386-20260602032557-1416ca09.jpg",
                 "thumbnail": "/uploads/panos/20260601-145217-386-20260602032557-1416ca09.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 49.9,
+                  "y": 77.51
+                },
+                "minimap": {
+                  "x": 49.9,
+                  "y": 77.51
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145211-362",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145211-362",
+                    "text": "Dressings_Right4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -14.31,
+                    "yaw": 80.17,
+                    "x": 72.27,
+                    "y": 57.95
+                  },
+                  {
+                    "id": "to-20260601-145223-334",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145223-334",
+                    "text": "Dressings_Right6",
+                    "coordinateMode": "pannellum",
+                    "pitch": -18.83,
+                    "yaw": 7.69,
+                    "x": 52.14,
+                    "y": 60.46
+                  },
+                  {
+                    "id": "to-20260601-145229-267",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145229-267",
+                    "text": "Dressings_Right7",
+                    "coordinateMode": "pannellum",
+                    "pitch": -17.15,
+                    "yaw": -94.46,
+                    "x": 23.76,
+                    "y": 59.53
+                  }
+                ]
               },
               "20260601-145252-719": {
                 "id": "20260601-145252-719",
-                "title": "20260601_145252_719",
-                "name": "20260601_145252_719",
-                "label": "20260601_145252_719",
+                "title": "Dressings_Left3",
+                "name": "Dressings_Left3",
+                "label": "Dressings_Left3",
                 "panorama": "/uploads/panos/20260601-145252-719-20260602032557-28bb9ef7.jpg",
                 "thumbnail": "/uploads/panos/20260601-145252-719-20260602032557-28bb9ef7.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 64.54,
+                  "y": 83.14
+                },
+                "minimap": {
+                  "x": 64.54,
+                  "y": 83.14
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145125-744",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145125-744",
+                    "text": "Dressings_Center7",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.7,
+                    "yaw": -82.04,
+                    "x": 27.21,
+                    "y": 60.94
+                  }
+                ]
               },
               "20260601-145334-075": {
                 "id": "20260601-145334-075",
-                "title": "20260601_145334_075",
-                "name": "20260601_145334_075",
-                "label": "20260601_145334_075",
+                "title": "Dressings_Left2",
+                "name": "Dressings_Left2",
+                "label": "Dressings_Left2",
                 "panorama": "/uploads/panos/20260601-145334-075-20260602032558-f91802af.jpg",
                 "thumbnail": "/uploads/panos/20260601-145334-075-20260602032558-f91802af.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 64.94,
+                  "y": 50.43
+                },
+                "minimap": {
+                  "x": 64.94,
+                  "y": 50.43
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145101-880",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145101-880",
+                    "text": "Dressings_Center3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -17.28,
+                    "yaw": -126.23,
+                    "x": 14.94,
+                    "y": 59.6
+                  },
+                  {
+                    "id": "to-20260601-145340-278",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145340-278",
+                    "text": "Dressings_Left5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -29.16,
+                    "yaw": 62.79,
+                    "x": 67.44,
+                    "y": 66.2
+                  }
+                ]
               },
               "20260601-145340-278": {
                 "id": "20260601-145340-278",
-                "title": "20260601_145340_278",
-                "name": "20260601_145340_278",
-                "label": "20260601_145340_278",
+                "title": "Dressings_Left5",
+                "name": "Dressings_Left5",
+                "label": "Dressings_Left5",
                 "panorama": "/uploads/panos/20260601-145340-278-20260602032558-a804d00a.jpg",
                 "thumbnail": "/uploads/panos/20260601-145340-278-20260602032558-a804d00a.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 66.33,
+                  "y": 48.48
+                },
+                "minimap": {
+                  "x": 66.33,
+                  "y": 48.48
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145334-075",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145334-075",
+                    "text": "Dressings_Left2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -25.26,
+                    "yaw": -64.21,
+                    "x": 32.16,
+                    "y": 64.03
+                  }
+                ]
               },
               "20260601-145050-083": {
                 "id": "20260601-145050-083",
-                "title": "20260601_145050_083",
-                "name": "20260601_145050_083",
-                "label": "20260601_145050_083",
+                "title": "Dressings_Center1",
+                "name": "Dressings_Center1",
+                "label": "Dressings_Center1",
                 "panorama": "/uploads/panos/20260601-145050-083-20260602032559-1cf86b4d.jpg",
                 "thumbnail": "/uploads/panos/20260601-145050-083-20260602032559-1cf86b4d.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 62.05,
+                  "y": 50.43
+                },
+                "minimap": {
+                  "x": 62.05,
+                  "y": 50.43
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145034-782",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145034-782",
+                    "text": "Dressings_Opening4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -17.15,
+                    "yaw": 179.27,
+                    "x": 99.8,
+                    "y": 59.53
+                  },
+                  {
+                    "id": "to-20260601-145056-169",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145056-169",
+                    "text": "Dressings_Center2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -12.77,
+                    "yaw": 1.1,
+                    "x": 50.31,
+                    "y": 57.09
+                  }
+                ]
               },
               "20260601-145056-169": {
                 "id": "20260601-145056-169",
-                "title": "20260601_145056_169",
-                "name": "20260601_145056_169",
-                "label": "20260601_145056_169",
+                "title": "Dressings_Center2",
+                "name": "Dressings_Center2",
+                "label": "Dressings_Center2",
                 "panorama": "/uploads/panos/20260601-145056-169-20260602032559-16896718.jpg",
                 "thumbnail": "/uploads/panos/20260601-145056-169-20260602032559-16896718.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 62.05,
+                  "y": 55.41
+                },
+                "minimap": {
+                  "x": 62.05,
+                  "y": 55.41
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145050-083",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145050-083",
+                    "text": "Dressings_Center1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -13.22,
+                    "yaw": 178.78,
+                    "x": 99.66,
+                    "y": 57.34
+                  },
+                  {
+                    "id": "to-20260601-145101-880",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145101-880",
+                    "text": "Dressings_Center3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -8.54,
+                    "yaw": 0.83,
+                    "x": 50.23,
+                    "y": 54.74
+                  },
+                  {
+                    "id": "to-20260601-145328-254",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145328-254",
+                    "text": "Dressings_Left1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -8.98,
+                    "yaw": -88.18,
+                    "x": 25.51,
+                    "y": 54.99
+                  },
+                  {
+                    "id": "to-20260601-145334-075",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145334-075",
+                    "text": "Dressings_Left2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -13.55,
+                    "yaw": -128.31,
+                    "x": 14.36,
+                    "y": 57.53
+                  },
+                  {
+                    "id": "to-20260601-145322-120",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145322-120",
+                    "text": "Dressings_Left7",
+                    "coordinateMode": "pannellum",
+                    "pitch": -9.98,
+                    "yaw": -51.29,
+                    "x": 35.75,
+                    "y": 55.54
+                  }
+                ]
               },
               "20260601-145101-880": {
                 "id": "20260601-145101-880",
-                "title": "20260601_145101_880",
-                "name": "20260601_145101_880",
-                "label": "20260601_145101_880",
+                "title": "Dressings_Center3",
+                "name": "Dressings_Center3",
+                "label": "Dressings_Center3",
                 "panorama": "/uploads/panos/20260601-145101-880-20260602032600-9a98409a.jpg",
                 "thumbnail": "/uploads/panos/20260601-145101-880-20260602032600-9a98409a.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 62.15,
+                  "y": 64.51
+                },
+                "minimap": {
+                  "x": 62.15,
+                  "y": 64.51
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145056-169",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145056-169",
+                    "text": "Dressings_Center2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -12.99,
+                    "yaw": 178.36,
+                    "x": 99.54,
+                    "y": 57.22
+                  },
+                  {
+                    "id": "to-20260601-145107-773",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145107-773",
+                    "text": "Dressings_Center4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -11,
+                    "yaw": 0.33,
+                    "x": 50.09,
+                    "y": 56.11
+                  },
+                  {
+                    "id": "to-20260601-145322-120",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145322-120",
+                    "text": "Dressings_Left7",
+                    "coordinateMode": "pannellum",
+                    "pitch": -8.94,
+                    "yaw": -140.17,
+                    "x": 11.06,
+                    "y": 54.97
+                  },
+                  {
+                    "id": "to-20260601-145316-177",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145316-177",
+                    "text": "Dressings_Left9",
+                    "coordinateMode": "pannellum",
+                    "pitch": -14.44,
+                    "yaw": -49.65,
+                    "x": 36.21,
+                    "y": 58.02
+                  },
+                  {
+                    "id": "to-20260601-145246-743",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145246-743",
+                    "text": "Dressings_Right10",
+                    "coordinateMode": "pannellum",
+                    "pitch": -10.76,
+                    "yaw": 40.26,
+                    "x": 61.18,
+                    "y": 55.98
+                  }
+                ]
               },
               "20260601-145154-347": {
                 "id": "20260601-145154-347",
-                "title": "20260601_145154_347",
-                "name": "20260601_145154_347",
-                "label": "20260601_145154_347",
+                "title": "Dressings_Right2",
+                "name": "Dressings_Right2",
+                "label": "Dressings_Right2",
                 "panorama": "/uploads/panos/20260601-145154-347-20260602032600-e2b44d90.jpg",
                 "thumbnail": "/uploads/panos/20260601-145154-347-20260602032600-e2b44d90.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 58.17,
+                  "y": 83.14
+                },
+                "minimap": {
+                  "x": 58.17,
+                  "y": 83.14
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145148-805",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145148-805",
+                    "text": "Dressings_Right1.5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -20.28,
+                    "yaw": -2.27,
+                    "x": 49.37,
+                    "y": 61.27
+                  }
+                ]
               },
               "20260601-145211-362": {
                 "id": "20260601-145211-362",
-                "title": "20260601_145211_362",
-                "name": "20260601_145211_362",
-                "label": "20260601_145211_362",
+                "title": "Dressings_Right4",
+                "name": "Dressings_Right4",
+                "label": "Dressings_Right4",
                 "panorama": "/uploads/panos/20260601-145211-362-20260602032601-92365fc0.jpg",
                 "thumbnail": "/uploads/panos/20260601-145211-362-20260602032601-92365fc0.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 50.4,
+                  "y": 84.22
+                },
+                "minimap": {
+                  "x": 50.4,
+                  "y": 84.22
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145205-573",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145205-573",
+                    "text": "Dressings_Right3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -26.92,
+                    "yaw": 96.38,
+                    "x": 76.77,
+                    "y": 64.96
+                  },
+                  {
+                    "id": "to-20260601-145217-386",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145217-386",
+                    "text": "Dressings_Right5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.79,
+                    "yaw": -8.91,
+                    "x": 47.52,
+                    "y": 59.33
+                  }
+                ]
               },
               "20260601-145113-656": {
                 "id": "20260601-145113-656",
-                "title": "20260601_145113_656",
-                "name": "20260601_145113_656",
-                "label": "20260601_145113_656",
+                "title": "Dressings_Center5",
+                "name": "Dressings_Center5",
+                "label": "Dressings_Center5",
                 "panorama": "/uploads/panos/20260601-145113-656-20260602032601-57027b70.jpg",
                 "thumbnail": "/uploads/panos/20260601-145113-656-20260602032601-57027b70.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 62.05,
+                  "y": 75.56
+                },
+                "minimap": {
+                  "x": 62.05,
+                  "y": 75.56
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145107-773",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145107-773",
+                    "text": "Dressings_Center4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -15.69,
+                    "yaw": 179.07,
+                    "x": 99.74,
+                    "y": 58.72
+                  },
+                  {
+                    "id": "to-20260601-145119-711",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145119-711",
+                    "text": "Dressings_Center6",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.26,
+                    "yaw": -3.34,
+                    "x": 49.07,
+                    "y": 60.7
+                  },
+                  {
+                    "id": "to-dressings-1",
+                    "type": "scene",
+                    "targetSceneId": "dressings-1",
+                    "text": "Dressings_Mespack3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -11.49,
+                    "yaw": -92.68,
+                    "x": 24.26,
+                    "y": 56.38
+                  }
+                ]
               },
               "20260601-145131-369": {
                 "id": "20260601-145131-369",
-                "title": "20260601_145131_369",
-                "name": "20260601_145131_369",
-                "label": "20260601_145131_369",
+                "title": "Dressings_Center8",
+                "name": "Dressings_Center8",
+                "label": "Dressings_Center8",
                 "panorama": "/uploads/panos/20260601-145131-369-20260602032602-9b9d6c73.jpg",
                 "thumbnail": "/uploads/panos/20260601-145131-369-20260602032602-9b9d6c73.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 62.05,
+                  "y": 88.55
+                },
+                "minimap": {
+                  "x": 62.05,
+                  "y": 88.55
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145137-368",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145137-368",
+                    "text": "Dressings_Center9",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.71,
+                    "yaw": -98.26,
+                    "x": 22.71,
+                    "y": 59.28
+                  },
+                  {
+                    "id": "to-20260601-145125-744",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145125-744",
+                    "text": "Dressings_Center7",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.28,
+                    "yaw": -1.66,
+                    "x": 49.54,
+                    "y": 60.71
+                  }
+                ]
               },
               "20260601-145148-805": {
                 "id": "20260601-145148-805",
-                "title": "20260601_145148_805",
-                "name": "20260601_145148_805",
-                "label": "20260601_145148_805",
+                "title": "Dressings_Right1.5",
+                "name": "Dressings_Right1.5",
+                "label": "Dressings_Right1.5",
                 "panorama": "/uploads/panos/20260601-145148-805-20260602032602-358fa394.jpg",
                 "thumbnail": "/uploads/panos/20260601-145148-805-20260602032602-358fa394.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 60.16,
+                  "y": 83.35
+                },
+                "minimap": {
+                  "x": 60.16,
+                  "y": 83.35
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145200-118",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145200-118",
+                    "text": "Dressings_Right1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -23.24,
+                    "yaw": -2.93,
+                    "x": 49.19,
+                    "y": 62.91
+                  },
+                  {
+                    "id": "to-20260601-145137-368",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145137-368",
+                    "text": "Dressings_Center9",
+                    "coordinateMode": "pannellum",
+                    "pitch": -22.54,
+                    "yaw": 178.08,
+                    "x": 99.47,
+                    "y": 62.52
+                  }
+                ]
               },
               "20260601-145223-334": {
                 "id": "20260601-145223-334",
-                "title": "20260601_145223_334",
-                "name": "20260601_145223_334",
-                "label": "20260601_145223_334",
+                "title": "Dressings_Right6",
+                "name": "Dressings_Right6",
+                "label": "Dressings_Right6",
                 "panorama": "/uploads/panos/20260601-145223-334-20260602032602-29c3781c.jpg",
                 "thumbnail": "/uploads/panos/20260601-145223-334-20260602032602-29c3781c.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 52.09,
+                  "y": 77.72
+                },
+                "minimap": {
+                  "x": 52.09,
+                  "y": 77.72
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145217-386",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145217-386",
+                    "text": "Dressings_Right5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.99,
+                    "yaw": 6.91,
+                    "x": 51.92,
+                    "y": 59.44
+                  }
+                ]
               },
               "20260601-145322-120": {
                 "id": "20260601-145322-120",
-                "title": "20260601_145322_120",
-                "name": "20260601_145322_120",
-                "label": "20260601_145322_120",
+                "title": "Dressings_Left7",
+                "name": "Dressings_Left7",
+                "label": "Dressings_Left7",
                 "panorama": "/uploads/panos/20260601-145322-120-20260602032603-cc63ceea.jpg",
                 "thumbnail": "/uploads/panos/20260601-145322-120-20260602032603-cc63ceea.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 64.14,
+                  "y": 59.96
+                },
+                "minimap": {
+                  "x": 64.14,
+                  "y": 59.96
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145101-880",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145101-880",
+                    "text": "Dressings_Center3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -15.96,
+                    "yaw": 137.34,
+                    "x": 88.15,
+                    "y": 58.87
+                  },
+                  {
+                    "id": "to-20260601-145056-169",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145056-169",
+                    "text": "Dressings_Center2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.06,
+                    "yaw": -139.91,
+                    "x": 11.14,
+                    "y": 58.92
+                  }
+                ]
               },
               "20260601-145107-773": {
                 "id": "20260601-145107-773",
-                "title": "20260601_145107_773",
-                "name": "20260601_145107_773",
-                "label": "20260601_145107_773",
+                "title": "Dressings_Center4",
+                "name": "Dressings_Center4",
+                "label": "Dressings_Center4",
                 "panorama": "/uploads/panos/20260601-145107-773-20260602032604-668c6fda.jpg",
                 "thumbnail": "/uploads/panos/20260601-145107-773-20260602032604-668c6fda.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 62.25,
+                  "y": 70.58
+                },
+                "minimap": {
+                  "x": 62.25,
+                  "y": 70.58
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145101-880",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145101-880",
+                    "text": "Dressings_Center3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -14.14,
+                    "yaw": 176.21,
+                    "x": 98.95,
+                    "y": 57.86
+                  },
+                  {
+                    "id": "to-20260601-145113-656",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145113-656",
+                    "text": "Dressings_Center5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -14.05,
+                    "yaw": -4.35,
+                    "x": 48.79,
+                    "y": 57.81
+                  },
+                  {
+                    "id": "to-20260601-145316-177",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145316-177",
+                    "text": "Dressings_Left9",
+                    "coordinateMode": "pannellum",
+                    "pitch": -18.74,
+                    "yaw": -134.69,
+                    "x": 12.59,
+                    "y": 60.41
+                  }
+                ]
               },
               "20260601-145143-091": {
                 "id": "20260601-145143-091",
-                "title": "20260601_145143_091",
-                "name": "20260601_145143_091",
-                "label": "20260601_145143_091",
+                "title": "Dressings_Center10",
+                "name": "Dressings_Center10",
+                "label": "Dressings_Center10",
                 "panorama": "/uploads/panos/20260601-145143-091-20260602032604-c9ecd2e1.jpg",
                 "thumbnail": "/uploads/panos/20260601-145143-091-20260602032604-c9ecd2e1.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 59.86,
+                  "y": 88.12
+                },
+                "minimap": {
+                  "x": 59.86,
+                  "y": 88.12
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145137-368",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145137-368",
+                    "text": "Dressings_Center9",
+                    "coordinateMode": "pannellum",
+                    "pitch": -18.13,
+                    "yaw": 93.74,
+                    "x": 76.04,
+                    "y": 60.07
+                  }
+                ]
               },
               "20260601-145205-573": {
                 "id": "20260601-145205-573",
-                "title": "20260601_145205_573",
-                "name": "20260601_145205_573",
-                "label": "20260601_145205_573",
+                "title": "Dressings_Right3",
+                "name": "Dressings_Right3",
+                "label": "Dressings_Right3",
                 "panorama": "/uploads/panos/20260601-145205-573-20260602032604-026aec9f.jpg",
                 "thumbnail": "/uploads/panos/20260601-145205-573-20260602032604-026aec9f.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 56.67,
+                  "y": 83.35
+                },
+                "minimap": {
+                  "x": 56.67,
+                  "y": 83.35
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145200-118",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145200-118",
+                    "text": "Dressings_Right1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -18.96,
+                    "yaw": 86.69,
+                    "x": 74.08,
+                    "y": 60.53
+                  },
+                  {
+                    "id": "to-20260601-145211-362",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145211-362",
+                    "text": "Dressings_Right4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -23.78,
+                    "yaw": -85.56,
+                    "x": 26.23,
+                    "y": 63.21
+                  }
+                ]
               },
               "20260601-145258-221": {
                 "id": "20260601-145258-221",
-                "title": "20260601_145258_221",
-                "name": "20260601_145258_221",
-                "label": "20260601_145258_221",
+                "title": "Dressings_Mespack1",
+                "name": "Dressings_Mespack1",
+                "label": "Dressings_Mespack1",
                 "panorama": "/uploads/panos/20260601-145258-221-20260602032605-85f36f5a.jpg",
                 "thumbnail": "/uploads/panos/20260601-145258-221-20260602032605-85f36f5a.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 63.94,
+                  "y": 73.17
+                },
+                "minimap": {
+                  "x": 63.94,
+                  "y": 73.17
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145304-125",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145304-125",
+                    "text": "Dressings_Mespack2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -17.1,
+                    "yaw": -94,
+                    "x": 23.89,
+                    "y": 59.5
+                  },
+                  {
+                    "id": "to-20260601-145119-711",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145119-711",
+                    "text": "Dressings_Center6",
+                    "coordinateMode": "pannellum",
+                    "pitch": -10.61,
+                    "yaw": 90.61,
+                    "x": 75.17,
+                    "y": 55.89
+                  }
+                ]
               },
               "20260601-145304-125": {
                 "id": "20260601-145304-125",
-                "title": "20260601_145304_125",
-                "name": "20260601_145304_125",
-                "label": "20260601_145304_125",
+                "title": "Dressings_Mespack2",
+                "name": "Dressings_Mespack2",
+                "label": "Dressings_Mespack2",
                 "panorama": "/uploads/panos/20260601-145304-125-20260602032605-8b461f09.jpg",
                 "thumbnail": "/uploads/panos/20260601-145304-125-20260602032605-8b461f09.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 65.84,
+                  "y": 72.74
+                },
+                "minimap": {
+                  "x": 65.84,
+                  "y": 72.74
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145258-221",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145258-221",
+                    "text": "Dressings_Mespack1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.69,
+                    "yaw": 88.38,
+                    "x": 74.55,
+                    "y": 59.27
+                  }
+                ]
               },
               "20260601-145351-983": {
                 "id": "20260601-145351-983",
-                "title": "20260601_145351_983",
-                "name": "20260601_145351_983",
-                "label": "20260601_145351_983",
+                "title": "Dressings_Opening8",
+                "name": "Dressings_Opening8",
+                "label": "Dressings_Opening8",
                 "panorama": "/uploads/panos/20260601-145351-983-20260602032606-62f455d5.jpg",
                 "thumbnail": "/uploads/panos/20260601-145351-983-20260602032606-62f455d5.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 49.8,
+                  "y": 56.06
+                },
+                "minimap": {
+                  "x": 49.8,
+                  "y": 56.06
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145346-044",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145346-044",
+                    "text": "Dressings_Right",
+                    "coordinateMode": "pannellum",
+                    "pitch": -10.12,
+                    "yaw": 8.9,
+                    "x": 52.47,
+                    "y": 55.62
+                  }
+                ]
               },
               "20260601-145119-711": {
                 "id": "20260601-145119-711",
-                "title": "20260601_145119_711",
-                "name": "20260601_145119_711",
-                "label": "20260601_145119_711",
+                "title": "Dressings_Center6",
+                "name": "Dressings_Center6",
+                "label": "Dressings_Center6",
                 "panorama": "/uploads/panos/20260601-145119-711-20260602032606-5a5b2f67.jpg",
                 "thumbnail": "/uploads/panos/20260601-145119-711-20260602032606-5a5b2f67.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 61.85,
+                  "y": 79.89
+                },
+                "minimap": {
+                  "x": 61.85,
+                  "y": 79.89
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145113-656",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145113-656",
+                    "text": "Dressings_Center5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.87,
+                    "yaw": -179.57,
+                    "x": 0.12,
+                    "y": 59.37
+                  },
+                  {
+                    "id": "to-20260601-145125-744",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145125-744",
+                    "text": "Dressings_Center7",
+                    "coordinateMode": "pannellum",
+                    "pitch": -18.3,
+                    "yaw": -22.01,
+                    "x": 43.89,
+                    "y": 60.17
+                  },
+                  {
+                    "id": "to-20260601-145258-221",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145258-221",
+                    "text": "Dressings_Mespack1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -12.73,
+                    "yaw": -95.28,
+                    "x": 23.53,
+                    "y": 57.07
+                  },
+                  {
+                    "id": "to-20260601-145200-118",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145200-118",
+                    "text": "Dressings_Right1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -18.89,
+                    "yaw": 57.99,
+                    "x": 66.11,
+                    "y": 60.49
+                  }
+                ]
               },
               "20260601-145125-744": {
                 "id": "20260601-145125-744",
-                "title": "20260601_145125_744",
-                "name": "20260601_145125_744",
-                "label": "20260601_145125_744",
+                "title": "Dressings_Center7",
+                "name": "Dressings_Center7",
+                "label": "Dressings_Center7",
                 "panorama": "/uploads/panos/20260601-145125-744-20260602032607-af4ad17a.jpg",
                 "thumbnail": "/uploads/panos/20260601-145125-744-20260602032607-af4ad17a.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 62.05,
+                  "y": 83.57
+                },
+                "minimap": {
+                  "x": 62.05,
+                  "y": 83.57
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145131-369",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145131-369",
+                    "text": "Dressings_Center8",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.32,
+                    "yaw": 8.59,
+                    "x": 52.39,
+                    "y": 60.73
+                  },
+                  {
+                    "id": "to-20260601-145119-711",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145119-711",
+                    "text": "Dressings_Center6",
+                    "coordinateMode": "pannellum",
+                    "pitch": -15.68,
+                    "yaw": 177.48,
+                    "x": 99.3,
+                    "y": 58.71
+                  },
+                  {
+                    "id": "to-20260601-145252-719",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145252-719",
+                    "text": "Dressings_Left3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -18.68,
+                    "yaw": -79.28,
+                    "x": 27.98,
+                    "y": 60.38
+                  }
+                ]
               },
               "20260601-145229-267": {
                 "id": "20260601-145229-267",
-                "title": "20260601_145229_267",
-                "name": "20260601_145229_267",
-                "label": "20260601_145229_267",
+                "title": "Dressings_Right7",
+                "name": "Dressings_Right7",
+                "label": "Dressings_Right7",
                 "panorama": "/uploads/panos/20260601-145229-267-20260602032607-24e9b00b.jpg",
                 "thumbnail": "/uploads/panos/20260601-145229-267-20260602032607-24e9b00b.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 49.1,
+                  "y": 71.66
+                },
+                "minimap": {
+                  "x": 49.1,
+                  "y": 71.66
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145217-386",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145217-386",
+                    "text": "Dressings_Right5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.82,
+                    "yaw": 90.17,
+                    "x": 75.05,
+                    "y": 61.01
+                  },
+                  {
+                    "id": "to-20260601-145235-167",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145235-167",
+                    "text": "Dressings-Right8",
+                    "coordinateMode": "pannellum",
+                    "pitch": -17.48,
+                    "yaw": -50.01,
+                    "x": 36.11,
+                    "y": 59.71
+                  }
+                ]
               },
               "20260601-145316-177": {
                 "id": "20260601-145316-177",
-                "title": "20260601_145316_177",
-                "name": "20260601_145316_177",
-                "label": "20260601_145316_177",
+                "title": "Dressings_Left9",
+                "name": "Dressings_Left9",
+                "label": "Dressings_Left9",
                 "panorama": "/uploads/panos/20260601-145316-177-20260602032608-a1fdd86c.jpg",
                 "thumbnail": "/uploads/panos/20260601-145316-177-20260602032608-a1fdd86c.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 63.84,
+                  "y": 67.11
+                },
+                "minimap": {
+                  "x": 63.84,
+                  "y": 67.11
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145101-880",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145101-880",
+                    "text": "Dressings_Center3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -15.77,
+                    "yaw": 113.94,
+                    "x": 81.65,
+                    "y": 58.76
+                  },
+                  {
+                    "id": "to-20260601-145107-773",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145107-773",
+                    "text": "Dressings_Center4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -10.02,
+                    "yaw": 59.37,
+                    "x": 66.49,
+                    "y": 55.57
+                  }
+                ]
               },
               "20260601-145346-044": {
                 "id": "20260601-145346-044",
-                "title": "Dressing_Opening3",
-                "name": "Dressing_Opening3",
-                "label": "Dressing_Opening3",
+                "title": "Dressings_Right",
+                "name": "Dressings_Right",
+                "label": "Dressings_Right",
                 "panorama": "/uploads/panos/20260601-145346-044-20260602032608-db4068cc.jpg",
                 "thumbnail": "/uploads/panos/20260601-145346-044-20260602032608-db4068cc.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "hotspots": []
+                "mapPoint": {
+                  "x": 49.6,
+                  "y": 48.92
+                },
+                "minimap": {
+                  "x": 49.6,
+                  "y": 48.92
+                },
+                "hotspots": [
+                  {
+                    "id": "to-20260601-145056-169",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145056-169",
+                    "text": "Dressings_Center2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.36,
+                    "yaw": 143.32,
+                    "x": 89.81,
+                    "y": 60.76
+                  },
+                  {
+                    "id": "to-20260601-145351-983",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145351-983",
+                    "text": "Dressings_Opening8",
+                    "coordinateMode": "pannellum",
+                    "pitch": -9.25,
+                    "yaw": -34.78,
+                    "x": 40.34,
+                    "y": 55.14
+                  }
+                ]
               }
             },
             "connections": []

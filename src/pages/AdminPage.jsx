@@ -12,7 +12,7 @@ import {
   saveFactoryMaps,
   uploadAdminImage,
 } from "../utils/streetViewAdminStorage";
-import "../styles/admin.css";
+import "../styles/streetview-clean-viewer-map-admin.css";
 
 function createBlankDraft(site) {
   const existingIds = site?.areas?.map((area) => area.id) || [];
@@ -30,29 +30,22 @@ function getSceneTitle(scene, sceneId = "Location") {
   return scene?.title || scene?.name || scene?.label || sceneId || "Location";
 }
 
-function getSceneMapPoint(scene) {
-  return scene?.mapPoint || scene?.minimap || null;
+function getAlphabeticalFirstScene(area) {
+  const scenes = Object.values(area?.tour?.scenes || {}).filter(Boolean);
+
+  return scenes
+    .sort((a, b) =>
+      getSceneTitle(a, a.id).localeCompare(getSceneTitle(b, b.id), undefined, {
+        numeric: true,
+        sensitivity: "base",
+      })
+    )[0] || null;
 }
 
-function getAdminMapDots(site) {
-  return (site?.areas || []).flatMap((area) => {
-    const tour = ensureTour(area?.tour, area);
-
-    return Object.values(tour?.scenes || {})
-      .filter((scene) => getSceneMapPoint(scene))
-      .map((scene) => {
-        const point = getSceneMapPoint(scene);
-
-        return {
-          areaId: area.id,
-          areaName: area.name,
-          sceneId: scene.id,
-          sceneName: getSceneTitle(scene, scene.id),
-          x: Number(point.x || 50),
-          y: Number(point.y || 50),
-        };
-      });
-  });
+function getAreaConfigUrl(siteId, area) {
+  const firstScene = getAlphabeticalFirstScene(area);
+  const sceneQuery = firstScene?.id ? `?scene=${encodeURIComponent(firstScene.id)}` : "";
+  return `/admin/config/${siteId}/${area.id}${sceneQuery}`;
 }
 
 function AdminPage() {
@@ -70,7 +63,6 @@ function AdminPage() {
   const site = selectedSiteId ? maps[selectedSiteId] : null;
   const siteOptions = useMemo(() => Object.values(maps), [maps]);
   const draftPolygon = draftArea?.points?.length ? pointsArrayToString(draftArea.points) : "";
-  const adminMapDots = useMemo(() => getAdminMapDots(site), [site]);
 
   useEffect(() => {
     function refresh() {
@@ -327,7 +319,7 @@ function AdminPage() {
                     onClick={(event) => {
                       if (isMapping) return;
                       event.stopPropagation();
-                      navigate(`/admin/config/${site.id}/${area.id}`);
+                      navigate(getAreaConfigUrl(site.id, area));
                     }}
                   />
                 ))}
@@ -338,27 +330,6 @@ function AdminPage() {
                   <circle key={`${point.x}-${point.y}-${index}`} cx={point.x} cy={point.y} r="0.85" className="admin-point-dot" />
                 ))}
               </svg>
-
-              {!isMapping && (
-                <div className="admin-location-dot-layer">
-                  {adminMapDots.map((dot) => (
-                    <button
-                      key={`${dot.areaId}-${dot.sceneId}`}
-                      type="button"
-                      className="admin-location-dot"
-                      style={{
-                        left: `${dot.x}%`,
-                        top: `${dot.y}%`,
-                      }}
-                      title={`${dot.sceneName} (${dot.areaName})`}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        navigate(`/admin/config/${site.id}/${dot.areaId}?scene=${encodeURIComponent(dot.sceneId)}`);
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
 
               {isMapping && (
                 <div className="admin-map-instruction-pill">
@@ -402,7 +373,7 @@ function AdminPage() {
                 <article
                   key={area.id}
                   className="mapped-area-card-popup is-config-link"
-                  onClick={() => navigate(`/admin/config/${site.id}/${area.id}`)}
+                  onClick={() => navigate(getAreaConfigUrl(site.id, area))}
                 >
                   <div className="mapped-area-index">{String(index + 1).padStart(2, "0")}</div>
 

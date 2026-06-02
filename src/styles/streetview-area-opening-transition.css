@@ -1,0 +1,108 @@
+/* =========================================================
+   AREA MAP -> 360 PRELOAD TRANSITION
+   Bright Google-Maps-like speed movement while the first panorama loads.
+   No dark screen, no destination preview text.
+   ========================================================= */
+
+.area-page.area-opening {
+  background: #f8fbff !important;
+  overflow: hidden !important;
+}
+
+.area-page.area-opening .simple-map-card {
+  transform-origin: center center !important;
+  animation: streetviewAreaRushForward 820ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  will-change: transform, filter, opacity !important;
+}
+
+.area-page.area-opening .area-map-image,
+.area-page.area-opening .area-map-svg {
+  filter: blur(7px) brightness(1.16) saturate(1.04) !important;
+}
+
+.area-page.area-opening .map-floating-info {
+  opacity: 0 !important;
+  transform: translateY(-10px) scale(0.98) !important;
+  transition: opacity 160ms ease, transform 160ms ease !important;
+}
+
+.area-opening-transition-layer {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 5000 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+.area-opening-haze {
+  position: absolute !important;
+  inset: -12% !important;
+  opacity: 0 !important;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255,255,255,0.72), rgba(255,255,255,0.22) 34%, rgba(255,255,255,0.02) 70%),
+    linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.46), rgba(255,255,255,0.08)) !important;
+  animation: streetviewBrightHaze 820ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.area-opening-speed-lines {
+  position: absolute !important;
+  inset: -20% !important;
+  opacity: 0 !important;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 42px,
+      rgba(255,255,255,0.35) 52px,
+      transparent 70px
+    ) !important;
+  transform: scaleX(1.8) skewX(-10deg) !important;
+  filter: blur(8px) !important;
+  animation: streetviewSpeedLines 820ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.area-opening-soft-focus {
+  position: absolute !important;
+  inset: 0 !important;
+  opacity: 0 !important;
+  backdrop-filter: blur(10px) brightness(1.14) !important;
+  -webkit-backdrop-filter: blur(10px) brightness(1.14) !important;
+  animation: streetviewSoftFocus 820ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes streetviewAreaRushForward {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+    filter: blur(0) brightness(1);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(1.14) translate3d(0, -1.5%, 0);
+    filter: blur(5px) brightness(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.34) translate3d(0, -3.5%, 0);
+    filter: blur(12px) brightness(1.18);
+    opacity: 0.92;
+  }
+}
+
+@keyframes streetviewBrightHaze {
+  0% { opacity: 0; transform: scale(0.96); }
+  40% { opacity: 0.56; }
+  100% { opacity: 0.72; transform: scale(1.08); }
+}
+
+@keyframes streetviewSpeedLines {
+  0% { opacity: 0; transform: translateX(-12%) scaleX(1.35) skewX(-10deg); }
+  32% { opacity: 0.55; }
+  100% { opacity: 0.2; transform: translateX(18%) scaleX(2.25) skewX(-10deg); }
+}
+
+@keyframes streetviewSoftFocus {
+  0% { opacity: 0; }
+  42% { opacity: 0.52; }
+  100% { opacity: 0.68; }
+}

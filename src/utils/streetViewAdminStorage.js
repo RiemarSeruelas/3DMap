@@ -40,7 +40,7 @@ export async function hydrateFactoryMapsFromPublicJson({ force = false } = {}) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryFactoryMaps));
       } catch {
-        // Saved JSON is the source of truth if localStorage is unavailable.
+        // Saved JSON is still the source of truth if localStorage is unavailable.
       }
       window.dispatchEvent(new Event("streetview-admin-storage-updated"));
     }
@@ -59,6 +59,51 @@ function fileToDataUrl(file) {
     reader.onload = () => resolve(reader.result);
     reader.onerror = reject;
     reader.readAsDataURL(file);
+  });
+}
+
+function dataUrlToFile(dataUrl, filename) {
+  const [header, base64] = dataUrl.split(",");
+  const mime = header.match(/data:(.*?);base64/)?.[1] || "image/jpeg";
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  return new File([bytes], filename, { type: mime });
+}
+
+export function createImageThumbnail(file, { maxWidth = 420, quality = 0.78 } = {}) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    image.onload = () => {
+      try {
+        const ratio = image.width ? maxWidth / image.width : 1;
+        const width = Math.max(1, Math.round(Math.min(maxWidth, image.width || maxWidth)));
+        const height = Math.max(1, Math.round((image.height || maxWidth / 2) * Math.min(1, ratio)));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d");
+        context.drawImage(image, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL("image/jpeg", quality);
+        const thumbName = file.name.replace(/\.[^/.]+$/, "") + "-thumb.jpg";
+        resolve(dataUrlToFile(dataUrl, thumbName));
+      } catch {
+        resolve(null);
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(null);
+    };
+
+    image.src = objectUrl;
   });
 }
 
@@ -91,10 +136,26 @@ export async function uploadAdminImage(file, kind = "panos") {
   }
 }
 
-
 export async function uploadAssetFile(file, folder = "panos") {
   const publicPath = await uploadAdminImage(file, folder);
   return { url: publicPath, publicPath, fallback: publicPath?.startsWith("data:image/") || false };
+}
+
+export async function uploadPanoramaAsset(file) {
+  const [full, thumbnailFile] = await Promise.all([
+    uploadAssetFile(file, "panos"),
+    createImageThumbnail(file),
+  ]);
+
+  let thumbnail = null;
+  if (thumbnailFile) {
+    thumbnail = await uploadAssetFile(thumbnailFile, "thumbs");
+  }
+
+  return {
+    panorama: full.publicPath || full.url,
+    thumbnail: thumbnail?.publicPath || thumbnail?.url || full.publicPath || full.url,
+  };
 }
 
 async function syncMapsToDataFile(nextMaps) {
@@ -118,17 +179,9 @@ async function syncMapsToDataFile(nextMaps) {
       } catch {}
     }
 
-    window.dispatchEvent(
-      new CustomEvent("streetview-admin-js-save-status", {
-        detail: { ok: true, savedTo: payload.savedTo },
-      })
-    );
+    window.dispatchEvent(new CustomEvent("streetview-admin-js-save-status", { detail: { ok: true, savedTo: payload.savedTo } }));
   } catch (error) {
-    window.dispatchEvent(
-      new CustomEvent("streetview-admin-js-save-status", {
-        detail: { ok: false, error: error.message },
-      })
-    );
+    window.dispatchEvent(new CustomEvent("streetview-admin-js-save-status", { detail: { ok: false, error: error.message } }));
   }
 }
 
@@ -173,46 +226,27 @@ export function ensureTour(tour, area = {}) {
     id: `${areaSlug}-tour`,
     name: `${area.name || "Area"} Tour`,
     version: 1,
-    settings: {
-      firstScene: null,
-      defaultHfov: 110,
-      mobileHfov: 90,
-    },
+    settings: { firstScene: null, defaultHfov: 110, mobileHfov: 90 },
     scenes: {},
     connections: [],
   };
 }
 
 export function getSavedFactoryMaps() {
-  if (hasUsableMaps(memoryFactoryMaps)) {
-    return normalizeMaps(memoryFactoryMaps);
-  }
-
+  if (hasUsableMaps(memoryFactoryMaps)) return normalizeMaps(memoryFactoryMaps);
   const saved = safeParse(localStorage.getItem(STORAGE_KEY));
   return hasUsableMaps(saved) ? normalizeMaps(saved) : null;
 }
 
 export function saveFactoryMaps(nextMaps) {
   const normalized = normalizeMaps(nextMaps);
-
-  // Always keep an in-memory copy so route changes never become blank,
-  // even if localStorage quota fails because of large Base64 panorama images.
   memoryFactoryMaps = normalized;
-
-  // Persist to public/data/streetview-data.json through the local save server.
-  // Uploaded images should already be file paths, not Base64.
   syncMapsToDataFile(normalized);
-
-  // Best-effort browser save. This may fail when panorama Base64 is too large.
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
   } catch (error) {
-    console.warn(
-      "[streetview-admin] localStorage save failed. The JSON save server is required for persistence.",
-      error
-    );
+    console.warn("[streetview-admin] localStorage save failed. The JSON save server is required for persistence.", error);
   }
-
   window.dispatchEvent(new Event("streetview-admin-storage-updated"));
   return normalized;
 }
@@ -222,7 +256,6 @@ export function resetSavedFactoryMaps() {
   localStorage.removeItem(STORAGE_KEY);
   window.dispatchEvent(new Event("streetview-admin-storage-updated"));
 }
-
 
 export async function getEffectiveFactoryMapsAsync({ force = false } = {}) {
   return hydrateFactoryMapsFromPublicJson({ force });
@@ -257,7 +290,6 @@ export function getEffectiveTour(siteId, areaId) {
 export function saveArea(siteId, area) {
   const maps = getEffectiveFactoryMaps();
   const site = maps[siteId];
-
   if (!site) return maps;
 
   const cleanArea = {
@@ -269,20 +301,14 @@ export function saveArea(siteId, area) {
   };
 
   const exists = site.areas.some((item) => item.id === cleanArea.id);
-
-  site.areas = exists
-    ? site.areas.map((item) => (item.id === cleanArea.id ? cleanArea : item))
-    : [...site.areas, cleanArea];
-
+  site.areas = exists ? site.areas.map((item) => (item.id === cleanArea.id ? cleanArea : item)) : [...site.areas, cleanArea];
   return saveFactoryMaps(maps);
 }
 
 export function deleteArea(siteId, areaId) {
   const maps = getEffectiveFactoryMaps();
   const site = maps[siteId];
-
   if (!site) return maps;
-
   site.areas = site.areas.filter((area) => area.id !== areaId);
   return saveFactoryMaps(maps);
 }
@@ -290,16 +316,10 @@ export function deleteArea(siteId, areaId) {
 export function updateAreaTour(siteId, areaId, nextTour) {
   const maps = getEffectiveFactoryMaps();
   const site = maps[siteId];
-
   if (!site) return maps;
 
   site.areas = site.areas.map((area) =>
-    area.id === areaId
-      ? {
-          ...area,
-          tour: ensureTour(nextTour, area),
-        }
-      : area
+    area.id === areaId ? { ...area, tour: ensureTour(nextTour, area) } : area
   );
 
   return saveFactoryMaps(maps);
@@ -320,12 +340,10 @@ export function createUniqueId(base, existingIds = []) {
   const cleanBase = createId(base || "item");
   let candidate = cleanBase;
   let index = 2;
-
   while (existingIds.includes(candidate)) {
     candidate = `${cleanBase}-${index}`;
     index += 1;
   }
-
   return candidate;
 }
 
@@ -348,9 +366,5 @@ export function getPercentPoint(event, element) {
   const rect = element.getBoundingClientRect();
   const x = ((event.clientX - rect.left) / rect.width) * 100;
   const y = ((event.clientY - rect.top) / rect.height) * 100;
-
-  return {
-    x: Number(Math.max(0, Math.min(100, x)).toFixed(2)),
-    y: Number(Math.max(0, Math.min(100, y)).toFixed(2)),
-  };
+  return { x: Number(Math.max(0, Math.min(100, x)).toFixed(2)), y: Number(Math.max(0, Math.min(100, y)).toFixed(2)) };
 }
