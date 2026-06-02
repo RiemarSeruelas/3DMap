@@ -10,8 +10,7 @@ import {
   uploadAssetFile,
   createUniqueId,
 } from "../utils/streetViewAdminStorage";
-import "../styles/AdminAreaConfigPage.css";
-import "../styles/admin-map-dot-patch.css";
+import "../styles/admin.css";
 
 function getSceneImage(scene) {
   return scene?.panorama || scene?.image || scene?.url || scene?.publicPath || "";
@@ -246,7 +245,7 @@ function AdminAreaConfigPage() {
   const [searchText, setSearchText] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newLocationName, setNewLocationName] = useState("");
-  const [newLocationFile, setNewLocationFile] = useState(null);
+  const [newLocationFiles, setNewLocationFiles] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
 
   const [mode, setMode] = useState("preview");
@@ -324,8 +323,8 @@ function AdminAreaConfigPage() {
   async function handleAddLocation(event) {
     event.preventDefault();
 
-    if (!newLocationFile) {
-      alert("Please choose a 360 image first.");
+    if (!newLocationFiles.length) {
+      alert("Please choose at least one 360 image first.");
       return;
     }
 
@@ -333,43 +332,58 @@ function AdminAreaConfigPage() {
 
     try {
       const existingIds = Object.keys(tour?.scenes || {});
-      const locationTitle =
-        newLocationName.trim() ||
-        newLocationFile.name.replace(/\.[^/.]+$/, "") ||
-        "New Location";
+      const nextScenes = { ...(tour?.scenes || {}) };
+      const uploadedSceneIds = [];
+      const typedBaseName = newLocationName.trim();
 
-      const sceneId = createUniqueId(locationTitle, existingIds);
-      const uploaded = await uploadAssetFile(newLocationFile, "panos");
+      for (const [index, file] of newLocationFiles.entries()) {
+        const fileBaseName = file.name.replace(/\.[^/.]+$/, "") || "New Location";
+        const locationTitle =
+          typedBaseName && newLocationFiles.length === 1
+            ? typedBaseName
+            : typedBaseName
+              ? `${typedBaseName} ${index + 1}`
+              : fileBaseName;
 
-      const nextScene = {
-        id: sceneId,
-        title: locationTitle,
-        name: locationTitle,
-        label: locationTitle,
-        panorama: uploaded.publicPath || uploaded.url,
-        thumbnail: uploaded.publicPath || uploaded.url,
-        mapPoint: null,
-        minimap: null,
-        hotspots: [],
-      };
+        const sceneId = createUniqueId(locationTitle, [...existingIds, ...Object.keys(nextScenes)]);
+        const uploaded = await uploadAssetFile(file, "panos");
+
+        nextScenes[sceneId] = {
+          id: sceneId,
+          title: locationTitle,
+          name: locationTitle,
+          label: locationTitle,
+          panorama: uploaded.publicPath || uploaded.url,
+          thumbnail: uploaded.publicPath || uploaded.url,
+          mapPoint: null,
+          minimap: null,
+          hotspots: [],
+        };
+
+        uploadedSceneIds.push(sceneId);
+      }
+
+      const firstUploadedSceneId = uploadedSceneIds[0] || null;
 
       const nextTour = {
         ...tour,
         settings: {
           ...tour.settings,
-          firstScene: tour?.settings?.firstScene || sceneId,
+          firstScene: tour?.settings?.firstScene || firstUploadedSceneId,
         },
-        scenes: {
-          ...(tour?.scenes || {}),
-          [sceneId]: nextScene,
-        },
+        scenes: nextScenes,
       };
 
-      saveTour(nextTour, "Image added");
-      setSelectedSceneId(sceneId);
+      saveTour(
+        nextTour,
+        newLocationFiles.length === 1
+          ? "Image added"
+          : `${newLocationFiles.length} images added`
+      );
+      setSelectedSceneId(firstUploadedSceneId);
       setIsAddOpen(false);
       setNewLocationName("");
-      setNewLocationFile(null);
+      setNewLocationFiles([]);
       setSearchText("");
 
       if (fileInputRef.current) {
@@ -377,7 +391,7 @@ function AdminAreaConfigPage() {
       }
     } catch (error) {
       console.error(error);
-      alert("Failed to add location image.");
+      alert("Failed to add location image(s).");
     } finally {
       setIsSaving(false);
     }
@@ -499,33 +513,12 @@ function AdminAreaConfigPage() {
           : [...currentHotspots, nextHotspot],
       };
 
-      const nextConnection = {
-        id: `${selectedScene.id}-to-${pendingTargetSceneId}`,
-        from: selectedScene.id,
-        to: pendingTargetSceneId,
-        label: targetScene ? `Go to ${getSceneTitle(targetScene)}` : "Go to location",
-        type: "move",
-        hotspot: {
-          coordinateMode: "pannellum",
-          yaw: point.yaw,
-          pitch: point.pitch,
-          x: legacyPoint.x,
-          y: legacyPoint.y,
-          icon: "↑",
-        },
-      };
-
-      const otherConnections = (tour?.connections || []).filter(
-        (connection) => !(connection?.from === selectedScene.id && connection?.to === pendingTargetSceneId)
-      );
-
       const nextTour = {
         ...tour,
         scenes: {
           ...tour.scenes,
           [selectedScene.id]: nextScene,
         },
-        connections: [...otherConnections, nextConnection],
       };
 
       saveTour(nextTour, existingHotspot ? "Location button relocated" : "Location button added");
@@ -740,7 +733,7 @@ function AdminAreaConfigPage() {
             <div className="admin-config-modal-header-v2">
               <div>
                 <span>Add Location</span>
-                <strong>Upload 360 image</strong>
+                <strong>Upload 360 image(s)</strong>
               </div>
 
               <button type="button" onClick={() => setIsAddOpen(false)}>×</button>
@@ -751,7 +744,7 @@ function AdminAreaConfigPage() {
               <input
                 value={newLocationName}
                 onChange={(event) => setNewLocationName(event.target.value)}
-                placeholder="Example: Filler Entrance"
+                placeholder="Optional. Single upload uses this name; batch uses this as a base name."
               />
             </label>
 
@@ -760,17 +753,26 @@ function AdminAreaConfigPage() {
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                onChange={(event) => setNewLocationFile(event.target.files?.[0] || null)}
+                multiple
+                onChange={(event) => setNewLocationFiles(Array.from(event.target.files || []))}
               />
 
-              <b>{newLocationFile ? newLocationFile.name : "Choose 360 Image"}</b>
-              <span>JPG, PNG, WEBP panorama image</span>
+              <b>
+                {newLocationFiles.length === 0
+                  ? "Choose 360 Image(s)"
+                  : newLocationFiles.length === 1
+                    ? newLocationFiles[0].name
+                    : `${newLocationFiles.length} images selected`}
+              </b>
+              <span>JPG, PNG, WEBP panorama images. You can select multiple files.</span>
             </label>
 
             <div className="admin-config-modal-actions-v2">
               <button type="button" onClick={() => setIsAddOpen(false)}>Cancel</button>
               <button type="submit" className="primary" disabled={isSaving}>
-                {isSaving ? "Adding..." : "Add Image"}
+                {isSaving
+                  ? newLocationFiles.length > 1 ? "Adding batch..." : "Adding..."
+                  : newLocationFiles.length > 1 ? "Add Images" : "Add Image"}
               </button>
             </div>
           </form>

@@ -12,7 +12,7 @@ import {
   saveFactoryMaps,
   uploadAdminImage,
 } from "../utils/streetViewAdminStorage";
-import "../styles/admin-map-dot-patch.css";
+import "../styles/admin.css";
 
 function createBlankDraft(site) {
   const existingIds = site?.areas?.map((area) => area.id) || [];

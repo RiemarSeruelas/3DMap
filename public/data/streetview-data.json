@@ -1,360 +1,24 @@
 {
-  "savedAt": "2026-06-02T01:37:05.776Z",
+  "savedAt": "2026-06-02T03:29:07.900Z",
   "factoryMaps": {
     "savoury": {
       "id": "savoury",
       "name": "Savoury Block",
-      "mapImage": "/maps/savoury-placeholder.jpg",
-      "areas": [
-        {
-          "id": "admin",
-          "name": "Admin",
-          "points": "1.32,4.65 60.53,3.1 61.03,19.62 2.53,20.65",
-          "tour": {
-            "id": "admin-tour",
-            "name": "Admin Tour",
-            "version": 1,
-            "settings": {
-              "firstScene": "heaven",
-              "defaultHfov": 110,
-              "mobileHfov": 90
-            },
-            "scenes": {
-              "heaven": {
-                "id": "heaven",
-                "title": "heaven",
-                "label": "heaven",
-                "panorama": "/uploads/panos/heaven-20260601011114-d56b334b.jpg",
-                "mapPoint": null,
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                },
-                "minimap": null,
-                "hotspots": []
-              },
-              "room": {
-                "id": "room",
-                "title": "room",
-                "label": "room",
-                "panorama": "/uploads/panos/room-20260601011118-245aa13c.jpg",
-                "mapPoint": null,
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                },
-                "minimap": null,
-                "hotspots": []
-              },
-              "drone": {
-                "id": "drone",
-                "title": "drone",
-                "label": "drone",
-                "panorama": "/uploads/panos/drone-20260601011121-c4d6f6de.jpg",
-                "mapPoint": null,
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                },
-                "minimap": null,
-                "hotspots": []
-              },
-              "20260601-095933-328": {
-                "id": "20260601-095933-328",
-                "title": "20260601_095933_328",
-                "label": "20260601_095933_328",
-                "panorama": "/uploads/panos/20260601-095933-328-20260601020313-6f8e6fd6.jpg",
-                "mapPoint": null,
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                },
-                "minimap": null,
-                "hotspots": []
-              }
-            },
-            "connections": []
-          }
-        },
-        {
-          "id": "logistics",
-          "name": "Logistics",
-          "points": "66.3,83.99 83.3,84.17 83.3,89.16 66.9,89.16",
-          "tour": {
-            "id": "logistics-tour",
-            "name": "Logistics Tour",
-            "version": 1,
-            "settings": {
-              "firstScene": "20260601-095933-328-2",
-              "defaultHfov": 110,
-              "mobileHfov": 90
-            },
-            "scenes": {
-              "20260601-095933-328-2": {
-                "id": "20260601-095933-328-2",
-                "title": "Engineering Room",
-                "label": "20260601_095933_328",
-                "panorama": "/uploads/panos/20260601-095933-328-20260601021858-6f8e6fd6.jpg",
-                "mapPoint": {
-                  "x": 76.79,
-                  "y": 87.04
-                },
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                },
-                "minimap": {
-                  "x": 76.79,
-                  "y": 87.04
-                },
-                "hotspots": [
-                  {
-                    "id": "to-20260601-101105-674",
-                    "type": "scene",
-                    "targetSceneId": "20260601-101105-674",
-                    "text": "20260601_101105_674",
-                    "coordinateMode": "pannellum",
-                    "pitch": 1.57,
-                    "yaw": -29.94,
-                    "x": 41.68,
-                    "y": 49.13
-                  }
-                ]
-              },
-              "20260601-101105-674": {
-                "id": "20260601-101105-674",
-                "title": "20260601_101105_674",
-                "label": "20260601_101105_674",
-                "panorama": "/uploads/panos/20260601-101105-674-20260601021910-a919b82e.jpg",
-                "mapPoint": {
-                  "x": 52.09,
-                  "y": 54.12
-                },
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                },
-                "minimap": {
-                  "x": 52.09,
-                  "y": 54.12
-                },
-                "hotspots": [
-                  {
-                    "id": "to-20260601-101033-074",
-                    "type": "scene",
-                    "targetSceneId": "20260601-101033-074",
-                    "text": "20260601_101033_074",
-                    "coordinateMode": "pannellum",
-                    "pitch": 11.64,
-                    "yaw": -24.33,
-                    "x": 43.24,
-                    "y": 43.53
-                  },
-                  {
-                    "id": "to-20260601-095933-328-2",
-                    "type": "scene",
-                    "targetSceneId": "20260601-095933-328-2",
-                    "text": "Engineering Room",
-                    "coordinateMode": "pannellum",
-                    "pitch": -1.62,
-                    "yaw": 152.77,
-                    "x": 92.44,
-                    "y": 50.9
-                  }
-                ]
-              },
-              "20260601-101050-675": {
-                "id": "20260601-101050-675",
-                "title": "20260601_101050_675",
-                "label": "20260601_101050_675",
-                "panorama": "/uploads/panos/20260601-101050-675-20260601021913-3fdca79d.jpg",
-                "mapPoint": null,
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                },
-                "minimap": null,
-                "hotspots": []
-              },
-              "20260601-101043-578": {
-                "id": "20260601-101043-578",
-                "title": "20260601_101043_578",
-                "label": "20260601_101043_578",
-                "panorama": "/uploads/panos/20260601-101043-578-20260601021917-dd825b2a.jpg",
-                "mapPoint": null,
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                },
-                "minimap": null,
-                "hotspots": []
-              },
-              "20260601-101033-074": {
-                "id": "20260601-101033-074",
-                "title": "20260601_101033_074",
-                "label": "20260601_101033_074",
-                "panorama": "/uploads/panos/20260601-101033-074-20260601021919-0b367af8.jpg",
-                "mapPoint": {
-                  "x": 11.85,
-                  "y": 38.09
-                },
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                },
-                "minimap": {
-                  "x": 11.85,
-                  "y": 38.09
-                },
-                "hotspots": [
-                  {
-                    "id": "to-20260601-101105-674",
-                    "type": "scene",
-                    "targetSceneId": "20260601-101105-674",
-                    "text": "20260601_101105_674",
-                    "coordinateMode": "pannellum",
-                    "pitch": -1.14,
-                    "yaw": 91.71,
-                    "x": 75.47,
-                    "y": 50.63
-                  }
-                ]
-              }
-            },
-            "connections": [
-              {
-                "id": "20260601-095933-328-2-to-20260601-101105-674",
-                "from": "20260601-095933-328-2",
-                "to": "20260601-101105-674",
-                "label": "Go to 20260601_101105_674",
-                "type": "move",
-                "hotspot": {
-                  "coordinateMode": "pannellum",
-                  "yaw": -29.94,
-                  "pitch": 1.57,
-                  "x": 41.68,
-                  "y": 49.13,
-                  "icon": "↑"
-                }
-              },
-              {
-                "id": "20260601-101105-674-to-20260601-101033-074",
-                "from": "20260601-101105-674",
-                "to": "20260601-101033-074",
-                "label": "Go to 20260601_101033_074",
-                "type": "move",
-                "hotspot": {
-                  "coordinateMode": "pannellum",
-                  "yaw": -24.33,
-                  "pitch": 11.64,
-                  "x": 43.24,
-                  "y": 43.53,
-                  "icon": "↑"
-                }
-              },
-              {
-                "id": "20260601-101105-674-to-20260601-095933-328-2",
-                "from": "20260601-101105-674",
-                "to": "20260601-095933-328-2",
-                "label": "Go to Engineering Room",
-                "type": "move",
-                "hotspot": {
-                  "coordinateMode": "pannellum",
-                  "yaw": 152.77,
-                  "pitch": -1.62,
-                  "x": 92.44,
-                  "y": 50.9,
-                  "icon": "↑"
-                }
-              },
-              {
-                "id": "20260601-101033-074-to-20260601-101105-674",
-                "from": "20260601-101033-074",
-                "to": "20260601-101105-674",
-                "label": "Go to 20260601_101105_674",
-                "type": "move",
-                "hotspot": {
-                  "coordinateMode": "pannellum",
-                  "yaw": 91.71,
-                  "pitch": -1.14,
-                  "x": 75.47,
-                  "y": 50.63,
-                  "icon": "↑"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "id": "engineering-room",
-          "name": "Engineering Room",
-          "points": "2.9,26.75 16.6,26.58 18.63,58.84 5.12,59.01",
-          "tour": {
-            "id": "engineering-room-tour",
-            "name": "Engineering Room Tour",
-            "version": 1,
-            "settings": {
-              "firstScene": "savoury-1",
-              "defaultHfov": 110,
-              "mobileHfov": 90
-            },
-            "scenes": {
-              "savoury-1": {
-                "id": "savoury-1",
-                "title": "Savoury-1",
-                "label": "Savoury-1",
-                "panorama": "/uploads/panos/20260601-145328-254-20260602000430-1fb668b5.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                },
-                "hotspots": []
-              },
-              "savoury-walking": {
-                "id": "savoury-walking",
-                "title": "Savoury-Walking",
-                "label": "Savoury-Walking",
-                "panorama": "/uploads/panos/20260601-145016-832-20260602000452-59db9dc5.jpg",
-                "mapPoint": null,
-                "minimap": null,
-                "view": {
-                  "initialYaw": 0,
-                  "initialPitch": 0,
-                  "initialHfov": 110
-                },
-                "hotspots": []
-              }
-            },
-            "connections": [],
-            "mapImage": "/maps/savoury-placeholder.jpg"
-          }
-        }
-      ]
+      "mapImage": "/uploads/maps/chatgpt-image-jun-2-2026-10-37-40-am-20260602024432-0293c30e.png",
+      "areas": []
     },
     "dressings": {
       "id": "dressings",
       "name": "Dressings",
-      "mapImage": "/maps/dressings-placeholder.jpg",
+      "mapImage": "/uploads/maps/chatgpt-image-jun-2-2026-11-18-32-am-20260602031910-68e988f6.png",
       "areas": [
         {
-          "id": "production",
-          "name": "Production",
-          "points": "64,2.38 63.03,71.19 93.44,72.05 97.39,2.38",
+          "id": "r-d-office",
+          "name": "R&D Office",
+          "points": "8.3,2.9 21.91,3.07 22.1,14.22 8.2,15.25",
           "tour": {
-            "id": "production-tour",
-            "name": "Production Tour",
+            "id": "r-d-office-tour",
+            "name": "R&D Office Tour",
             "version": 1,
             "settings": {
               "firstScene": null,
@@ -362,8 +26,477 @@
               "mobileHfov": 90
             },
             "scenes": {},
-            "connections": [],
-            "mapImage": "/maps/dressings-placeholder.jpg"
+            "connections": []
+          }
+        },
+        {
+          "id": "locker",
+          "name": "Locker",
+          "points": "12.36,15.42 21.81,14.91 21.91,23.66 12.55,23.83",
+          "tour": {
+            "id": "locker-tour",
+            "name": "Locker Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": null,
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {},
+            "connections": []
+          }
+        },
+        {
+          "id": "r-d-lab",
+          "name": "R&D Lab",
+          "points": "12.55,24.35 22.88,24.35 22.97,40.65 12.36,40.82",
+          "tour": {
+            "id": "r-d-lab-tour",
+            "name": "R&D Lab Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": null,
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {},
+            "connections": []
+          }
+        },
+        {
+          "id": "dressings",
+          "name": "Dressings",
+          "points": "31.18,44.08 90.83,43.74 91.22,95.22 30.98,95.73",
+          "tour": {
+            "id": "dressings-tour",
+            "name": "Dressings Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": "dressings-1",
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {
+              "dressings-1": {
+                "id": "dressings-1",
+                "title": "Dressings-Mespack4",
+                "name": "Dressings-Mespack4",
+                "label": "Dressings-Mespack4",
+                "panorama": "/uploads/panos/20260601-145309-906-20260602032059-e1a913fb.jpg",
+                "thumbnail": "/uploads/panos/20260601-145309-906-20260602032059-e1a913fb.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145246-743": {
+                "id": "20260601-145246-743",
+                "title": "Dressing_Rideside11",
+                "name": "Dressing_Rideside11",
+                "label": "Dressing_Rideside11",
+                "panorama": "/uploads/panos/20260601-145246-743-20260602032120-84f41f33.jpg",
+                "thumbnail": "/uploads/panos/20260601-145246-743-20260602032120-84f41f33.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145235-167": {
+                "id": "20260601-145235-167",
+                "title": "Dressing-Rideside10",
+                "name": "Dressing-Rideside10",
+                "label": "Dressing-Rideside10",
+                "panorama": "/uploads/panos/20260601-145235-167-20260602032134-dd23242c.jpg",
+                "thumbnail": "/uploads/panos/20260601-145235-167-20260602032134-dd23242c.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145137-368": {
+                "id": "20260601-145137-368",
+                "title": "20260601_145137_368",
+                "name": "20260601_145137_368",
+                "label": "20260601_145137_368",
+                "panorama": "/uploads/panos/20260601-145137-368-20260602032208-3daef6c9.jpg",
+                "thumbnail": "/uploads/panos/20260601-145137-368-20260602032208-3daef6c9.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145002-544": {
+                "id": "20260601-145002-544",
+                "title": "20260601_145002_544",
+                "name": "20260601_145002_544",
+                "label": "20260601_145002_544",
+                "panorama": "/uploads/panos/20260601-145002-544-20260602032553-e2ae036e.jpg",
+                "thumbnail": "/uploads/panos/20260601-145002-544-20260602032553-e2ae036e.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145016-832": {
+                "id": "20260601-145016-832",
+                "title": "20260601_145016_832",
+                "name": "20260601_145016_832",
+                "label": "20260601_145016_832",
+                "panorama": "/uploads/panos/20260601-145016-832-20260602032553-59db9dc5.jpg",
+                "thumbnail": "/uploads/panos/20260601-145016-832-20260602032553-59db9dc5.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145034-782": {
+                "id": "20260601-145034-782",
+                "title": "20260601_145034_782",
+                "name": "20260601_145034_782",
+                "label": "20260601_145034_782",
+                "panorama": "/uploads/panos/20260601-145034-782-20260602032553-981c3972.jpg",
+                "thumbnail": "/uploads/panos/20260601-145034-782-20260602032553-981c3972.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145010-964": {
+                "id": "20260601-145010-964",
+                "title": "20260601_145010_964",
+                "name": "20260601_145010_964",
+                "label": "20260601_145010_964",
+                "panorama": "/uploads/panos/20260601-145010-964-20260602032554-b3b97251.jpg",
+                "thumbnail": "/uploads/panos/20260601-145010-964-20260602032554-b3b97251.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145024-325": {
+                "id": "20260601-145024-325",
+                "title": "20260601_145024_325",
+                "name": "20260601_145024_325",
+                "label": "20260601_145024_325",
+                "panorama": "/uploads/panos/20260601-145024-325-20260602032554-43e9e466.jpg",
+                "thumbnail": "/uploads/panos/20260601-145024-325-20260602032554-43e9e466.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145043-312": {
+                "id": "20260601-145043-312",
+                "title": "20260601_145043_312",
+                "name": "20260601_145043_312",
+                "label": "20260601_145043_312",
+                "panorama": "/uploads/panos/20260601-145043-312-20260602032555-d664d30c.jpg",
+                "thumbnail": "/uploads/panos/20260601-145043-312-20260602032555-d664d30c.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145200-118": {
+                "id": "20260601-145200-118",
+                "title": "20260601_145200_118",
+                "name": "20260601_145200_118",
+                "label": "20260601_145200_118",
+                "panorama": "/uploads/panos/20260601-145200-118-20260602032555-5da2b1d5.jpg",
+                "thumbnail": "/uploads/panos/20260601-145200-118-20260602032555-5da2b1d5.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145240-894": {
+                "id": "20260601-145240-894",
+                "title": "20260601_145240_894",
+                "name": "20260601_145240_894",
+                "label": "20260601_145240_894",
+                "panorama": "/uploads/panos/20260601-145240-894-20260602032556-45251720.jpg",
+                "thumbnail": "/uploads/panos/20260601-145240-894-20260602032556-45251720.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145328-254": {
+                "id": "20260601-145328-254",
+                "title": "20260601_145328_254",
+                "name": "20260601_145328_254",
+                "label": "20260601_145328_254",
+                "panorama": "/uploads/panos/20260601-145328-254-20260602032556-1fb668b5.jpg",
+                "thumbnail": "/uploads/panos/20260601-145328-254-20260602032556-1fb668b5.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145217-386": {
+                "id": "20260601-145217-386",
+                "title": "20260601_145217_386",
+                "name": "20260601_145217_386",
+                "label": "20260601_145217_386",
+                "panorama": "/uploads/panos/20260601-145217-386-20260602032557-1416ca09.jpg",
+                "thumbnail": "/uploads/panos/20260601-145217-386-20260602032557-1416ca09.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145252-719": {
+                "id": "20260601-145252-719",
+                "title": "20260601_145252_719",
+                "name": "20260601_145252_719",
+                "label": "20260601_145252_719",
+                "panorama": "/uploads/panos/20260601-145252-719-20260602032557-28bb9ef7.jpg",
+                "thumbnail": "/uploads/panos/20260601-145252-719-20260602032557-28bb9ef7.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145334-075": {
+                "id": "20260601-145334-075",
+                "title": "20260601_145334_075",
+                "name": "20260601_145334_075",
+                "label": "20260601_145334_075",
+                "panorama": "/uploads/panos/20260601-145334-075-20260602032558-f91802af.jpg",
+                "thumbnail": "/uploads/panos/20260601-145334-075-20260602032558-f91802af.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145340-278": {
+                "id": "20260601-145340-278",
+                "title": "20260601_145340_278",
+                "name": "20260601_145340_278",
+                "label": "20260601_145340_278",
+                "panorama": "/uploads/panos/20260601-145340-278-20260602032558-a804d00a.jpg",
+                "thumbnail": "/uploads/panos/20260601-145340-278-20260602032558-a804d00a.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145050-083": {
+                "id": "20260601-145050-083",
+                "title": "20260601_145050_083",
+                "name": "20260601_145050_083",
+                "label": "20260601_145050_083",
+                "panorama": "/uploads/panos/20260601-145050-083-20260602032559-1cf86b4d.jpg",
+                "thumbnail": "/uploads/panos/20260601-145050-083-20260602032559-1cf86b4d.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145056-169": {
+                "id": "20260601-145056-169",
+                "title": "20260601_145056_169",
+                "name": "20260601_145056_169",
+                "label": "20260601_145056_169",
+                "panorama": "/uploads/panos/20260601-145056-169-20260602032559-16896718.jpg",
+                "thumbnail": "/uploads/panos/20260601-145056-169-20260602032559-16896718.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145101-880": {
+                "id": "20260601-145101-880",
+                "title": "20260601_145101_880",
+                "name": "20260601_145101_880",
+                "label": "20260601_145101_880",
+                "panorama": "/uploads/panos/20260601-145101-880-20260602032600-9a98409a.jpg",
+                "thumbnail": "/uploads/panos/20260601-145101-880-20260602032600-9a98409a.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145154-347": {
+                "id": "20260601-145154-347",
+                "title": "20260601_145154_347",
+                "name": "20260601_145154_347",
+                "label": "20260601_145154_347",
+                "panorama": "/uploads/panos/20260601-145154-347-20260602032600-e2b44d90.jpg",
+                "thumbnail": "/uploads/panos/20260601-145154-347-20260602032600-e2b44d90.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145211-362": {
+                "id": "20260601-145211-362",
+                "title": "20260601_145211_362",
+                "name": "20260601_145211_362",
+                "label": "20260601_145211_362",
+                "panorama": "/uploads/panos/20260601-145211-362-20260602032601-92365fc0.jpg",
+                "thumbnail": "/uploads/panos/20260601-145211-362-20260602032601-92365fc0.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145113-656": {
+                "id": "20260601-145113-656",
+                "title": "20260601_145113_656",
+                "name": "20260601_145113_656",
+                "label": "20260601_145113_656",
+                "panorama": "/uploads/panos/20260601-145113-656-20260602032601-57027b70.jpg",
+                "thumbnail": "/uploads/panos/20260601-145113-656-20260602032601-57027b70.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145131-369": {
+                "id": "20260601-145131-369",
+                "title": "20260601_145131_369",
+                "name": "20260601_145131_369",
+                "label": "20260601_145131_369",
+                "panorama": "/uploads/panos/20260601-145131-369-20260602032602-9b9d6c73.jpg",
+                "thumbnail": "/uploads/panos/20260601-145131-369-20260602032602-9b9d6c73.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145148-805": {
+                "id": "20260601-145148-805",
+                "title": "20260601_145148_805",
+                "name": "20260601_145148_805",
+                "label": "20260601_145148_805",
+                "panorama": "/uploads/panos/20260601-145148-805-20260602032602-358fa394.jpg",
+                "thumbnail": "/uploads/panos/20260601-145148-805-20260602032602-358fa394.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145223-334": {
+                "id": "20260601-145223-334",
+                "title": "20260601_145223_334",
+                "name": "20260601_145223_334",
+                "label": "20260601_145223_334",
+                "panorama": "/uploads/panos/20260601-145223-334-20260602032602-29c3781c.jpg",
+                "thumbnail": "/uploads/panos/20260601-145223-334-20260602032602-29c3781c.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145322-120": {
+                "id": "20260601-145322-120",
+                "title": "20260601_145322_120",
+                "name": "20260601_145322_120",
+                "label": "20260601_145322_120",
+                "panorama": "/uploads/panos/20260601-145322-120-20260602032603-cc63ceea.jpg",
+                "thumbnail": "/uploads/panos/20260601-145322-120-20260602032603-cc63ceea.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145107-773": {
+                "id": "20260601-145107-773",
+                "title": "20260601_145107_773",
+                "name": "20260601_145107_773",
+                "label": "20260601_145107_773",
+                "panorama": "/uploads/panos/20260601-145107-773-20260602032604-668c6fda.jpg",
+                "thumbnail": "/uploads/panos/20260601-145107-773-20260602032604-668c6fda.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145143-091": {
+                "id": "20260601-145143-091",
+                "title": "20260601_145143_091",
+                "name": "20260601_145143_091",
+                "label": "20260601_145143_091",
+                "panorama": "/uploads/panos/20260601-145143-091-20260602032604-c9ecd2e1.jpg",
+                "thumbnail": "/uploads/panos/20260601-145143-091-20260602032604-c9ecd2e1.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145205-573": {
+                "id": "20260601-145205-573",
+                "title": "20260601_145205_573",
+                "name": "20260601_145205_573",
+                "label": "20260601_145205_573",
+                "panorama": "/uploads/panos/20260601-145205-573-20260602032604-026aec9f.jpg",
+                "thumbnail": "/uploads/panos/20260601-145205-573-20260602032604-026aec9f.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145258-221": {
+                "id": "20260601-145258-221",
+                "title": "20260601_145258_221",
+                "name": "20260601_145258_221",
+                "label": "20260601_145258_221",
+                "panorama": "/uploads/panos/20260601-145258-221-20260602032605-85f36f5a.jpg",
+                "thumbnail": "/uploads/panos/20260601-145258-221-20260602032605-85f36f5a.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145304-125": {
+                "id": "20260601-145304-125",
+                "title": "20260601_145304_125",
+                "name": "20260601_145304_125",
+                "label": "20260601_145304_125",
+                "panorama": "/uploads/panos/20260601-145304-125-20260602032605-8b461f09.jpg",
+                "thumbnail": "/uploads/panos/20260601-145304-125-20260602032605-8b461f09.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145351-983": {
+                "id": "20260601-145351-983",
+                "title": "20260601_145351_983",
+                "name": "20260601_145351_983",
+                "label": "20260601_145351_983",
+                "panorama": "/uploads/panos/20260601-145351-983-20260602032606-62f455d5.jpg",
+                "thumbnail": "/uploads/panos/20260601-145351-983-20260602032606-62f455d5.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145119-711": {
+                "id": "20260601-145119-711",
+                "title": "20260601_145119_711",
+                "name": "20260601_145119_711",
+                "label": "20260601_145119_711",
+                "panorama": "/uploads/panos/20260601-145119-711-20260602032606-5a5b2f67.jpg",
+                "thumbnail": "/uploads/panos/20260601-145119-711-20260602032606-5a5b2f67.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145125-744": {
+                "id": "20260601-145125-744",
+                "title": "20260601_145125_744",
+                "name": "20260601_145125_744",
+                "label": "20260601_145125_744",
+                "panorama": "/uploads/panos/20260601-145125-744-20260602032607-af4ad17a.jpg",
+                "thumbnail": "/uploads/panos/20260601-145125-744-20260602032607-af4ad17a.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145229-267": {
+                "id": "20260601-145229-267",
+                "title": "20260601_145229_267",
+                "name": "20260601_145229_267",
+                "label": "20260601_145229_267",
+                "panorama": "/uploads/panos/20260601-145229-267-20260602032607-24e9b00b.jpg",
+                "thumbnail": "/uploads/panos/20260601-145229-267-20260602032607-24e9b00b.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145316-177": {
+                "id": "20260601-145316-177",
+                "title": "20260601_145316_177",
+                "name": "20260601_145316_177",
+                "label": "20260601_145316_177",
+                "panorama": "/uploads/panos/20260601-145316-177-20260602032608-a1fdd86c.jpg",
+                "thumbnail": "/uploads/panos/20260601-145316-177-20260602032608-a1fdd86c.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              },
+              "20260601-145346-044": {
+                "id": "20260601-145346-044",
+                "title": "Dressing_Opening3",
+                "name": "Dressing_Opening3",
+                "label": "Dressing_Opening3",
+                "panorama": "/uploads/panos/20260601-145346-044-20260602032608-db4068cc.jpg",
+                "thumbnail": "/uploads/panos/20260601-145346-044-20260602032608-db4068cc.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": []
+              }
+            },
+            "connections": []
           }
         }
       ]
