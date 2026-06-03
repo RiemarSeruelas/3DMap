@@ -4930,6 +4930,479 @@ button.danger,
 }
 
 /* =========================================================
+   STREETVIEW MOBILE / TABLET INTEGRATION PATCH
+   Paste this at the VERY BOTTOM of src/styles/admin.css
+
+   Fixes:
+   - Admin Area Mapping on tablet/portrait: sidebar no longer eats huge space
+   - Admin Config on tablet/portrait: left panel + preview stack cleanly
+   - Viewer on tablet/landscape: UI becomes smaller, minimap moves/downsized
+   - Uses dynamic viewport units so browser bars behave better
+   ========================================================= */
+
+html,
+body,
+#root {
+  width: 100% !important;
+  min-height: 100% !important;
+}
+
+body {
+  overflow: hidden !important;
+}
+
+/* =========================================================
+   TABLET / MOBILE ADMIN AREA MAPPING
+   ========================================================= */
+@media (max-width: 980px), (orientation: portrait) {
+  .admin-page.admin-side-nav-page,
+  .admin-shell,
+  .admin-layout-shell,
+  .admin-main-shell {
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 10px !important;
+    padding: 10px !important;
+    overflow: hidden !important;
+  }
+
+  .admin-side-navbar,
+  .admin-side-nav,
+  .admin-sidebar,
+  .side-navbar,
+  .admin-nav {
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 12px !important;
+    border-radius: 20px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    align-items: center !important;
+  }
+
+  .admin-side-brand,
+  .admin-brand,
+  .admin-nav-brand {
+    padding-bottom: 8px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .admin-side-brand h1,
+  .admin-brand-title strong,
+  .admin-side-title strong,
+  .admin-nav-title strong {
+    font-size: 16px !important;
+  }
+
+  .admin-nav-logo,
+  .admin-brand-badge,
+  .admin-logo,
+  .admin-360-badge {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 13px !important;
+    font-size: 13px !important;
+  }
+
+  .admin-side-nav-actions,
+  .admin-side-map-status {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .admin-side-nav-actions button,
+  .admin-side-map-status button,
+  .admin-side-navbar button,
+  .admin-side-nav button,
+  .admin-sidebar button,
+  .side-navbar button,
+  .admin-nav button {
+    min-height: 38px !important;
+    border-radius: 12px !important;
+    padding: 8px 11px !important;
+    font-size: 12px !important;
+    text-align: center !important;
+  }
+
+  .admin-side-map-stage,
+  .admin-main,
+  .admin-content,
+  .admin-map-main,
+  .admin-main-content,
+  .admin-stage,
+  .admin-map-main-full {
+    height: auto !important;
+    min-height: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .admin-map-main-full::before {
+    margin: 4px 0 8px !important;
+    font-size: 10px !important;
+    letter-spacing: 0.16em !important;
+  }
+
+  .admin-fixed-map-canvas,
+  .admin-map-canvas,
+  .admin-map-frame,
+  .map-canvas,
+  .area-map-card,
+  .simple-map-card {
+    width: min(100%, calc((100dvh - 210px) * 16 / 9)) !important;
+    max-width: 100% !important;
+    max-height: calc(100dvh - 210px) !important;
+    border-radius: 18px !important;
+  }
+}
+
+@media (orientation: portrait) and (min-width: 700px) {
+  .admin-fixed-map-canvas,
+  .admin-map-canvas,
+  .admin-map-frame,
+  .map-canvas,
+  .area-map-card,
+  .simple-map-card {
+    width: min(100%, calc((100dvh - 185px) * 16 / 9)) !important;
+    max-height: calc(100dvh - 185px) !important;
+  }
+}
+
+/* =========================================================
+   TABLET / MOBILE LOCATION CONFIG
+   ========================================================= */
+@media (max-width: 980px), (orientation: portrait) {
+  .admin-config-page-v2,
+  .admin-config-page {
+    width: 100vw !important;
+    min-height: 100dvh !important;
+    height: 100dvh !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 10px !important;
+    padding: 0 !important;
+    overflow: auto !important;
+    background: #eaf2ff !important;
+  }
+
+  .admin-config-topbar-v2 {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 50 !important;
+    height: auto !important;
+    min-height: 52px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 8px !important;
+    align-items: center !important;
+    padding: 8px 10px !important;
+    border-radius: 0 !important;
+  }
+
+  .admin-config-topbar-brand-v2 {
+    min-width: 0 !important;
+    gap: 8px !important;
+  }
+
+  .admin-config-logo-v2 {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 11px !important;
+    font-size: 12px !important;
+  }
+
+  .admin-config-topbar-brand-v2 span,
+  .admin-config-topbar-meta-v2 span {
+    font-size: 8px !important;
+    letter-spacing: 0.11em !important;
+  }
+
+  .admin-config-topbar-brand-v2 strong {
+    font-size: 14px !important;
+    line-height: 1.05 !important;
+  }
+
+  .admin-config-topbar-meta-v2 {
+    display: none !important;
+  }
+
+  .admin-config-topbar-actions-v2 {
+    gap: 6px !important;
+  }
+
+  .admin-config-topbar-actions-v2 button {
+    min-height: 32px !important;
+    padding: 7px 10px !important;
+    font-size: 11px !important;
+    border-radius: 999px !important;
+  }
+
+  .admin-config-workspace-v2 {
+    height: auto !important;
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 10px !important;
+    overflow: visible !important;
+  }
+
+  .admin-config-image-rail-v2 {
+    width: 100% !important;
+    max-height: 230px !important;
+    min-height: 0 !important;
+    border-radius: 18px !important;
+    padding: 12px !important;
+  }
+
+  .admin-config-search-v2 input,
+  .admin-config-search-v2 {
+    height: 38px !important;
+    font-size: 12px !important;
+  }
+
+  .admin-config-add-card-v2 {
+    min-height: 58px !important;
+    border-radius: 16px !important;
+    padding: 10px !important;
+  }
+
+  .admin-config-add-card-v2 b,
+  .admin-config-add-card-v2 .plus {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 24px !important;
+  }
+
+  .admin-config-add-card-v2 strong {
+    font-size: 13px !important;
+  }
+
+  .admin-config-add-card-v2 span {
+    font-size: 10px !important;
+  }
+
+  .admin-config-text-location-list-v2 {
+    max-height: 110px !important;
+  }
+
+  .admin-config-location-row-v2 {
+    min-height: 34px !important;
+    grid-template-columns: 30px minmax(0, 1fr) auto !important;
+    border-radius: 12px !important;
+    padding: 6px 7px !important;
+  }
+
+  .admin-config-center-stage-v2,
+  .admin-config-main-panel-v2,
+  .admin-config-stage-card-v2 {
+    min-width: 0 !important;
+    border-radius: 18px !important;
+    padding: 12px !important;
+  }
+
+  .admin-config-selected-title-v2,
+  .admin-config-center-stage-v2 h1,
+  .admin-config-stage-card-v2 h1 {
+    margin: 0 0 8px !important;
+    font-size: 20px !important;
+    line-height: 1.08 !important;
+  }
+
+  .admin-config-panorama-360-v2,
+  .admin-config-panorama-360,
+  .admin-config-panorama,
+  .admin-panorama-placement,
+  .location-placement-box,
+  .panorama-placement-box {
+    width: 100% !important;
+    height: min(45dvh, 390px) !important;
+    min-height: 240px !important;
+    border-radius: 18px !important;
+  }
+
+  .admin-config-preview-actions-bar-v2 {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+  }
+
+  .admin-config-preview-actions-bar-v2 button {
+    min-height: 38px !important;
+    border-radius: 13px !important;
+    padding: 8px 6px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* =========================================================
+   VIEWER TABLET / LANDSCAPE CLEANUP
+   ========================================================= */
+@media (max-width: 1180px) and (orientation: landscape) {
+  .viewer-page,
+  .clean-viewer-page,
+  .street-viewer-shell,
+  .viewer360-shell {
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    overflow: hidden !important;
+    background: #000 !important;
+  }
+
+  .street-pannellum-stage,
+  .viewer360-pannellum {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .floating-back-btn,
+  .street-back-btn,
+  .map-only-back-btn {
+    top: max(10px, env(safe-area-inset-top)) !important;
+    left: max(10px, env(safe-area-inset-left)) !important;
+    z-index: 95 !important;
+    min-height: 34px !important;
+    padding: 8px 12px !important;
+    border-radius: 14px !important;
+    font-size: 12px !important;
+  }
+
+  .street-location-pill,
+  .viewer-area-pill {
+    top: max(10px, env(safe-area-inset-top)) !important;
+    right: max(10px, env(safe-area-inset-right)) !important;
+    z-index: 90 !important;
+    max-width: min(330px, 42vw) !important;
+    padding: 9px 13px !important;
+    border-radius: 999px !important;
+    gap: 10px !important;
+  }
+
+  .street-location-pill span,
+  .viewer-area-pill span {
+    font-size: 9px !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .street-location-pill strong,
+  .viewer-area-pill strong {
+    font-size: 12px !important;
+    max-width: 190px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .street-viewer-controls-clean {
+    right: max(10px, env(safe-area-inset-right)) !important;
+    top: 82px !important;
+    z-index: 95 !important;
+    gap: 6px !important;
+    padding: 6px !important;
+    border-radius: 15px !important;
+  }
+
+  .street-viewer-controls-clean button {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 10px !important;
+    font-size: 16px !important;
+  }
+
+  .street-minimap-card,
+  .street-minimap-card.raw-only {
+    left: max(10px, env(safe-area-inset-left)) !important;
+    bottom: calc(max(10px, env(safe-area-inset-bottom)) + 30px) !important;
+    width: 250px !important;
+    border-radius: 16px !important;
+    z-index: 80 !important;
+  }
+
+  .street-minimap-card .street-minimap-window,
+  .street-minimap-card.raw-only .street-minimap-window,
+  .street-minimap-window {
+    width: 250px !important;
+    height: 140px !important;
+  }
+
+  .street-minimap-world {
+    width: 420px !important;
+    height: 236px !important;
+  }
+
+  .street-minimap-dot,
+  .street-minimap-card.raw-only .street-minimap-dot {
+    width: 14px !important;
+    height: 14px !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.22), 0 6px 14px rgba(0,0,0,0.24) !important;
+  }
+
+  .street-arrow-only-button,
+  .admin-config-pnlm-hotspot-button-v2 {
+    width: 54px !important;
+    height: 54px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-config-preview-actions-bar-v2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .admin-config-panorama-360-v2,
+  .admin-config-panorama-360,
+  .admin-config-panorama {
+    height: 42dvh !important;
+    min-height: 220px !important;
+  }
+
+  .street-minimap-card,
+  .street-minimap-card.raw-only {
+    width: 220px !important;
+  }
+
+  .street-minimap-card .street-minimap-window,
+  .street-minimap-card.raw-only .street-minimap-window,
+  .street-minimap-window {
+    width: 220px !important;
+    height: 124px !important;
+  }
+
+  .street-viewer-controls-clean {
+    top: 72px !important;
+  }
+}
+
+.street-viewer-shell:fullscreen .street-minimap-card,
+.street-viewer-shell:fullscreen .street-minimap-card.raw-only {
+  bottom: max(14px, env(safe-area-inset-bottom)) !important;
+}
+
+.street-viewer-shell:fullscreen .floating-back-btn,
+.street-viewer-shell:fullscreen .street-back-btn,
+.street-viewer-shell:fullscreen .map-only-back-btn {
+  top: max(14px, env(safe-area-inset-top)) !important;
+}
+
+.street-viewer-shell:fullscreen .street-location-pill,
+.street-viewer-shell:fullscreen .viewer-area-pill {
+  top: max(14px, env(safe-area-inset-top)) !important;
+}
+
+
+/* =========================================================
    GROUNDED GOOGLE-MAPS-STYLE MARKERS PATCH
    Paste this at the VERY BOTTOM of src/styles/admin.css
 
@@ -5157,516 +5630,3 @@ button.danger,
     height: 16px !important;
   }
 }
-
-/* =========================================================
-   FLOOR CIRCLE + HOVER ARROW PATCH
-   Paste this at the VERY BOTTOM of src/styles/admin.css
-
-   Behavior:
-   - normal state: floor circle / oval marker, so users know where to go
-   - hover state: arrow appears on top of the circle
-   - works for both final viewer and admin preview hotspots
-
-   Targets:
-   - .street-arrow-only-button
-   - .admin-config-pnlm-hotspot-button-v2
-   ========================================================= */
-
-/* 
-.pnlm-street-arrow-hotspot,
-.admin-config-pnlm-hotspot-shell-v2 {
-  width: 0 !important;
-  height: 0 !important;
-  margin: 0 !important;
-  background: transparent !important;
-  background-image: none !important;
-  overflow: visible !important;
-  pointer-events: auto !important;
-}
-
-.street-arrow-only-button,
-.admin-config-pnlm-hotspot-button-v2 {
-  position: absolute !important;
-  left: 0 !important;
-  top: 0 !important;
-  width: 92px !important;
-  height: 58px !important;
-  transform: translate(-50%, -50%) perspective(190px) rotateX(58deg) !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 2px solid rgba(255, 255, 255, 0.78) !important;
-  border-radius: 999px !important;
-  background:
-    radial-gradient(circle at 50% 46%,
-      rgba(255, 255, 255, 0.58) 0%,
-      rgba(255, 255, 255, 0.34) 45%,
-      rgba(255, 255, 255, 0.18) 72%,
-      rgba(255, 255, 255, 0.08) 100%) !important;
-  box-shadow:
-    0 16px 34px rgba(15, 23, 42, 0.22),
-    inset 0 0 22px rgba(255, 255, 255, 0.22) !important;
-  cursor: pointer !important;
-  overflow: hidden !important;
-  pointer-events: auto !important;
-  color: transparent !important;
-  font-size: 0 !important;
-  backdrop-filter: blur(2px) !important;
-  transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    opacity 160ms ease !important;
-}
-
-.street-arrow-only-button > span,
-.admin-config-pnlm-hotspot-button-v2 > span {
-  display: none !important;
-}
-
-.street-arrow-only-button::before,
-.admin-config-pnlm-hotspot-button-v2::before {
-  content: "" !important;
-  position: absolute !important;
-  left: 50% !important;
-  top: 50% !important;
-  width: 30px !important;
-  height: 30px !important;
-  transform: translate(-50%, -50%) rotate(45deg) scale(0.76) !important;
-  border-top: 8px solid rgba(37, 99, 235, 0.88) !important;
-  border-left: 8px solid rgba(37, 99, 235, 0.88) !important;
-  opacity: 0 !important;
-  filter: drop-shadow(0 5px 8px rgba(15, 23, 42, 0.18)) !important;
-  pointer-events: none !important;
-  transition:
-    opacity 140ms ease,
-    transform 160ms ease !important;
-}
-
-.street-arrow-only-button::after,
-.admin-config-pnlm-hotspot-button-v2::after {
-  content: "" !important;
-  position: absolute !important;
-  inset: 8px 14px !important;
-  border-radius: inherit !important;
-  background: radial-gradient(circle at 50% 40%,
-    rgba(255,255,255,0.34),
-    rgba(255,255,255,0.08) 62%,
-    transparent 100%) !important;
-  pointer-events: none !important;
-  opacity: 0.9 !important;
-  transition: opacity 160ms ease !important;
-}
-
-.street-arrow-only-button:hover,
-.admin-config-pnlm-hotspot-button-v2:hover {
-  background:
-    radial-gradient(circle at 50% 46%,
-      rgba(219, 234, 254, 0.70) 0%,
-      rgba(147, 197, 253, 0.42) 45%,
-      rgba(255, 255, 255, 0.20) 72%,
-      rgba(255, 255, 255, 0.08) 100%) !important;
-  border-color: rgba(147, 197, 253, 0.95) !important;
-  box-shadow:
-    0 18px 38px rgba(37, 99, 235, 0.20),
-    0 12px 32px rgba(15, 23, 42, 0.20),
-    inset 0 0 22px rgba(255, 255, 255, 0.26) !important;
-}
-
-.street-arrow-only-button:hover::before,
-.admin-config-pnlm-hotspot-button-v2:hover::before {
-  opacity: 1 !important;
-  transform: translate(-50%, -50%) rotate(45deg) scale(1) !important;
-  animation: floorHoverArrowPulse 720ms ease-in-out infinite !important;
-}
-
-.street-arrow-only-button:hover::after,
-.admin-config-pnlm-hotspot-button-v2:hover::after {
-  opacity: 0.35 !important;
-}
-
-.street-floor-cursor-marker,
-.admin-floor-cursor-marker {
-  position: fixed !important;
-  left: 0 !important;
-  top: 0 !important;
-  z-index: 120 !important;
-  width: 92px !important;
-  height: 58px !important;
-  transform: translate(-50%, -50%) perspective(190px) rotateX(58deg) !important;
-  border: 2px solid rgba(255, 255, 255, 0.74) !important;
-  border-radius: 999px !important;
-  background:
-    radial-gradient(circle at 50% 46%,
-      rgba(255, 255, 255, 0.52) 0%,
-      rgba(255, 255, 255, 0.30) 45%,
-      rgba(255, 255, 255, 0.14) 72%,
-      rgba(255, 255, 255, 0.06) 100%) !important;
-  box-shadow:
-    0 16px 34px rgba(15, 23, 42, 0.20),
-    inset 0 0 22px rgba(255, 255, 255, 0.18) !important;
-  pointer-events: none !important;
-  opacity: 0 !important;
-  transition:
-    opacity 120ms ease,
-    left 70ms linear,
-    top 70ms linear,
-    filter 120ms ease !important;
-  backdrop-filter: blur(2px) !important;
-}
-
-.street-floor-cursor-marker.is-visible,
-.admin-floor-cursor-marker.is-visible {
-  opacity: 1 !important;
-}
-
-.street-floor-cursor-marker::before,
-.admin-floor-cursor-marker::before {
-  content: "" !important;
-  position: absolute !important;
-  left: 50% !important;
-  top: 50% !important;
-  width: 30px !important;
-  height: 30px !important;
-  transform: translate(-50%, -50%) rotate(45deg) scale(0.76) !important;
-  border-top: 8px solid rgba(37, 99, 235, 0.88) !important;
-  border-left: 8px solid rgba(37, 99, 235, 0.88) !important;
-  opacity: 0 !important;
-  filter: drop-shadow(0 5px 8px rgba(15, 23, 42, 0.18)) !important;
-  pointer-events: none !important;
-  transition:
-    opacity 140ms ease,
-    transform 160ms ease !important;
-}
-
-.street-floor-cursor-marker.is-snapped::before,
-.admin-floor-cursor-marker.is-snapped::before {
-  opacity: 1 !important;
-  transform: translate(-50%, -50%) rotate(45deg) scale(1) !important;
-  animation: floorHoverArrowPulse 720ms ease-in-out infinite !important;
-}
-
-@keyframes floorHoverArrowPulse {
-  0% {
-    transform: translate(-50%, -50%) rotate(45deg) translate(0, 0) scale(1) !important;
-    opacity: 0.88;
-  }
-  50% {
-    transform: translate(-50%, -50%) rotate(45deg) translate(-4px, -4px) scale(1.04) !important;
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -50%) rotate(45deg) translate(0, 0) scale(1) !important;
-    opacity: 0.88;
-  }
-}
-
-@media (max-width: 760px) {
-  .street-arrow-only-button,
-  .admin-config-pnlm-hotspot-button-v2,
-  .street-floor-cursor-marker,
-  .admin-floor-cursor-marker {
-    width: 78px !important;
-    height: 50px !important;
-  }
-
-  .street-arrow-only-button::before,
-  .admin-config-pnlm-hotspot-button-v2::before,
-  .street-floor-cursor-marker::before,
-  .admin-floor-cursor-marker::before {
-    width: 24px !important;
-    height: 24px !important;
-    border-top-width: 7px !important;
-    border-left-width: 7px !important;
-  }
-}
-*/
-
-/* =========================================================
-   MORE-GROUNDED GOOGLE-MAPS-STYLE CIRCLE PATCH
-   Paste this at the VERY BOTTOM of src/styles/admin.css
-
-   Purpose:
-   - keep the true circle marker you liked
-   - make it feel MORE grounded / embedded like Google Maps
-   - keep hover arrow, hover glow, and snapped cursor arrow behavior
-
-   Works for:
-   - saved clickable markers
-   - moving cursor follower
-   ========================================================= */
-
-   /*
-.pnlm-street-arrow-hotspot,
-.admin-config-pnlm-hotspot-shell-v2 {
-  width: 0 !important;
-  height: 0 !important;
-  margin: 0 !important;
-  background: transparent !important;
-  background-image: none !important;
-  overflow: visible !important;
-  pointer-events: auto !important;
-}
-
-.street-arrow-only-button,
-.admin-config-pnlm-hotspot-button-v2 {
-  position: absolute !important;
-  left: 0 !important;
-  top: 0 !important;
-  width: 60px !important;
-  height: 60px !important;
-  transform-origin: center bottom !important;
-  transform:
-    translate(-50%, -50%)
-    perspective(260px)
-    rotateX(26deg)
-    scaleY(0.88) !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 1.8px solid rgba(255, 255, 255, 0.84) !important;
-  border-radius: 999px !important;
-  background:
-    radial-gradient(circle at 50% 32%,
-      rgba(255, 255, 255, 0.70) 0%,
-      rgba(255, 255, 255, 0.36) 38%,
-      rgba(255, 255, 255, 0.15) 70%,
-      rgba(255, 255, 255, 0.05) 100%) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.42),
-    inset 0 0 14px rgba(255,255,255,0.14),
-    0 4px 10px rgba(15, 23, 42, 0.08) !important;
-  backdrop-filter: blur(1.8px) saturate(1.04) !important;
-  -webkit-backdrop-filter: blur(1.8px) saturate(1.04) !important;
-  cursor: pointer !important;
-  overflow: visible !important;
-  pointer-events: auto !important;
-  color: transparent !important;
-  font-size: 0 !important;
-  transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    opacity 160ms ease,
-    transform 160ms ease !important;
-}
-
-.street-arrow-only-button > span,
-.admin-config-pnlm-hotspot-button-v2 > span {
-  display: none !important;
-}
-
-.street-arrow-only-button::after,
-.admin-config-pnlm-hotspot-button-v2::after {
-  content: "" !important;
-  position: absolute !important;
-  left: 50% !important;
-  top: calc(100% - 2px) !important;
-  width: 48px !important;
-  height: 13px !important;
-  transform: translateX(-50%) !important;
-  border-radius: 999px !important;
-  background: radial-gradient(circle at center,
-    rgba(15, 23, 42, 0.30) 0%,
-    rgba(15, 23, 42, 0.14) 40%,
-    rgba(15, 23, 42, 0.05) 68%,
-    rgba(15, 23, 42, 0.00) 100%) !important;
-  filter: blur(4px) !important;
-  pointer-events: none !important;
-  opacity: 0.95 !important;
-}
-
-.street-arrow-only-button::before,
-.admin-config-pnlm-hotspot-button-v2::before {
-  content: "" !important;
-  position: absolute !important;
-  left: 50% !important;
-  top: 50% !important;
-  width: 21px !important;
-  height: 21px !important;
-  transform: translate(-50%, -52%) rotate(45deg) scale(0.72) !important;
-  border-top: 6px solid rgba(37, 99, 235, 0.92) !important;
-  border-left: 6px solid rgba(37, 99, 235, 0.92) !important;
-  opacity: 0 !important;
-  filter: drop-shadow(0 4px 7px rgba(15, 23, 42, 0.18)) !important;
-  pointer-events: none !important;
-  transition:
-    opacity 140ms ease,
-    transform 160ms ease !important;
-}
-
-.street-arrow-only-button:hover,
-.admin-config-pnlm-hotspot-button-v2:hover {
-  background:
-    radial-gradient(circle at 50% 32%,
-      rgba(219, 234, 254, 0.84) 0%,
-      rgba(147, 197, 253, 0.46) 38%,
-      rgba(255, 255, 255, 0.16) 70%,
-      rgba(255, 255, 255, 0.04) 100%) !important;
-  border-color: rgba(147, 197, 253, 0.98) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.48),
-    inset 0 0 16px rgba(255,255,255,0.16),
-    0 0 0 2px rgba(59, 130, 246, 0.10),
-    0 8px 18px rgba(37, 99, 235, 0.14) !important;
-  transform:
-    translate(-50%, -50%)
-    perspective(260px)
-    rotateX(26deg)
-    scaleY(0.88)
-    scale(1.05) !important;
-}
-
-.street-arrow-only-button:hover::before,
-.admin-config-pnlm-hotspot-button-v2:hover::before {
-  opacity: 1 !important;
-  transform: translate(-50%, -52%) rotate(45deg) scale(1) !important;
-  animation: googleGroundedCircleArrowPulse 720ms ease-in-out infinite !important;
-}
-
-.street-floor-cursor-marker,
-.admin-floor-cursor-marker {
-  position: fixed !important;
-  left: 0 !important;
-  top: 0 !important;
-  z-index: 120 !important;
-  width: 60px !important;
-  height: 60px !important;
-  transform-origin: center bottom !important;
-  transform:
-    translate(-50%, -50%)
-    perspective(260px)
-    rotateX(26deg)
-    scaleY(0.88) !important;
-  border: 1.8px solid rgba(255, 255, 255, 0.80) !important;
-  border-radius: 999px !important;
-  background:
-    radial-gradient(circle at 50% 32%,
-      rgba(255, 255, 255, 0.64) 0%,
-      rgba(255, 255, 255, 0.32) 38%,
-      rgba(255, 255, 255, 0.12) 70%,
-      rgba(255, 255, 255, 0.04) 100%) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.36),
-    inset 0 0 14px rgba(255,255,255,0.12),
-    0 4px 10px rgba(15, 23, 42, 0.06) !important;
-  backdrop-filter: blur(1.8px) saturate(1.04) !important;
-  -webkit-backdrop-filter: blur(1.8px) saturate(1.04) !important;
-  pointer-events: none !important;
-  opacity: 0 !important;
-  transition:
-    opacity 120ms ease,
-    left 70ms linear,
-    top 70ms linear,
-    filter 120ms ease,
-    transform 120ms ease !important;
-}
-
-.street-floor-cursor-marker.is-visible,
-.admin-floor-cursor-marker.is-visible {
-  opacity: 1 !important;
-}
-
-.street-floor-cursor-marker::after,
-.admin-floor-cursor-marker::after {
-  content: "" !important;
-  position: absolute !important;
-  left: 50% !important;
-  top: calc(100% - 2px) !important;
-  width: 48px !important;
-  height: 13px !important;
-  transform: translateX(-50%) !important;
-  border-radius: 999px !important;
-  background: radial-gradient(circle at center,
-    rgba(15, 23, 42, 0.28) 0%,
-    rgba(15, 23, 42, 0.12) 40%,
-    rgba(15, 23, 42, 0.04) 68%,
-    rgba(15, 23, 42, 0.00) 100%) !important;
-  filter: blur(4px) !important;
-  pointer-events: none !important;
-  opacity: 0.92 !important;
-}
-
-.street-floor-cursor-marker::before,
-.admin-floor-cursor-marker::before {
-  content: "" !important;
-  position: absolute !important;
-  left: 50% !important;
-  top: 50% !important;
-  width: 21px !important;
-  height: 21px !important;
-  transform: translate(-50%, -52%) rotate(45deg) scale(0.72) !important;
-  border-top: 6px solid rgba(37, 99, 235, 0.92) !important;
-  border-left: 6px solid rgba(37, 99, 235, 0.92) !important;
-  opacity: 0 !important;
-  filter: drop-shadow(0 4px 7px rgba(15, 23, 42, 0.18)) !important;
-  pointer-events: none !important;
-  transition:
-    opacity 140ms ease,
-    transform 160ms ease !important;
-}
-
-.street-floor-cursor-marker.is-snapped,
-.admin-floor-cursor-marker.is-snapped {
-  background:
-    radial-gradient(circle at 50% 32%,
-      rgba(219, 234, 254, 0.84) 0%,
-      rgba(147, 197, 253, 0.46) 38%,
-      rgba(255, 255, 255, 0.16) 70%,
-      rgba(255, 255, 255, 0.04) 100%) !important;
-  border-color: rgba(147, 197, 253, 0.98) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.48),
-    inset 0 0 16px rgba(255,255,255,0.16),
-    0 0 0 2px rgba(59, 130, 246, 0.10),
-    0 8px 18px rgba(37, 99, 235, 0.14) !important;
-}
-
-.street-floor-cursor-marker.is-snapped::before,
-.admin-floor-cursor-marker.is-snapped::before {
-  opacity: 1 !important;
-  transform: translate(-50%, -52%) rotate(45deg) scale(1) !important;
-  animation: googleGroundedCircleArrowPulse 720ms ease-in-out infinite !important;
-}
-
-@keyframes googleGroundedCircleArrowPulse {
-  0% {
-    transform: translate(-50%, -52%) rotate(45deg) translate(0, 0) scale(1) !important;
-    opacity: 0.88;
-  }
-  50% {
-    transform: translate(-50%, -52%) rotate(45deg) translate(-3px, -3px) scale(1.04) !important;
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -52%) rotate(45deg) translate(0, 0) scale(1) !important;
-    opacity: 0.88;
-  }
-}
-
-@media (max-width: 760px) {
-  .street-arrow-only-button,
-  .admin-config-pnlm-hotspot-button-v2,
-  .street-floor-cursor-marker,
-  .admin-floor-cursor-marker {
-    width: 54px !important;
-    height: 54px !important;
-  }
-
-  .street-arrow-only-button::before,
-  .admin-config-pnlm-hotspot-button-v2::before,
-  .street-floor-cursor-marker::before,
-  .admin-floor-cursor-marker::before {
-    width: 19px !important;
-    height: 19px !important;
-    border-top-width: 5px !important;
-    border-left-width: 5px !important;
-  }
-
-  .street-arrow-only-button::after,
-  .admin-config-pnlm-hotspot-button-v2::after,
-  .street-floor-cursor-marker::after,
-  .admin-floor-cursor-marker::after {
-    width: 42px !important;
-    height: 11px !important;
-  }
-}
-*/
