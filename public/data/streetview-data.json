@@ -1,5 +1,5 @@
 {
-  "savedAt": "2026-06-02T06:56:51.942Z",
+  "savedAt": "2026-06-03T02:25:27.543Z",
   "factoryMaps": {
     "savoury": {
       "id": "savoury",
@@ -172,6 +172,17 @@
                     "yaw": 126.42,
                     "x": 85.12,
                     "y": 59.42
+                  },
+                  {
+                    "id": "to-20260601-145240-894",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145240-894",
+                    "text": "Dressings_Right9",
+                    "coordinateMode": "pannellum",
+                    "pitch": -18.45,
+                    "yaw": -113.8,
+                    "x": 18.39,
+                    "y": 60.25
                   }
                 ]
               },
@@ -452,6 +463,17 @@
                     "yaw": 90.25,
                     "x": 75.07,
                     "y": 62.7
+                  },
+                  {
+                    "id": "to-20260601-145205-573",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145205-573",
+                    "text": "Dressings_Right3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -17.61,
+                    "yaw": 173.34,
+                    "x": 98.15,
+                    "y": 59.78
                   }
                 ]
               },
@@ -1056,6 +1078,17 @@
                     "yaw": 178.08,
                     "x": 99.47,
                     "y": 62.52
+                  },
+                  {
+                    "id": "to-20260601-145154-347",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145154-347",
+                    "text": "Dressings_Right2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.18,
+                    "yaw": -93.99,
+                    "x": 23.89,
+                    "y": 60.66
                   }
                 ]
               },
@@ -1556,17 +1589,6 @@
                 },
                 "hotspots": [
                   {
-                    "id": "to-20260601-145056-169",
-                    "type": "scene",
-                    "targetSceneId": "20260601-145056-169",
-                    "text": "Dressings_Center2",
-                    "coordinateMode": "pannellum",
-                    "pitch": -19.36,
-                    "yaw": 143.32,
-                    "x": 89.81,
-                    "y": 60.76
-                  },
-                  {
                     "id": "to-20260601-145351-983",
                     "type": "scene",
                     "targetSceneId": "20260601-145351-983",
@@ -1576,6 +1598,17 @@
                     "yaw": -34.78,
                     "x": 40.34,
                     "y": 55.14
+                  },
+                  {
+                    "id": "to-20260601-145016-832",
+                    "type": "scene",
+                    "targetSceneId": "20260601-145016-832",
+                    "text": "Dressings_Opening2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -18.52,
+                    "yaw": 143.32,
+                    "x": 89.81,
+                    "y": 60.29
                   }
                 ]
               }

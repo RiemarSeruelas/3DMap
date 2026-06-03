@@ -20,10 +20,12 @@ function labelForScene(scene, sceneId) {
 function getAlphabeticalSceneList(mapData) {
   return Object.values(safeScenes(mapData))
     .filter(Boolean)
-    .sort((a, b) => labelForScene(a, a.id).localeCompare(labelForScene(b, b.id), undefined, {
-      numeric: true,
-      sensitivity: "base",
-    }));
+    .sort((a, b) =>
+      labelForScene(a, a.id).localeCompare(labelForScene(b, b.id), undefined, {
+        numeric: true,
+        sensitivity: "base",
+      })
+    );
 }
 
 function getFirstSceneId(mapData) {
@@ -38,6 +40,53 @@ function normalizeNumber(value, fallback = 0) {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function normalizeYaw(yaw) {
+  let nextYaw = normalizeNumber(yaw, 0);
+  while (nextYaw > 180) nextYaw -= 360;
+  while (nextYaw < -180) nextYaw += 360;
+  return Number(nextYaw.toFixed(2));
+}
+
+/**
+ * Per-image real-world direction offset.
+ *
+ * Why this exists:
+ * If image A was captured with the camera facing north and image B was captured
+ * with the camera facing south, their raw yaw=0 does NOT mean the same real-world
+ * direction. This offset lets each panorama say where its "pano yaw 0" points.
+ *
+ * Supported fields, any of these works:
+ * scene.view.northOffset
+ * scene.view.yawOffset
+ * scene.northOffset
+ * scene.yawOffset
+ *
+ * Example:
+ * view: {
+ *   initialYaw: 0,
+ *   initialPitch: 0,
+ *   initialHfov: 110,
+ *   northOffset: 180
+ * }
+ */
+function getSceneNorthOffset(scene) {
+  return normalizeYaw(
+    scene?.view?.northOffset ??
+      scene?.view?.yawOffset ??
+      scene?.northOffset ??
+      scene?.yawOffset ??
+      0
+  );
+}
+
+function toWorldYaw(sceneYaw, scene) {
+  return normalizeYaw(normalizeNumber(sceneYaw, 0) + getSceneNorthOffset(scene));
+}
+
+function toSceneYaw(worldYaw, scene) {
+  return normalizeYaw(normalizeNumber(worldYaw, 0) - getSceneNorthOffset(scene));
 }
 
 function xyToYawPitch(hotspot = {}) {
@@ -126,7 +175,14 @@ function StreetViewer({ mapData, site, area }) {
   const shellRef = useRef(null);
   const viewerRef = useRef(null);
   const pannellumInstanceRef = useRef(null);
+
+  /*
+   * Stores real-world view direction, not just raw panorama yaw.
+   * This is what prevents "north becomes south" when each panorama has a
+   * different northOffset / yawOffset.
+   */
   const viewMemoryRef = useRef(null);
+
   const requestedSceneId = searchParams.get("scene");
 
   const scenes = useMemo(() => safeScenes(mapData), [mapData]);
@@ -147,9 +203,13 @@ function StreetViewer({ mapData, site, area }) {
 
   function rememberCurrentView() {
     const viewer = pannellumInstanceRef.current;
-    if (!viewer) return;
+    if (!viewer || !currentScene) return;
+
+    const rawYaw = normalizeNumber(viewer.getYaw?.(), 0);
+
     viewMemoryRef.current = {
-      yaw: normalizeNumber(viewer.getYaw?.(), 0),
+      worldYaw: toWorldYaw(rawYaw, currentScene),
+      rawYaw,
       pitch: normalizeNumber(viewer.getPitch?.(), 0),
       hfov: normalizeNumber(viewer.getHfov?.(), normalizeNumber(mapData?.settings?.defaultHfov, 110)),
     };
@@ -157,9 +217,12 @@ function StreetViewer({ mapData, site, area }) {
 
   async function switchScene(nextSceneId) {
     if (!scenes[nextSceneId] || nextSceneId === currentSceneIdResolved) return;
+
     rememberCurrentView();
     setIsTransitioning(true);
+
     await preloadImage(scenes[nextSceneId]?.panorama);
+
     setCurrentSceneId(nextSceneId);
     window.setTimeout(() => setIsTransitioning(false), 360);
   }
@@ -190,6 +253,15 @@ function StreetViewer({ mapData, site, area }) {
     }
 
     const remembered = viewMemoryRef.current;
+
+    /*
+     * If we have memory, convert remembered world direction into this panorama's
+     * local yaw. If there is no memory yet, use the scene's saved initial view.
+     */
+    const rememberedYawForThisScene = remembered
+      ? toSceneYaw(remembered.worldYaw, currentScene)
+      : null;
+
     const viewer = pannellumGlobal.viewer(viewerRef.current, {
       type: "equirectangular",
       panorama: currentScene.panorama,
@@ -204,7 +276,10 @@ function StreetViewer({ mapData, site, area }) {
         remembered?.hfov,
         normalizeNumber(currentScene?.view?.initialHfov, normalizeNumber(mapData?.settings?.defaultHfov, 110))
       ),
-      yaw: normalizeNumber(remembered?.yaw, normalizeNumber(currentScene?.view?.initialYaw, 0)),
+      yaw: normalizeNumber(
+        rememberedYawForThisScene,
+        normalizeNumber(currentScene?.view?.initialYaw, 0)
+      ),
       pitch: normalizeNumber(remembered?.pitch, normalizeNumber(currentScene?.view?.initialPitch, 0)),
       hotSpots: sceneConnections
         .filter((connection) => scenes[connection.to])
