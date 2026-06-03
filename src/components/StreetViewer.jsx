@@ -49,28 +49,6 @@ function normalizeYaw(yaw) {
   return Number(nextYaw.toFixed(2));
 }
 
-/**
- * Per-image real-world direction offset.
- *
- * Why this exists:
- * If image A was captured with the camera facing north and image B was captured
- * with the camera facing south, their raw yaw=0 does NOT mean the same real-world
- * direction. This offset lets each panorama say where its "pano yaw 0" points.
- *
- * Supported fields, any of these works:
- * scene.view.northOffset
- * scene.view.yawOffset
- * scene.northOffset
- * scene.yawOffset
- *
- * Example:
- * view: {
- *   initialYaw: 0,
- *   initialPitch: 0,
- *   initialHfov: 110,
- *   northOffset: 180
- * }
- */
 function getSceneNorthOffset(scene) {
   return normalizeYaw(
     scene?.view?.northOffset ??
@@ -175,12 +153,6 @@ function StreetViewer({ mapData, site, area }) {
   const shellRef = useRef(null);
   const viewerRef = useRef(null);
   const pannellumInstanceRef = useRef(null);
-
-  /*
-   * Stores real-world view direction, not just raw panorama yaw.
-   * This is what prevents "north becomes south" when each panorama has a
-   * different northOffset / yawOffset.
-   */
   const viewMemoryRef = useRef(null);
 
   const requestedSceneId = searchParams.get("scene");
@@ -253,14 +225,7 @@ function StreetViewer({ mapData, site, area }) {
     }
 
     const remembered = viewMemoryRef.current;
-
-    /*
-     * If we have memory, convert remembered world direction into this panorama's
-     * local yaw. If there is no memory yet, use the scene's saved initial view.
-     */
-    const rememberedYawForThisScene = remembered
-      ? toSceneYaw(remembered.worldYaw, currentScene)
-      : null;
+    const rememberedYawForThisScene = remembered ? toSceneYaw(remembered.worldYaw, currentScene) : null;
 
     const viewer = pannellumGlobal.viewer(viewerRef.current, {
       type: "equirectangular",

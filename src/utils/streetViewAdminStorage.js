@@ -21,6 +21,46 @@ function hasUsableMaps(value) {
   return value && typeof value === "object" && Object.keys(value).length > 0;
 }
 
+function normalizeNumber(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function normalizeSceneView(scene = {}) {
+  const view = scene.view || {};
+  return {
+    initialYaw: normalizeNumber(view.initialYaw, normalizeNumber(scene.initialYaw, 0)),
+    initialPitch: normalizeNumber(view.initialPitch, normalizeNumber(scene.initialPitch, 0)),
+    initialHfov: normalizeNumber(view.initialHfov, normalizeNumber(scene.initialHfov, 110)),
+    northOffset: normalizeNumber(
+      view.northOffset ??
+        view.yawOffset ??
+        scene.northOffset ??
+        scene.yawOffset,
+      0
+    ),
+  };
+}
+
+function normalizeScene(scene = {}) {
+  return {
+    ...scene,
+    hotspots: Array.isArray(scene.hotspots) ? scene.hotspots : [],
+    mapPoint: scene.mapPoint || scene.minimap || null,
+    minimap: scene.minimap || scene.mapPoint || null,
+    view: normalizeSceneView(scene),
+  };
+}
+
+function normalizeScenes(scenes = {}) {
+  return Object.fromEntries(
+    Object.entries(scenes || {}).map(([sceneId, scene]) => [
+      sceneId,
+      normalizeScene({ id: scene?.id || sceneId, ...scene }),
+    ])
+  );
+}
+
 export function getBaseFactoryMaps() {
   return factoryMaps;
 }
@@ -205,6 +245,8 @@ export function ensureTour(tour, area = {}) {
   const areaSlug = area.id || `area-${Date.now()}`;
 
   if (tour?.scenes && tour?.settings) {
+    const normalizedScenes = normalizeScenes(tour.scenes || {});
+
     return {
       ...tour,
       id: tour.id || `${areaSlug}-tour`,
@@ -212,12 +254,12 @@ export function ensureTour(tour, area = {}) {
       version: tour.version || 1,
       mapImage: tour.mapImage || undefined,
       settings: {
-        firstScene: tour.settings.firstScene || Object.keys(tour.scenes || {})[0] || null,
+        firstScene: tour.settings.firstScene || Object.keys(normalizedScenes || {})[0] || null,
         defaultHfov: tour.settings.defaultHfov || 110,
         mobileHfov: tour.settings.mobileHfov || 90,
         ...tour.settings,
       },
-      scenes: tour.scenes || {},
+      scenes: normalizedScenes,
       connections: Array.isArray(tour.connections) ? tour.connections : [],
     };
   }

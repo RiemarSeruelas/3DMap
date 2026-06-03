@@ -1,11 +1,1595 @@
 {
-  "savedAt": "2026-06-03T03:04:32.710Z",
+  "savedAt": "2026-06-03T08:21:40.548Z",
   "factoryMaps": {
     "savoury": {
       "id": "savoury",
       "name": "Savoury Block",
       "mapImage": "/uploads/maps/chatgpt-image-jun-2-2026-10-37-40-am-20260602024432-0293c30e.png",
-      "areas": []
+      "areas": [
+        {
+          "id": "savoury",
+          "name": "Savoury",
+          "points": "1.25,1.87 99.03,2.04 99.13,98.65 1.35,98.99",
+          "tour": {
+            "id": "savoury-tour",
+            "name": "Savoury Tour",
+            "version": 1,
+            "settings": {
+              "firstScene": "savoury-left7-3",
+              "defaultHfov": 110,
+              "mobileHfov": 90
+            },
+            "scenes": {
+              "savoury-left7-3": {
+                "id": "savoury-left7-3",
+                "title": "Savoury_Left7-3",
+                "name": "Savoury_Left7-3",
+                "label": "Savoury_Left7-3",
+                "panorama": "/uploads/panos/savoury-left7-3-20260603075146-866694c1.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left7-3-thumb-20260603075146-3d8bc313.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right2-1": {
+                "id": "savoury-right2-1",
+                "title": "Savoury_Right2-1",
+                "name": "Savoury_Right2-1",
+                "label": "Savoury_Right2-1",
+                "panorama": "/uploads/panos/savoury-right2-1-20260603075147-b002bfd3.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right2-1-thumb-20260603075147-4b0a1ddb.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left3-4": {
+                "id": "savoury-left3-4",
+                "title": "Savoury_Left3-3",
+                "name": "Savoury_Left3-3",
+                "label": "Savoury_Left3-3",
+                "panorama": "/uploads/panos/savoury-left3-4-20260603075147-878f3f66.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left3-4-thumb-20260603075147-3f6613a9.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-left3-3",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left3-3",
+                    "text": "Savoury_Left3-2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -20.2,
+                    "yaw": 94.6,
+                    "x": 76.28,
+                    "y": 61.22
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left6-1": {
+                "id": "savoury-left6-1",
+                "title": "Savoury_Left6-1",
+                "name": "Savoury_Left6-1",
+                "label": "Savoury_Left6-1",
+                "panorama": "/uploads/panos/savoury-left6-1-20260603075148-c6ca0d86.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left6-1-thumb-20260603075148-7aec929a.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left6-2": {
+                "id": "savoury-left6-2",
+                "title": "Savoury_Left6-2",
+                "name": "Savoury_Left6-2",
+                "label": "Savoury_Left6-2",
+                "panorama": "/uploads/panos/savoury-left6-2-20260603075148-9fa60b60.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left6-2-thumb-20260603075148-cb388337.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left7-1": {
+                "id": "savoury-left7-1",
+                "title": "Savoury_Left7-1",
+                "name": "Savoury_Left7-1",
+                "label": "Savoury_Left7-1",
+                "panorama": "/uploads/panos/savoury-left7-1-20260603075149-1e85f295.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left7-1-thumb-20260603075149-652d20a9.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right1-1": {
+                "id": "savoury-right1-1",
+                "title": "Savoury_Right1-1",
+                "name": "Savoury_Right1-1",
+                "label": "Savoury_Right1-1",
+                "panorama": "/uploads/panos/savoury-right1-1-20260603075149-639d74a0.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right1-1-thumb-20260603075149-03a53181.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right1-2": {
+                "id": "savoury-right1-2",
+                "title": "Savoury_Right1-2",
+                "name": "Savoury_Right1-2",
+                "label": "Savoury_Right1-2",
+                "panorama": "/uploads/panos/savoury-right1-2-20260603075150-9af987c5.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right1-2-thumb-20260603075150-1f7e61bc.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left2-6": {
+                "id": "savoury-left2-6",
+                "title": "Savoury_Left2-6",
+                "name": "Savoury_Left2-6",
+                "label": "Savoury_Left2-6",
+                "panorama": "/uploads/panos/savoury-left2-6-20260603075150-873d38af.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left2-6-thumb-20260603075150-65187109.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-left2-5",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left2-5",
+                    "text": "Savoury_Left2-5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.22,
+                    "yaw": -89.35,
+                    "x": 25.18,
+                    "y": 59.01
+                  },
+                  {
+                    "id": "to-savoury-left3-1",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left3-1",
+                    "text": "Savoury_Left3-1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -26.48,
+                    "yaw": 92.63,
+                    "x": 75.73,
+                    "y": 64.71
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left3-3": {
+                "id": "savoury-left3-3",
+                "title": "Savoury_Left3-2",
+                "name": "Savoury_Left3-2",
+                "label": "Savoury_Left3-2",
+                "panorama": "/uploads/panos/savoury-left3-3-20260603075151-744082d6.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left3-3-thumb-20260603075151-51de36c6.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-left3-2",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left3-2",
+                    "text": "Savoury_Left3-1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -17.38,
+                    "yaw": 102.4,
+                    "x": 78.44,
+                    "y": 59.66
+                  },
+                  {
+                    "id": "to-savoury-left3-4",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left3-4",
+                    "text": "Savoury_Left3-3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -17.92,
+                    "yaw": -94.77,
+                    "x": 23.68,
+                    "y": 59.96
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left5-3": {
+                "id": "savoury-left5-3",
+                "title": "Savoury_Left5-3",
+                "name": "Savoury_Left5-3",
+                "label": "Savoury_Left5-3",
+                "panorama": "/uploads/panos/savoury-left5-3-20260603075151-391b8373.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left5-3-thumb-20260603075151-1c0c66a0.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left6-3": {
+                "id": "savoury-left6-3",
+                "title": "Savoury_Left6-3",
+                "name": "Savoury_Left6-3",
+                "label": "Savoury_Left6-3",
+                "panorama": "/uploads/panos/savoury-left6-3-20260603075152-2dc17c63.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left6-3-thumb-20260603075152-b930c884.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left7-2": {
+                "id": "savoury-left7-2",
+                "title": "Savoury_Left7-2",
+                "name": "Savoury_Left7-2",
+                "label": "Savoury_Left7-2",
+                "panorama": "/uploads/panos/savoury-left7-2-20260603075152-14c26774.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left7-2-thumb-20260603075152-17cfa5f7.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right4-1": {
+                "id": "savoury-right4-1",
+                "title": "Savoury_Right4-1",
+                "name": "Savoury_Right4-1",
+                "label": "Savoury_Right4-1",
+                "panorama": "/uploads/panos/savoury-right4-1-20260603075153-caff1d91.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right4-1-thumb-20260603075153-b5abe198.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left4-2": {
+                "id": "savoury-left4-2",
+                "title": "Savoury_Left4-2",
+                "name": "Savoury_Left4-2",
+                "label": "Savoury_Left4-2",
+                "panorama": "/uploads/panos/savoury-left4-2-20260603075153-66329af3.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left4-2-thumb-20260603075154-cebb5c9a.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left5-2": {
+                "id": "savoury-left5-2",
+                "title": "Savoury_Left5-2",
+                "name": "Savoury_Left5-2",
+                "label": "Savoury_Left5-2",
+                "panorama": "/uploads/panos/savoury-left5-2-20260603075154-38422a2f.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left5-2-thumb-20260603075154-666ed9f6.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left7-4": {
+                "id": "savoury-left7-4",
+                "title": "Savoury_Left7-4",
+                "name": "Savoury_Left7-4",
+                "label": "Savoury_Left7-4",
+                "panorama": "/uploads/panos/savoury-left7-4-20260603075154-fc9b50a9.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left7-4-thumb-20260603075154-3f66030b.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right7-1": {
+                "id": "savoury-right7-1",
+                "title": "Savoury_Right7-1",
+                "name": "Savoury_Right7-1",
+                "label": "Savoury_Right7-1",
+                "panorama": "/uploads/panos/savoury-right7-1-20260603075155-6808347f.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right7-1-thumb-20260603075156-faf933c5.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left2-1": {
+                "id": "savoury-left2-1",
+                "title": "Savoury_Left2-1",
+                "name": "Savoury_Left2-1",
+                "label": "Savoury_Left2-1",
+                "panorama": "/uploads/panos/savoury-left2-1-20260603075156-ebddae5e.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left2-1-thumb-20260603075156-148f687f.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-jessicasavoury-opening1-2",
+                    "type": "scene",
+                    "targetSceneId": "jessicasavoury-opening1-2",
+                    "text": "JessicaSavoury_Opening1-2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.38,
+                    "yaw": 91.21,
+                    "x": 75.34,
+                    "y": 60.77
+                  },
+                  {
+                    "id": "to-savoury-left2-2",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left2-2",
+                    "text": "Savoury_Left2-2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -20.71,
+                    "yaw": -88.46,
+                    "x": 25.43,
+                    "y": 61.51
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left2-5": {
+                "id": "savoury-left2-5",
+                "title": "Savoury_Left2-5",
+                "name": "Savoury_Left2-5",
+                "label": "Savoury_Left2-5",
+                "panorama": "/uploads/panos/savoury-left2-5-20260603075156-020d5fcc.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left2-5-thumb-20260603075156-065a6524.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-left2-4",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left2-4",
+                    "text": "Savoury_Left2-4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.22,
+                    "yaw": -165.36,
+                    "x": 4.07,
+                    "y": 59.01
+                  },
+                  {
+                    "id": "to-savoury-left2-6",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left2-6",
+                    "text": "Savoury_Left2-6",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.8,
+                    "yaw": 89.85,
+                    "x": 74.96,
+                    "y": 59.33
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left4-1": {
+                "id": "savoury-left4-1",
+                "title": "Savoury_Left4-1",
+                "name": "Savoury_Left4-1",
+                "label": "Savoury_Left4-1",
+                "panorama": "/uploads/panos/savoury-left4-1-20260603075157-604318b7.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left4-1-thumb-20260603075157-18e3b597.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left5-1": {
+                "id": "savoury-left5-1",
+                "title": "Savoury_Left5-1",
+                "name": "Savoury_Left5-1",
+                "label": "Savoury_Left5-1",
+                "panorama": "/uploads/panos/savoury-left5-1-20260603075158-3f721873.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left5-1-thumb-20260603075158-cdeb490f.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right4-2": {
+                "id": "savoury-right4-2",
+                "title": "Savoury_Right4-2",
+                "name": "Savoury_Right4-2",
+                "label": "Savoury_Right4-2",
+                "panorama": "/uploads/panos/savoury-right4-2-20260603075158-fc41c8d7.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right4-2-thumb-20260603075158-13cce102.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right6-1": {
+                "id": "savoury-right6-1",
+                "title": "Savoury_Right6-1",
+                "name": "Savoury_Right6-1",
+                "label": "Savoury_Right6-1",
+                "panorama": "/uploads/panos/savoury-right6-1-20260603075159-085f01eb.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right6-1-thumb-20260603075159-eb9069b7.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left1-2": {
+                "id": "savoury-left1-2",
+                "title": "Savoury_Left1-2",
+                "name": "Savoury_Left1-2",
+                "label": "Savoury_Left1-2",
+                "panorama": "/uploads/panos/savoury-left1-2-20260603075159-8311e779.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left1-2-thumb-20260603075159-6b3569e3.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-left1-1",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left1-1",
+                    "text": "Savoury_Left1-1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.01,
+                    "yaw": 90.53,
+                    "x": 75.15,
+                    "y": 60.56
+                  },
+                  {
+                    "id": "to-savoury-left1-3",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left1-3",
+                    "text": "Savoury_Left1-3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -28.44,
+                    "yaw": -98.25,
+                    "x": 22.71,
+                    "y": 65.8
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left1-4": {
+                "id": "savoury-left1-4",
+                "title": "Savoury_Left1-4",
+                "name": "Savoury_Left1-4",
+                "label": "Savoury_Left1-4",
+                "panorama": "/uploads/panos/savoury-left1-4-20260603075159-dad7569e.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left1-4-thumb-20260603075200-25ca7289.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-left1-3",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left1-3",
+                    "text": "Savoury_Left1-3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -29.74,
+                    "yaw": 111.78,
+                    "x": 81.05,
+                    "y": 66.52
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left3-2": {
+                "id": "savoury-left3-2",
+                "title": "Savoury_Left3-1",
+                "name": "Savoury_Left3-1",
+                "label": "Savoury_Left3-1",
+                "panorama": "/uploads/panos/savoury-left3-2-20260603075200-4cc56768.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left3-2-thumb-20260603075200-1bd023a9.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-opening3",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening3",
+                    "text": "Savoury_Opening3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.18,
+                    "yaw": 96.06,
+                    "x": 76.68,
+                    "y": 60.66
+                  },
+                  {
+                    "id": "to-savoury-left3-3",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left3-3",
+                    "text": "Savoury_Left3-2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.18,
+                    "yaw": -82.2,
+                    "x": 27.17,
+                    "y": 60.66
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-next1-1": {
+                "id": "savoury-next1-1",
+                "title": "Savoury_Next1-1",
+                "name": "Savoury_Next1-1",
+                "label": "Savoury_Next1-1",
+                "panorama": "/uploads/panos/savoury-next1-1-20260603075200-db320aaa.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-next1-1-thumb-20260603075200-21cad811.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-next1",
+                    "type": "scene",
+                    "targetSceneId": "savoury-next1",
+                    "text": "Savoury_Next1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.55,
+                    "yaw": -122,
+                    "x": 16.11,
+                    "y": 60.86
+                  },
+                  {
+                    "id": "to-savoury-next1-3",
+                    "type": "scene",
+                    "targetSceneId": "savoury-next1-3",
+                    "text": "Savoury_Next1-3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -25.57,
+                    "yaw": 30.47,
+                    "x": 58.46,
+                    "y": 64.21
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-next1-3": {
+                "id": "savoury-next1-3",
+                "title": "Savoury_Next1-3",
+                "name": "Savoury_Next1-3",
+                "label": "Savoury_Next1-3",
+                "panorama": "/uploads/panos/savoury-next1-3-20260603075201-8101c129.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-next1-3-thumb-20260603075201-5c55b735.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-next1-1",
+                    "type": "scene",
+                    "targetSceneId": "savoury-next1-1",
+                    "text": "Savoury_Next1-1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -14.14,
+                    "yaw": -99.31,
+                    "x": 22.41,
+                    "y": 57.86
+                  },
+                  {
+                    "id": "to-savoury-next1-4",
+                    "type": "scene",
+                    "targetSceneId": "savoury-next1-4",
+                    "text": "Savoury_Next1-4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -12.34,
+                    "yaw": 87.18,
+                    "x": 74.22,
+                    "y": 56.86
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right5-1": {
+                "id": "savoury-right5-1",
+                "title": "Savoury_Right5-1",
+                "name": "Savoury_Right5-1",
+                "label": "Savoury_Right5-1",
+                "panorama": "/uploads/panos/savoury-right5-1-20260603075201-6eeb6854.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right5-1-thumb-20260603075201-7edaa84e.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left2-2": {
+                "id": "savoury-left2-2",
+                "title": "Savoury_Left2-2",
+                "name": "Savoury_Left2-2",
+                "label": "Savoury_Left2-2",
+                "panorama": "/uploads/panos/savoury-left2-2-20260603075202-c70192fc.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left2-2-thumb-20260603075202-7f9ae82c.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-left2-1",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left2-1",
+                    "text": "Savoury_Left2-1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.99,
+                    "yaw": 89.51,
+                    "x": 74.86,
+                    "y": 61.11
+                  },
+                  {
+                    "id": "to-savoury-left2-3",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left2-3",
+                    "text": "Savoury_Left2-3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -21.69,
+                    "yaw": -98.35,
+                    "x": 22.68,
+                    "y": 62.05
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left2-3": {
+                "id": "savoury-left2-3",
+                "title": "Savoury_Left2-3",
+                "name": "Savoury_Left2-3",
+                "label": "Savoury_Left2-3",
+                "panorama": "/uploads/panos/savoury-left2-3-20260603075202-07284259.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left2-3-thumb-20260603075202-882d125f.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-left2-2",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left2-2",
+                    "text": "Savoury_Left2-2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -22.83,
+                    "yaw": 88.45,
+                    "x": 74.57,
+                    "y": 62.68
+                  },
+                  {
+                    "id": "to-savoury-left2-4",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left2-4",
+                    "text": "Savoury_Left2-4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -28.17,
+                    "yaw": -88.74,
+                    "x": 25.35,
+                    "y": 65.65
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left3-1": {
+                "id": "savoury-left3-1",
+                "title": "Savoury_Left2-7",
+                "name": "Savoury_Left2-7",
+                "label": "Savoury_Left2-7",
+                "panorama": "/uploads/panos/savoury-left3-1-20260603075203-967ab9fe.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left3-1-thumb-20260603075203-fe0fd1e6.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-left2-6",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left2-6",
+                    "text": "Savoury_Left2-6",
+                    "coordinateMode": "pannellum",
+                    "pitch": -25.72,
+                    "yaw": -96.23,
+                    "x": 23.27,
+                    "y": 64.29
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-opening3": {
+                "id": "savoury-opening3",
+                "title": "Savoury_Opening3",
+                "name": "Savoury_Opening3",
+                "label": "Savoury_Opening3",
+                "panorama": "/uploads/panos/savoury-opening3-20260603075203-5f6a31ff.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-opening3-thumb-20260603075203-f5752e7e.jpg",
+                "mapPoint": {
+                  "x": 22.85,
+                  "y": 59.92
+                },
+                "minimap": {
+                  "x": 22.85,
+                  "y": 59.92
+                },
+                "hotspots": [
+                  {
+                    "id": "to-jessicasavoury-opening1-2",
+                    "type": "scene",
+                    "targetSceneId": "jessicasavoury-opening1-2",
+                    "text": "JessicaSavoury_Opening1-2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -18.7,
+                    "yaw": 177.12,
+                    "x": 99.2,
+                    "y": 60.39
+                  },
+                  {
+                    "id": "to-savoury-opening4",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening4",
+                    "text": "Savoury_Opening4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -25.44,
+                    "yaw": 0.92,
+                    "x": 50.26,
+                    "y": 64.13
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-opening7": {
+                "id": "savoury-opening7",
+                "title": "Savoury_Opening7",
+                "name": "Savoury_Opening7",
+                "label": "Savoury_Opening7",
+                "panorama": "/uploads/panos/savoury-opening7-20260603075204-09dbeb0a.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-opening7-thumb-20260603075204-dfecf839.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-opening6",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening6",
+                    "text": "Savoury_Opening6",
+                    "coordinateMode": "pannellum",
+                    "pitch": -15.79,
+                    "yaw": 164.45,
+                    "x": 95.68,
+                    "y": 58.77
+                  },
+                  {
+                    "id": "to-savoury-opening8",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening8",
+                    "text": "Savoury_Opening8",
+                    "coordinateMode": "pannellum",
+                    "pitch": -27.77,
+                    "yaw": -16.5,
+                    "x": 45.42,
+                    "y": 65.43
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right2-2": {
+                "id": "savoury-right2-2",
+                "title": "Savoury_Right2-2",
+                "name": "Savoury_Right2-2",
+                "label": "Savoury_Right2-2",
+                "panorama": "/uploads/panos/savoury-right2-2-20260603075204-c7e91963.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right2-2-thumb-20260603075204-7212ae1d.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right3-2": {
+                "id": "savoury-right3-2",
+                "title": "Savoury_Right3-2",
+                "name": "Savoury_Right3-2",
+                "label": "Savoury_Right3-2",
+                "panorama": "/uploads/panos/savoury-right3-2-20260603075205-344813c8.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right3-2-thumb-20260603075205-4d94c2b1.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left1-3": {
+                "id": "savoury-left1-3",
+                "title": "Savoury_Left1-3",
+                "name": "Savoury_Left1-3",
+                "label": "Savoury_Left1-3",
+                "panorama": "/uploads/panos/savoury-left1-3-20260603075205-984bddb5.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left1-3-thumb-20260603075205-7f322529.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-left1-2",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left1-2",
+                    "text": "Savoury_Left1-2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -26.05,
+                    "yaw": 85.35,
+                    "x": 73.71,
+                    "y": 64.47
+                  },
+                  {
+                    "id": "to-savoury-left1-4",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left1-4",
+                    "text": "Savoury_Left1-4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -26.98,
+                    "yaw": -110.55,
+                    "x": 19.29,
+                    "y": 64.99
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right3-1": {
+                "id": "savoury-right3-1",
+                "title": "Savoury_Right3-1",
+                "name": "Savoury_Right3-1",
+                "label": "Savoury_Right3-1",
+                "panorama": "/uploads/panos/savoury-right3-1-20260603075206-6a3f045c.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right3-1-thumb-20260603075206-4c7bb028.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right3-3": {
+                "id": "savoury-right3-3",
+                "title": "Savoury_Right3-3",
+                "name": "Savoury_Right3-3",
+                "label": "Savoury_Right3-3",
+                "panorama": "/uploads/panos/savoury-right3-3-20260603075206-99febcc1.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right3-3-thumb-20260603075206-ea55ce05.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right6-2": {
+                "id": "savoury-right6-2",
+                "title": "Savoury_Right6-2",
+                "name": "Savoury_Right6-2",
+                "label": "Savoury_Right6-2",
+                "panorama": "/uploads/panos/savoury-right6-2-20260603075207-e03f680e.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right6-2-thumb-20260603075207-61f5a634.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left1-1": {
+                "id": "savoury-left1-1",
+                "title": "Savoury_Left1-1",
+                "name": "Savoury_Left1-1",
+                "label": "Savoury_Left1-1",
+                "panorama": "/uploads/panos/savoury-left1-1-20260603075207-6e1afa98.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left1-1-thumb-20260603075207-d15a0fcb.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-jessicasavoury-opening1-1",
+                    "type": "scene",
+                    "targetSceneId": "jessicasavoury-opening1-1",
+                    "text": "JessicaSavoury_Opening1-1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -17.79,
+                    "yaw": 91.8,
+                    "x": 75.5,
+                    "y": 59.88
+                  },
+                  {
+                    "id": "to-savoury-left1-2",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left1-2",
+                    "text": "Savoury_Left1-2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -20.53,
+                    "yaw": -90.81,
+                    "x": 24.77,
+                    "y": 61.41
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-left2-4": {
+                "id": "savoury-left2-4",
+                "title": "Savoury_Left2-4",
+                "name": "Savoury_Left2-4",
+                "label": "Savoury_Left2-4",
+                "panorama": "/uploads/panos/savoury-left2-4-20260603075208-c813fcac.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-left2-4-thumb-20260603075208-ab20b1c6.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-left2-3",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left2-3",
+                    "text": "Savoury_Left2-3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -21.81,
+                    "yaw": 85.5,
+                    "x": 73.75,
+                    "y": 62.12
+                  },
+                  {
+                    "id": "to-savoury-left2-5",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left2-5",
+                    "text": "Savoury_Left2-5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -13.54,
+                    "yaw": 9.21,
+                    "x": 52.56,
+                    "y": 57.52
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-next1-5": {
+                "id": "savoury-next1-5",
+                "title": "Savoury_Next1-5",
+                "name": "Savoury_Next1-5",
+                "label": "Savoury_Next1-5",
+                "panorama": "/uploads/panos/savoury-next1-5-20260603075208-96aa1ad2.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-next1-5-thumb-20260603075208-8a418d15.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-next1-4",
+                    "type": "scene",
+                    "targetSceneId": "savoury-next1-4",
+                    "text": "Savoury_Next1-4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -23.79,
+                    "yaw": -170.95,
+                    "x": 2.51,
+                    "y": 63.22
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-opening6": {
+                "id": "savoury-opening6",
+                "title": "Savoury_Opening6",
+                "name": "Savoury_Opening6",
+                "label": "Savoury_Opening6",
+                "panorama": "/uploads/panos/savoury-opening6-20260603075209-8cd2b1cc.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-opening6-thumb-20260603075209-b75ee6fb.jpg",
+                "mapPoint": {
+                  "x": 46.81,
+                  "y": 60.79
+                },
+                "minimap": {
+                  "x": 46.81,
+                  "y": 60.79
+                },
+                "hotspots": [
+                  {
+                    "id": "to-savoury-opening5",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening5",
+                    "text": "Savoury_Opening5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -21.75,
+                    "yaw": 177.96,
+                    "x": 99.43,
+                    "y": 62.08
+                  },
+                  {
+                    "id": "to-savoury-opening7",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening7",
+                    "text": "Savoury_Opening7",
+                    "coordinateMode": "pannellum",
+                    "pitch": -16.09,
+                    "yaw": -3.56,
+                    "x": 49.01,
+                    "y": 58.94
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-opening9": {
+                "id": "savoury-opening9",
+                "title": "Savoury_Opening9",
+                "name": "Savoury_Opening9",
+                "label": "Savoury_Opening9",
+                "panorama": "/uploads/panos/savoury-opening9-20260603075209-707cc458.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-opening9-thumb-20260603075209-3521d835.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-opening8",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening8",
+                    "text": "Savoury_Opening8",
+                    "coordinateMode": "pannellum",
+                    "pitch": -20.19,
+                    "yaw": 179.23,
+                    "x": 99.79,
+                    "y": 61.22
+                  },
+                  {
+                    "id": "to-savoury-next1",
+                    "type": "scene",
+                    "targetSceneId": "savoury-next1",
+                    "text": "Savoury_Next1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -14.24,
+                    "yaw": -1.43,
+                    "x": 49.6,
+                    "y": 57.91
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-right7-2": {
+                "id": "savoury-right7-2",
+                "title": "Savoury_Right7-2",
+                "name": "Savoury_Right7-2",
+                "label": "Savoury_Right7-2",
+                "panorama": "/uploads/panos/savoury-right7-2-20260603075210-c9268aec.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-right7-2-thumb-20260603075210-c981edb3.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "jessicasavoury-opening1-1": {
+                "id": "jessicasavoury-opening1-1",
+                "title": "JessicaSavoury_Opening1-1",
+                "name": "JessicaSavoury_Opening1-1",
+                "label": "JessicaSavoury_Opening1-1",
+                "panorama": "/uploads/panos/jessicasavoury-opening1-1-20260603075210-e94be558.jpg",
+                "thumbnail": "/uploads/thumbs/jessicasavoury-opening1-1-thumb-20260603075210-dcadcdaa.jpg",
+                "mapPoint": {
+                  "x": 4.19,
+                  "y": 59.49
+                },
+                "minimap": {
+                  "x": 4.19,
+                  "y": 59.49
+                },
+                "hotspots": [
+                  {
+                    "id": "to-jessicasavoury-opening1-2",
+                    "type": "scene",
+                    "targetSceneId": "jessicasavoury-opening1-2",
+                    "text": "JessicaSavoury_Opening1-2",
+                    "coordinateMode": "pannellum",
+                    "pitch": -22.82,
+                    "yaw": -1.67,
+                    "x": 49.54,
+                    "y": 62.68
+                  },
+                  {
+                    "id": "to-savoury-left1-1",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left1-1",
+                    "text": "Savoury_Left1-1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.42,
+                    "yaw": -93.36,
+                    "x": 24.07,
+                    "y": 60.79
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "jessicasavoury-opening1-2": {
+                "id": "jessicasavoury-opening1-2",
+                "title": "JessicaSavoury_Opening1-2",
+                "name": "JessicaSavoury_Opening1-2",
+                "label": "JessicaSavoury_Opening1-2",
+                "panorama": "/uploads/panos/jessicasavoury-opening1-2-20260603075211-0a8ae7b4.jpg",
+                "thumbnail": "/uploads/thumbs/jessicasavoury-opening1-2-thumb-20260603075211-384c40ce.jpg",
+                "mapPoint": {
+                  "x": 12.57,
+                  "y": 59.92
+                },
+                "minimap": {
+                  "x": 12.57,
+                  "y": 59.92
+                },
+                "hotspots": [
+                  {
+                    "id": "to-jessicasavoury-opening1-1",
+                    "type": "scene",
+                    "targetSceneId": "jessicasavoury-opening1-1",
+                    "text": "JessicaSavoury_Opening1-1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -23.04,
+                    "yaw": 174.32,
+                    "x": 98.42,
+                    "y": 62.8
+                  },
+                  {
+                    "id": "to-savoury-opening3",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening3",
+                    "text": "Savoury_Opening3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -13.28,
+                    "yaw": -2.5,
+                    "x": 49.31,
+                    "y": 57.38
+                  },
+                  {
+                    "id": "to-savoury-left2-1",
+                    "type": "scene",
+                    "targetSceneId": "savoury-left2-1",
+                    "text": "Savoury_Left2-1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -20.29,
+                    "yaw": -96.54,
+                    "x": 23.18,
+                    "y": 61.27
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-next1": {
+                "id": "savoury-next1",
+                "title": "Savoury_Next1",
+                "name": "Savoury_Next1",
+                "label": "Savoury_Next1",
+                "panorama": "/uploads/panos/savoury-next1-20260603075211-04b76689.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-next1-thumb-20260603075211-a3043149.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-opening9",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening9",
+                    "text": "Savoury_Opening9",
+                    "coordinateMode": "pannellum",
+                    "pitch": -15.96,
+                    "yaw": 178.63,
+                    "x": 99.62,
+                    "y": 58.87
+                  },
+                  {
+                    "id": "to-savoury-next1-1",
+                    "type": "scene",
+                    "targetSceneId": "savoury-next1-1",
+                    "text": "Savoury_Next1-1",
+                    "coordinateMode": "pannellum",
+                    "pitch": -20.84,
+                    "yaw": 61.61,
+                    "x": 67.11,
+                    "y": 61.58
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-next1-4": {
+                "id": "savoury-next1-4",
+                "title": "Savoury_Next1-4",
+                "name": "Savoury_Next1-4",
+                "label": "Savoury_Next1-4",
+                "panorama": "/uploads/panos/savoury-next1-4-20260603075211-d5edc7cd.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-next1-4-thumb-20260603075211-02b90711.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-next1-5",
+                    "type": "scene",
+                    "targetSceneId": "savoury-next1-5",
+                    "text": "Savoury_Next1-5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -23.2,
+                    "yaw": -0.84,
+                    "x": 49.77,
+                    "y": 62.89
+                  },
+                  {
+                    "id": "to-savoury-next1-3",
+                    "type": "scene",
+                    "targetSceneId": "savoury-next1-3",
+                    "text": "Savoury_Next1-3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -12.15,
+                    "yaw": -89.99,
+                    "x": 25,
+                    "y": 56.75
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-opening4": {
+                "id": "savoury-opening4",
+                "title": "Savoury_Opening4",
+                "name": "Savoury_Opening4",
+                "label": "Savoury_Opening4",
+                "panorama": "/uploads/panos/savoury-opening4-20260603075212-0ef5c553.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-opening4-thumb-20260603075212-67c56b8f.jpg",
+                "mapPoint": {
+                  "x": 30.24,
+                  "y": 59.71
+                },
+                "minimap": {
+                  "x": 30.24,
+                  "y": 59.71
+                },
+                "hotspots": [
+                  {
+                    "id": "to-savoury-opening3",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening3",
+                    "text": "Savoury_Opening3",
+                    "coordinateMode": "pannellum",
+                    "pitch": -26.4,
+                    "yaw": -179.67,
+                    "x": 0.09,
+                    "y": 64.67
+                  },
+                  {
+                    "id": "to-savoury-opening5",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening5",
+                    "text": "Savoury_Opening5",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.46,
+                    "yaw": -4,
+                    "x": 48.89,
+                    "y": 60.81
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-opening5": {
+                "id": "savoury-opening5",
+                "title": "Savoury_Opening5",
+                "name": "Savoury_Opening5",
+                "label": "Savoury_Opening5",
+                "panorama": "/uploads/panos/savoury-opening5-20260603075213-b59defa2.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-opening5-thumb-20260603075213-2326669c.jpg",
+                "mapPoint": {
+                  "x": 38.82,
+                  "y": 60.14
+                },
+                "minimap": {
+                  "x": 38.82,
+                  "y": 60.14
+                },
+                "hotspots": [
+                  {
+                    "id": "to-savoury-opening4",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening4",
+                    "text": "Savoury_Opening4",
+                    "coordinateMode": "pannellum",
+                    "pitch": -18.5,
+                    "yaw": 178.92,
+                    "x": 99.7,
+                    "y": 60.28
+                  },
+                  {
+                    "id": "to-savoury-opening6",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening6",
+                    "text": "Savoury_Opening6",
+                    "coordinateMode": "pannellum",
+                    "pitch": -22,
+                    "yaw": -2.8,
+                    "x": 49.22,
+                    "y": 62.22
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              },
+              "savoury-opening8": {
+                "id": "savoury-opening8",
+                "title": "Savoury_Opening8",
+                "name": "Savoury_Opening8",
+                "label": "Savoury_Opening8",
+                "panorama": "/uploads/panos/savoury-opening8-20260603075213-ae218e9e.jpg",
+                "thumbnail": "/uploads/thumbs/savoury-opening8-thumb-20260603075213-747a5e4e.jpg",
+                "mapPoint": null,
+                "minimap": null,
+                "hotspots": [
+                  {
+                    "id": "to-savoury-opening7",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening7",
+                    "text": "Savoury_Opening7",
+                    "coordinateMode": "pannellum",
+                    "pitch": -26.24,
+                    "yaw": 176.53,
+                    "x": 99.04,
+                    "y": 64.58
+                  },
+                  {
+                    "id": "to-savoury-opening9",
+                    "type": "scene",
+                    "targetSceneId": "savoury-opening9",
+                    "text": "Savoury_Opening9",
+                    "coordinateMode": "pannellum",
+                    "pitch": -19.75,
+                    "yaw": -4.76,
+                    "x": 48.68,
+                    "y": 60.97
+                  }
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
+              }
+            },
+            "connections": []
+          }
+        }
+      ]
     },
     "dressings": {
       "id": "dressings",
@@ -104,7 +1688,13 @@
                     "x": 74.06,
                     "y": 56.25
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145246-743": {
                 "id": "20260601-145246-743",
@@ -144,7 +1734,13 @@
                     "x": 49.08,
                     "y": 56.83
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145235-167": {
                 "id": "20260601-145235-167",
@@ -184,7 +1780,13 @@
                     "x": 18.39,
                     "y": 60.25
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145137-368": {
                 "id": "20260601-145137-368",
@@ -235,7 +1837,13 @@
                     "x": 52.19,
                     "y": 64.2
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145016-832": {
                 "id": "20260601-145016-832",
@@ -275,7 +1883,13 @@
                     "x": 25.14,
                     "y": 61.38
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145034-782": {
                 "id": "20260601-145034-782",
@@ -326,7 +1940,13 @@
                     "x": 75.89,
                     "y": 61.75
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145010-964": {
                 "id": "20260601-145010-964",
@@ -355,7 +1975,13 @@
                     "x": 46.51,
                     "y": 67.47
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145024-325": {
                 "id": "20260601-145024-325",
@@ -395,7 +2021,13 @@
                     "x": 76.04,
                     "y": 61.24
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145043-312": {
                 "id": "20260601-145043-312",
@@ -424,7 +2056,13 @@
                     "x": 78.95,
                     "y": 62.95
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145200-118": {
                 "id": "20260601-145200-118",
@@ -475,7 +2113,13 @@
                     "x": 98.15,
                     "y": 59.78
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145240-894": {
                 "id": "20260601-145240-894",
@@ -515,7 +2159,13 @@
                     "x": 49.13,
                     "y": 59.04
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145328-254": {
                 "id": "20260601-145328-254",
@@ -544,7 +2194,13 @@
                     "x": 99.38,
                     "y": 56.28
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145217-386": {
                 "id": "20260601-145217-386",
@@ -595,7 +2251,13 @@
                     "x": 23.76,
                     "y": 59.53
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145252-719": {
                 "id": "20260601-145252-719",
@@ -624,7 +2286,13 @@
                     "x": 27.21,
                     "y": 60.94
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145334-075": {
                 "id": "20260601-145334-075",
@@ -664,7 +2332,13 @@
                     "x": 67.44,
                     "y": 66.2
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145340-278": {
                 "id": "20260601-145340-278",
@@ -693,7 +2367,13 @@
                     "x": 32.16,
                     "y": 64.03
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145050-083": {
                 "id": "20260601-145050-083",
@@ -733,7 +2413,13 @@
                     "x": 50.31,
                     "y": 57.09
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145056-169": {
                 "id": "20260601-145056-169",
@@ -806,7 +2492,13 @@
                     "x": 25.71,
                     "y": 56.68
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145101-880": {
                 "id": "20260601-145101-880",
@@ -879,7 +2571,13 @@
                     "x": 36.37,
                     "y": 58.89
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145154-347": {
                 "id": "20260601-145154-347",
@@ -908,7 +2606,13 @@
                     "x": 49.37,
                     "y": 61.27
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145211-362": {
                 "id": "20260601-145211-362",
@@ -948,7 +2652,13 @@
                     "x": 47.52,
                     "y": 59.33
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145113-656": {
                 "id": "20260601-145113-656",
@@ -999,7 +2709,13 @@
                     "x": 24.26,
                     "y": 56.38
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145131-369": {
                 "id": "20260601-145131-369",
@@ -1039,7 +2755,13 @@
                     "x": 49.54,
                     "y": 60.71
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145148-805": {
                 "id": "20260601-145148-805",
@@ -1090,7 +2812,13 @@
                     "x": 23.89,
                     "y": 60.66
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145223-334": {
                 "id": "20260601-145223-334",
@@ -1119,7 +2847,13 @@
                     "x": 51.92,
                     "y": 59.44
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145322-120": {
                 "id": "20260601-145322-120",
@@ -1159,7 +2893,13 @@
                     "x": 11.14,
                     "y": 58.92
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145107-773": {
                 "id": "20260601-145107-773",
@@ -1210,7 +2950,13 @@
                     "x": 11.85,
                     "y": 59.46
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145143-091": {
                 "id": "20260601-145143-091",
@@ -1239,7 +2985,13 @@
                     "x": 76.04,
                     "y": 60.07
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145205-573": {
                 "id": "20260601-145205-573",
@@ -1279,7 +3031,13 @@
                     "x": 26.23,
                     "y": 63.21
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145258-221": {
                 "id": "20260601-145258-221",
@@ -1319,7 +3077,13 @@
                     "x": 75.17,
                     "y": 55.89
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145304-125": {
                 "id": "20260601-145304-125",
@@ -1348,7 +3112,13 @@
                     "x": 74.55,
                     "y": 59.27
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145351-983": {
                 "id": "20260601-145351-983",
@@ -1377,7 +3147,13 @@
                     "x": 52.47,
                     "y": 55.62
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145119-711": {
                 "id": "20260601-145119-711",
@@ -1439,7 +3215,13 @@
                     "x": 66.11,
                     "y": 60.49
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145125-744": {
                 "id": "20260601-145125-744",
@@ -1490,7 +3272,13 @@
                     "x": 27.98,
                     "y": 60.38
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145229-267": {
                 "id": "20260601-145229-267",
@@ -1530,7 +3318,13 @@
                     "x": 36.11,
                     "y": 59.71
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145316-177": {
                 "id": "20260601-145316-177",
@@ -1570,7 +3364,13 @@
                     "x": 66.49,
                     "y": 55.57
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               },
               "20260601-145346-044": {
                 "id": "20260601-145346-044",
@@ -1610,7 +3410,13 @@
                     "x": 89.81,
                     "y": 60.29
                   }
-                ]
+                ],
+                "view": {
+                  "initialYaw": 0,
+                  "initialPitch": 0,
+                  "initialHfov": 110,
+                  "northOffset": 0
+                }
               }
             },
             "connections": []
