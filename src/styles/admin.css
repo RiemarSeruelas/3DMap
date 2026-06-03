@@ -1,10 +1,4 @@
 /* =========================================================
-   STREET VIEW COMBINED CSS
-   Put this as ONE file in src/styles/streetview-combined.css
-   Then import only this CSS file after pannellum CSS / normal app imports.
-   ========================================================= */
-
-/* =========================================================
    STREET VIEW ADMIN - SINGLE COMBINED CSS
    Use ONLY this CSS file:
    import "./styles/admin.css" in App.jsx
@@ -1127,1034 +1121,2701 @@ button.danger,
   }
 }
 
-
 /* =========================================================
-   ADMIN AREA CONFIG PAGE CSS
+   PERFORMANCE + TEXT LIST + MAP ZOOM + SMALL MAP DOT PATCH
+   Append after existing AdminAreaConfigPage.css.
    ========================================================= */
 
-/* Compact professional Canva-style Location Configuration page */
-
-.admin-config-page-v2 {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  background: linear-gradient(135deg, #eef5ff 0%, #f8fbff 55%, #e6efff 100%);
-  color: #07152f;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+/* Replace the left thumbnails with a light text-only list. */
+.admin-config-text-location-list-v2 {
+  min-height: 0 !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  padding-right: 2px !important;
+  scrollbar-width: thin !important;
 }
 
-.admin-config-page-v2 * {
-  box-sizing: border-box;
+.admin-config-location-row-v2 {
+  width: 100% !important;
+  min-height: 38px !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  border: 1px solid rgba(148, 163, 184, 0.26) !important;
+  border-radius: 13px !important;
+  padding: 7px 8px !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  color: #10204d !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  transition: border-color 120ms ease, background 120ms ease !important;
 }
 
-.admin-config-topbar-v2 {
-  height: 58px;
-  display: grid;
-  grid-template-columns: minmax(250px, 1fr) auto auto;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 14px;
-  background: linear-gradient(135deg, #10204d, #1d4ed8);
-  color: white;
-  box-shadow: 0 12px 26px rgba(15, 35, 80, 0.18);
+.admin-config-location-row-v2:hover {
+  background: #eff6ff !important;
+  border-color: #93c5fd !important;
 }
 
-.admin-config-topbar-brand-v2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
+.admin-config-location-row-v2.active {
+  background: #dbeafe !important;
+  border-color: #2563eb !important;
+  box-shadow: inset 0 0 0 1px #2563eb !important;
 }
 
-.admin-config-logo-v2 {
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.13);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  font-size: 13px;
-  font-weight: 950;
-  flex: 0 0 auto;
+.admin-config-location-index-v2 {
+  width: 28px !important;
+  height: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  background: #e0ecff !important;
+  color: #1d4ed8 !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
 }
 
-.admin-config-topbar-brand-v2 span,
-.admin-config-topbar-meta-v2 span {
-  display: block;
-  margin-bottom: 1px;
-  font-size: 9px;
-  font-weight: 950;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
+.admin-config-location-row-v2.active .admin-config-location-index-v2 {
+  background: #2563eb !important;
+  color: white !important;
 }
 
-.admin-config-topbar-brand-v2 strong {
-  display: block;
-  font-size: 17px;
-  line-height: 1.05;
-  font-weight: 950;
-  letter-spacing: -0.035em;
-  color: white;
+.admin-config-location-row-v2 strong {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
 }
 
-.admin-config-topbar-meta-v2 {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
+.admin-config-location-badges-v2 {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
 }
 
-.admin-config-topbar-meta-v2 div {
-  min-width: 96px;
+.admin-config-location-badges-v2 em {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 18px !important;
+  padding: 3px 6px !important;
+  border-radius: 999px !important;
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  font-size: 8px !important;
+  font-style: normal !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.03em !important;
 }
 
-.admin-config-topbar-meta-v2 strong {
-  display: block;
-  max-width: 145px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 12px;
-  font-weight: 950;
-  color: white;
+.admin-config-load-more-v2 {
+  min-height: 38px !important;
+  border: 0 !important;
+  border-radius: 13px !important;
+  background: #e0ecff !important;
+  color: #1e3a8a !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
 }
 
-.admin-config-topbar-actions-v2 {
-  display: flex;
-  align-items: center;
-  gap: 7px;
+/* Text-only Mark Locations picker. */
+.admin-config-text-target-list-v2 {
+  max-height: 62vh !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding-right: 3px !important;
 }
 
-.admin-config-topbar-actions-v2 button {
-  border: 0;
-  border-radius: 999px;
-  min-height: 32px;
-  padding: 7px 11px;
-  background: rgba(255, 255, 255, 0.95);
-  color: #10204d;
-  font-size: 12px;
-  font-weight: 950;
-  cursor: pointer;
+.admin-config-target-row-v2 {
+  width: 100% !important;
+  min-height: 46px !important;
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  border: 1px solid #dbeafe !important;
+  border-radius: 15px !important;
+  padding: 9px 11px !important;
+  background: #f8fbff !important;
+  color: #10204d !important;
+  text-align: left !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
 }
 
-.admin-config-topbar-actions-v2 button.danger {
-  background: #fee2e2;
-  color: #991b1b;
+.admin-config-target-row-v2:hover {
+  border-color: #2563eb !important;
+  background: #eff6ff !important;
 }
 
-.admin-config-workspace-v2 {
-  height: calc(100vh - 58px);
-  display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
-  gap: 14px;
-  padding: 14px;
-  overflow: hidden;
+.admin-config-target-row-v2 span {
+  width: 30px !important;
+  height: 26px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  background: #e0ecff !important;
+  color: #1d4ed8 !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
 }
 
-.admin-config-image-rail-v2 {
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.86);
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  box-shadow: 0 16px 36px rgba(15, 35, 80, 0.1);
-  overflow: hidden;
+.admin-config-target-row-v2 strong {
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
 }
 
-.admin-config-search-v2 {
-  display: block;
+.admin-config-target-row-v2 em {
+  padding: 4px 8px !important;
+  border-radius: 999px !important;
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  font-size: 9px !important;
+  font-style: normal !important;
+  font-weight: 950 !important;
+  text-transform: uppercase !important;
 }
 
-.admin-config-search-v2 span {
-  display: block;
-  margin-bottom: 6px;
-  color: #64748b;
-  font-size: 10px;
-  font-weight: 950;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+/* Edit modal remove marked locations. */
+.admin-config-edit-modal-v2 {
+  width: min(620px, 94vw) !important;
 }
 
-.admin-config-search-v2 input {
-  width: 100%;
-  height: 38px;
-  border: 1px solid #c9d8f7;
-  border-radius: 14px;
-  padding: 0 13px;
-  outline: none;
-  background: #f8fbff;
-  color: #07152f;
-  font-size: 13px;
-  font-weight: 850;
+.admin-config-edit-links-v2 {
+  margin-top: 14px !important;
+  padding: 13px !important;
+  border-radius: 18px !important;
+  border: 1px solid #dbeafe !important;
+  background: #f8fbff !important;
 }
 
-.admin-config-search-v2 input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+.admin-config-edit-links-title-v2 {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 10px !important;
 }
 
-.admin-config-add-card-v2 {
-  min-height: 64px;
-  border: 0;
-  border-radius: 17px;
-  background: linear-gradient(135deg, #2563eb, #60a5fa);
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 11px 12px;
-  text-align: left;
-  cursor: pointer;
-  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.28);
+.admin-config-edit-links-title-v2 span {
+  color: #64748b !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
 }
 
-.admin-config-add-card-v2:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.34);
+.admin-config-edit-links-title-v2 button,
+.admin-config-edit-link-row-v2 button {
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 7px 10px !important;
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
 }
 
-.admin-config-add-card-v2 b {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border-radius: 13px;
-  background: rgba(255, 255, 255, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.26);
-  color: white;
-  font-size: 29px;
-  line-height: 1;
-  font-weight: 850;
+.admin-config-edit-links-v2 p {
+  margin: 0 !important;
+  color: #64748b !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
 }
 
-.admin-config-add-card-v2 strong {
-  display: block;
-  font-size: 14px;
-  font-weight: 950;
+.admin-config-edit-link-row-v2 {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 0 !important;
+  border-top: 1px solid #e0ecff !important;
 }
 
-.admin-config-add-card-v2 small {
-  display: block;
-  margin-top: 2px;
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 11px;
-  font-weight: 850;
+.admin-config-edit-link-row-v2:first-of-type {
+  border-top: 0 !important;
 }
 
-.admin-config-rail-title-v2 {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #10204d;
-  padding: 2px 2px 0;
+.admin-config-edit-link-row-v2 strong {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  color: #10204d !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
 }
 
-.admin-config-rail-title-v2 span {
-  font-size: 10px;
-  font-weight: 950;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+/* Mark-in-map zoom controls. */
+.admin-config-map-toolbar-v2 {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin: -8px 0 12px !important;
 }
 
-.admin-config-rail-title-v2 strong {
-  min-width: 36px;
-  height: 24px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: #dbeafe;
-  color: #1d4ed8;
-  font-size: 11px;
+.admin-config-map-toolbar-v2 .admin-config-map-help-v2 {
+  margin: 0 !important;
+  min-width: 0 !important;
 }
 
-.admin-config-image-list-v2 {
-  min-height: 0;
-  flex: 1;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-content: start;
-  gap: 9px;
-  padding-right: 2px;
-  scrollbar-width: none;
+.admin-config-map-zoom-controls-v2 {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 6px !important;
+  border-radius: 999px !important;
+  background: #eff6ff !important;
+  border: 1px solid #cbdafa !important;
 }
 
-.admin-config-image-list-v2::-webkit-scrollbar {
-  display: none;
+.admin-config-map-zoom-controls-v2 button {
+  min-width: 32px !important;
+  height: 30px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 0 10px !important;
+  background: white !important;
+  color: #10204d !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
 }
 
-.admin-config-image-card-v2 {
-  position: relative;
-  height: 94px;
-  overflow: hidden;
-  border: 2px solid transparent;
-  border-radius: 15px;
-  background: #eaf2ff;
-  padding: 0;
-  cursor: pointer;
-  box-shadow: 0 10px 20px rgba(15, 35, 80, 0.1);
+.admin-config-map-zoom-controls-v2 button:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
 }
 
-.admin-config-image-card-v2.active {
-  border-color: #2563eb;
-  box-shadow: 0 13px 26px rgba(37, 99, 235, 0.22);
+.admin-config-map-zoom-controls-v2 span {
+  min-width: 48px !important;
+  text-align: center !important;
+  color: #10204d !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
 }
 
-.admin-config-image-card-v2 img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.admin-config-map-scroll-v2 {
+  width: 100% !important;
+  max-height: 68vh !important;
+  overflow: auto !important;
+  border-radius: 20px !important;
+  background: #020617 !important;
+  border: 1px solid #cbdafa !important;
 }
 
-.admin-config-card-no-image-v2 {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  color: #64748b;
-  font-size: 11px;
-  font-weight: 950;
+.admin-config-map-scroll-v2 .admin-config-map-canvas-v2 {
+  position: relative !important;
+  min-width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  max-height: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  background: #020617 !important;
+  cursor: crosshair !important;
 }
 
-.admin-config-image-card-v2::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 40%, rgba(2, 6, 23, 0.84));
+.admin-config-map-scroll-v2 .admin-config-map-canvas-v2 > img,
+.admin-config-map-scroll-v2 .admin-config-map-canvas-v2 > svg {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
-.admin-config-image-card-label-v2 {
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 8px;
-  z-index: 2;
-  color: white;
-  text-align: left;
+.admin-config-map-scroll-v2 .admin-config-map-canvas-v2 > img {
+  object-fit: fill !important;
+  object-position: center center !important;
+  pointer-events: none !important;
+  user-select: none !important;
 }
 
-.admin-config-image-card-label-v2 strong {
-  display: block;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-size: 11px;
-  font-weight: 950;
+/* Make Mark-in-Map dots smaller and less aggressive. */
+.admin-config-site-dot-v2 {
+  position: absolute !important;
+  z-index: 6 !important;
+  width: 8px !important;
+  height: 8px !important;
+  transform: translate(-50%, -50%) scale(calc(1 / var(--admin-map-zoom, 1))) !important;
+  transform-origin: center center !important;
+  border-radius: 999px !important;
+  background: #22c55e !important;
+  border: 2px solid white !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.24), 0 5px 12px rgba(15, 23, 42, 0.24) !important;
+  pointer-events: none !important;
 }
 
-.admin-config-image-card-v2 em {
-  position: absolute;
-  top: 7px;
-  right: 7px;
-  z-index: 3;
-  padding: 4px 7px;
-  border-radius: 999px;
-  background: #22c55e;
-  color: white;
-  font-size: 8px;
-  font-style: normal;
-  font-weight: 950;
-  letter-spacing: 0.04em;
+.admin-config-site-dot-v2.is-selected {
+  width: 11px !important;
+  height: 11px !important;
+  background: #2563eb !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.24), 0 6px 14px rgba(15, 23, 42, 0.28) !important;
 }
 
-.admin-config-empty-list-v2 {
-  grid-column: 1 / -1;
-  padding: 16px;
-  border-radius: 16px;
-  background: #eff6ff;
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 850;
-  text-align: center;
+/* Keep Pannellum arrow centered and smaller. */
+.admin-config-pnlm-hotspot-shell-v2,
+.pnlm-street-arrow-hotspot {
+  width: 0 !important;
+  height: 0 !important;
+  margin-left: 0 !important;
+  margin-top: 0 !important;
+  background: transparent !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+  background-image: none !important;
 }
 
-.admin-config-center-stage-v2 {
-  min-width: 0;
-  min-height: 0;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 10px;
-  padding: 14px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  box-shadow: 0 16px 36px rgba(15, 35, 80, 0.1);
-  overflow: hidden;
+.admin-config-pnlm-hotspot-button-v2,
+.street-arrow-only-button {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 44px !important;
+  height: 44px !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: white !important;
+  color: #0f766e !important;
+  font-size: 24px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.35) !important;
+  pointer-events: auto !important;
 }
 
-.admin-config-stage-header-v2 {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 34px;
+@media (max-width: 760px) {
+  .admin-config-map-toolbar-v2 {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .admin-config-map-zoom-controls-v2 {
+    justify-content: center !important;
+  }
 }
 
-.admin-config-stage-header-v2 > strong {
-  display: block;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: #07152f;
-  font-size: 23px;
-  line-height: 1.08;
-  font-weight: 950;
-  letter-spacing: -0.045em;
+
+/* =========================================================
+   MAP MODAL CLEAN SCROLL + REMOVE MARK UI
+   Keeps wheel/trackpad scrolling for zoomed maps, but hides scrollbars.
+   ========================================================= */
+.admin-config-map-modal-v2 {
+  overflow: hidden !important;
 }
 
-.admin-config-mode-pill-v2 {
-  flex: 0 0 auto;
-  max-width: 420px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  padding: 8px 11px;
-  border-radius: 999px;
-  background: #e0ecff;
-  color: #1e3a8a;
-  font-size: 11px;
-  font-weight: 950;
+.admin-config-map-scroll-v2 {
+  overflow: auto !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  overscroll-behavior: contain !important;
+  cursor: crosshair !important;
 }
 
-.admin-config-mode-pill-v2.active {
-  background: #dcfce7;
-  color: #166534;
+.admin-config-map-scroll-v2::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
 }
 
-.admin-config-main-preview-v2 {
-  position: relative;
-  min-height: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  border-radius: 21px;
-  background: #020617;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 18px 42px rgba(15, 23, 42, 0.16);
+.admin-config-map-zoom-controls-v2 button.danger {
+  min-width: auto !important;
+  padding: 0 12px !important;
+  background: #fee2e2 !important;
+  color: #991b1b !important;
 }
 
-.admin-config-pannellum-wrap-v2,
-.admin-config-pannellum-mount-v2 {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #020617;
+.admin-config-edit-map-v2 {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 6px 0 12px !important;
+  padding: 12px !important;
+  border-radius: 16px !important;
+  background: #eff6ff !important;
+  border: 1px solid #cbdafa !important;
 }
 
-.admin-config-pannellum-wrap-v2.is-marking {
-  cursor: crosshair;
-  outline: 4px solid rgba(37, 99, 235, 0.28);
-  outline-offset: -4px;
+.admin-config-edit-map-v2 span {
+  display: block !important;
+  margin-bottom: 3px !important;
+  color: #64748b !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
 }
 
-.admin-config-fallback-panorama-v2 {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.admin-config-edit-map-v2 strong {
+  display: block !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  color: #10204d !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
 }
 
-.admin-config-empty-preview-v2 {
-  height: 100%;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  color: white;
+.admin-config-edit-map-v2 button {
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 8px 11px !important;
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
 }
 
-.admin-config-empty-preview-v2 b {
-  display: block;
-  font-size: 26px;
-  font-weight: 950;
+/* Smaller map dots after the zoom update. */
+.admin-config-site-dot-v2 {
+  width: 6px !important;
+  height: 6px !important;
+  border-width: 2px !important;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.22), 0 4px 10px rgba(15, 23, 42, 0.20) !important;
 }
 
-.admin-config-empty-preview-v2 span {
-  display: block;
-  margin-top: 6px;
-  color: rgba(255, 255, 255, 0.68);
-  font-size: 13px;
-  font-weight: 850;
+.admin-config-site-dot-v2.is-selected {
+  width: 9px !important;
+  height: 9px !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.23), 0 5px 12px rgba(15, 23, 42, 0.24) !important;
 }
 
-.admin-config-picking-banner-v2 {
-  position: absolute;
-  left: 50%;
-  bottom: 14px;
-  z-index: 30;
-  transform: translateX(-50%);
-  max-width: calc(100% - 28px);
-  padding: 9px 13px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.88);
-  color: white;
-  font-size: 12px;
-  font-weight: 950;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.25);
+/* =========================================================
+   MARK-IN-MAP PAN + CURSOR ZOOM PATCH
+   - Mouse wheel / trackpad zooms into the cursor position.
+   - Hold right click and drag to move the map.
+   - Shift + left drag also pans for laptops/touchpads.
+   - No visible scrollbars; the map itself never uses native scroll.
+   ========================================================= */
+.admin-config-map-viewport-v2 {
+  position: relative !important;
+  width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  max-height: 68vh !important;
+  overflow: hidden !important;
+  border-radius: 20px !important;
+  background: #020617 !important;
+  border: 1px solid #cbdafa !important;
+  cursor: crosshair !important;
+  overscroll-behavior: contain !important;
+  touch-action: none !important;
+  user-select: none !important;
 }
 
-.admin-config-pnlm-hotspot-shell-v2 {
-  width: 48px !important;
-  height: 48px !important;
+.admin-config-map-viewport-v2.is-panning {
+  cursor: grabbing !important;
+}
+
+.admin-config-map-viewport-v2 .admin-config-map-canvas-v2 {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  background: #020617 !important;
+  transform-origin: 0 0 !important;
+  will-change: transform !important;
+  cursor: inherit !important;
+}
+
+.admin-config-map-viewport-v2 .admin-config-map-canvas-v2 > img,
+.admin-config-map-viewport-v2 .admin-config-map-canvas-v2 > svg {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.admin-config-map-viewport-v2 .admin-config-map-canvas-v2 > img {
+  object-fit: fill !important;
+  object-position: center center !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
+.admin-config-map-viewport-v2 .admin-config-site-dot-v2 {
+  width: 7px !important;
+  height: 7px !important;
+  transform: translate(-50%, -50%) scale(calc(1 / var(--admin-map-zoom, 1))) !important;
+  border-width: 2px !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22), 0 5px 12px rgba(15, 23, 42, 0.22) !important;
+}
+
+.admin-config-map-viewport-v2 .admin-config-site-dot-v2.is-selected {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+/* Old native scroll container is kept hidden in case a cached component still renders it. */
+.admin-config-map-scroll-v2 {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.admin-config-map-scroll-v2::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+/* =========================================================
+   FINAL CONSOLIDATED OVERRIDES - KEEP AT VERY BOTTOM
+   Purpose:
+   - One admin.css file only
+   - Removes old dark transitions / duplicate overlays
+   - Keeps bright speed movement
+   - Raw minimap only
+   - Horizontal animated chevron arrows in admin + viewer
+   - Hides public/admin map dot noise outside Mark-in-Map
+   ========================================================= */
+
+/* ---------- Area Map -> 360 bright preload transition ---------- */
+.area-page.area-opening {
+  background: #f8fbff !important;
+  overflow: hidden !important;
+}
+
+.area-page.area-opening .simple-map-card {
+  transform-origin: center center !important;
+  animation: streetviewAreaRushForward 820ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  will-change: transform, filter, opacity !important;
+}
+
+.area-page.area-opening .area-map-image,
+.area-page.area-opening .area-map-svg {
+  filter: blur(7px) brightness(1.16) saturate(1.04) !important;
+}
+
+.area-page.area-opening .map-floating-info {
+  opacity: 0 !important;
+  transform: translateY(-10px) scale(0.98) !important;
+  transition: opacity 160ms ease, transform 160ms ease !important;
+}
+
+.area-opening-transition-layer {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 5000 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
   background: transparent !important;
 }
 
-.admin-config-pnlm-hotspot-button-v2 {
-  width: 48px;
-  height: 48px;
-  border: 0;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  transform: translate(-50%, -50%);
-  background: #ffffff;
-  color: #0f766e;
-  font-size: 26px;
-  font-weight: 950;
-  cursor: pointer;
-  box-shadow: 0 15px 36px rgba(15, 23, 42, 0.36);
+.area-opening-haze {
+  position: absolute !important;
+  inset: -12% !important;
+  opacity: 0 !important;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255,255,255,0.72), rgba(255,255,255,0.22) 34%, rgba(255,255,255,0.02) 70%),
+    linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.46), rgba(255,255,255,0.08)) !important;
+  animation: streetviewBrightHaze 820ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
-.admin-config-pnlm-hotspot-button-v2:hover {
-  transform: translate(-50%, -50%) scale(1.06);
+.area-opening-speed-lines {
+  position: absolute !important;
+  inset: -20% !important;
+  opacity: 0 !important;
+  background:
+    repeating-linear-gradient(90deg, transparent 0, transparent 42px, rgba(255,255,255,0.35) 52px, transparent 70px) !important;
+  transform: scaleX(1.8) skewX(-10deg) !important;
+  filter: blur(8px) !important;
+  animation: streetviewSpeedLines 820ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
-.admin-config-preview-actions-bar-v2 {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(118px, 1fr));
-  gap: 8px;
-}
-
-.admin-config-preview-actions-bar-v2 button {
-  min-height: 40px;
-  border: 0;
-  border-radius: 14px;
-  background: #e0ecff;
-  color: #1e3a8a;
-  font-size: 12px;
-  font-weight: 950;
-  cursor: pointer;
-}
-
-.admin-config-preview-actions-bar-v2 button.active {
-  background: #bfdbfe;
-  color: #10204d;
-  box-shadow: inset 0 0 0 2px #2563eb;
-}
-
-.admin-config-preview-actions-bar-v2 button.danger {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.admin-config-preview-actions-bar-v2 button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.admin-config-modal-backdrop-v2 {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: rgba(15, 23, 42, 0.38);
-  backdrop-filter: blur(7px);
-}
-
-.admin-config-add-modal-v2,
-.admin-config-link-modal-v2 {
-  width: min(510px, 94vw);
-  max-height: 88vh;
-  overflow: hidden;
-  padding: 20px;
-  border-radius: 24px;
-  background: white;
-  color: #07152f;
-  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.32);
-}
-
-.admin-config-link-modal-v2 {
-  width: min(800px, 94vw);
-}
-
-.admin-config-modal-header-v2 {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.admin-config-modal-header-v2 span {
-  display: block;
-  color: #64748b;
-  font-size: 10px;
-  font-weight: 950;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.admin-config-modal-header-v2 strong {
-  display: block;
-  margin-top: 3px;
-  font-size: 24px;
-  font-weight: 950;
-  letter-spacing: -0.045em;
-}
-
-.admin-config-modal-header-v2 button {
-  width: 36px;
-  height: 36px;
-  border: 0;
-  border-radius: 12px;
-  background: #e0ecff;
-  color: #1e3a8a;
-  font-size: 22px;
-  font-weight: 950;
-  cursor: pointer;
-}
-
-.admin-config-form-field-v2 {
-  display: block;
-  margin-bottom: 12px;
-}
-
-.admin-config-form-field-v2 span {
-  display: block;
-  margin-bottom: 6px;
-  color: #64748b;
-  font-size: 11px;
-  font-weight: 950;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.admin-config-form-field-v2 input {
-  width: 100%;
-  border: 1px solid #cbd5e1;
-  border-radius: 14px;
-  padding: 12px 13px;
-  outline: none;
-  font-weight: 850;
-}
-
-.admin-config-upload-box-v2 {
-  min-height: 118px;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  padding: 16px;
-  border-radius: 18px;
-  border: 2px dashed #9bbcf5;
-  background: #f8fbff;
-  cursor: pointer;
-}
-
-.admin-config-upload-box-v2 input {
-  display: none;
-}
-
-.admin-config-upload-box-v2 b {
-  color: #10204d;
-  font-size: 16px;
-  font-weight: 950;
-}
-
-.admin-config-upload-box-v2 span {
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 850;
-}
-
-.admin-config-modal-actions-v2 {
-  display: flex;
-  justify-content: flex-end;
-  gap: 9px;
-  margin-top: 16px;
-}
-
-.admin-config-modal-actions-v2 button {
-  border: 0;
-  border-radius: 14px;
-  min-height: 40px;
-  padding: 10px 14px;
-  background: #e0ecff;
-  color: #1e3a8a;
-  font-weight: 950;
-  cursor: pointer;
-}
-
-.admin-config-modal-actions-v2 button.primary {
-  background: #2563eb;
-  color: white;
-}
-
-.admin-config-link-gallery-v2 {
-  max-height: 62vh;
-  overflow: auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 11px;
-  padding-right: 2px;
-  scrollbar-width: none;
-}
-
-.admin-config-link-gallery-v2::-webkit-scrollbar {
-  display: none;
-}
-
-.admin-config-link-target-card-v2 {
-  position: relative;
-  height: 120px;
-  overflow: hidden;
-  border: 2px solid transparent;
-  border-radius: 17px;
-  background: #eaf2ff;
-  padding: 0;
-  cursor: pointer;
-  text-align: left;
-  box-shadow: 0 10px 22px rgba(15, 35, 80, 0.1);
-}
-
-.admin-config-link-target-card-v2:hover {
-  border-color: #2563eb;
-}
-
-.admin-config-link-target-card-v2 img,
-.admin-config-link-target-card-v2 > div {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: grid;
-  place-items: center;
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 950;
-}
-
-.admin-config-link-target-card-v2::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 42%, rgba(2, 6, 23, 0.82));
-}
-
-.admin-config-link-target-card-v2 strong {
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 9px;
-  z-index: 2;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: white;
-  font-size: 12px;
-  font-weight: 950;
-}
-
-@media (max-width: 1000px) {
-  .admin-config-workspace-v2 {
-    grid-template-columns: 230px minmax(0, 1fr);
-  }
-
-  .admin-config-image-list-v2 {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-config-preview-actions-bar-v2 {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 760px) {
-  .admin-config-topbar-v2 {
-    height: auto;
-    grid-template-columns: 1fr;
-    align-items: start;
-  }
-
-  .admin-config-topbar-meta-v2,
-  .admin-config-topbar-actions-v2 {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-
-  .admin-config-workspace-v2 {
-    height: calc(100vh - 155px);
-    grid-template-columns: 1fr;
-  }
-
-  .admin-config-image-rail-v2 {
-    max-height: 230px;
-  }
-
-  .admin-config-image-list-v2 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* === Update: stable Pannellum, top controls, map placement modal === */
-.admin-config-pannellum-controls-v2 {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 45;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.76);
-  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.32);
-  backdrop-filter: blur(12px);
-}
-
-.admin-config-pannellum-controls-v2 button {
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  background: white;
-  color: #10204d;
-  font-size: 18px;
-  line-height: 1;
-  font-weight: 950;
-  cursor: pointer;
-}
-
-.admin-config-pannellum-controls-v2 button:hover {
-  background: #dbeafe;
-}
-
-.admin-config-add-card-v2 {
-  min-height: 72px;
-  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 52%, #60a5fa 100%);
-  box-shadow: 0 18px 34px rgba(37, 99, 235, 0.34);
-}
-
-.admin-config-add-card-v2 b {
-  width: 44px;
-  height: 44px;
-  font-size: 32px;
-  background: #ffffff;
-  color: #1d4ed8;
-}
-
-.admin-config-add-card-v2 strong {
-  font-size: 15px;
-}
-
-.admin-config-stage-header-v2 {
-  padding-right: 2px;
-}
-
-.admin-config-map-modal-v2 {
-  width: min(1040px, 94vw);
-  max-height: 90vh;
-  overflow: hidden;
-  border-radius: 26px;
-  background: #ffffff;
-  color: #07152f;
-  box-shadow: 0 34px 90px rgba(15, 23, 42, 0.34);
-  padding: 18px;
-}
-
-.admin-config-map-help-v2 {
-  margin: -8px 0 12px;
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 850;
-}
-
-.admin-config-map-canvas-v2 {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  max-height: 68vh;
-  overflow: hidden;
-  border-radius: 20px;
-  background: #020617;
-  border: 1px solid #cbdafa;
-  cursor: crosshair;
-}
-
-.admin-config-map-canvas-v2 img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: fill;
-  pointer-events: none;
-}
-
-.admin-config-site-dot-v2 {
-  position: absolute;
-  z-index: 5;
-  width: 15px;
-  height: 15px;
-  transform: translate(-50%, -50%);
-  border-radius: 999px;
-  background: #22c55e;
-  border: 3px solid white;
-  box-shadow: 0 0 0 7px rgba(34, 197, 94, 0.24), 0 8px 22px rgba(15, 23, 42, 0.32);
-  pointer-events: none;
-}
-
-.admin-config-mode-pill-v2:empty {
-  display: none;
-}
-
-@media (max-width: 760px) {
-  .admin-config-pannellum-controls-v2 {
-    top: 8px;
-    right: 8px;
-  }
-
-  .admin-config-pannellum-controls-v2 button {
-    width: 30px;
-    height: 30px;
-  }
-}
-
-/* === Update: remove start UI, add edit button flow, one hotspot per target image === */
-.admin-config-link-target-card-v2 em {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 3;
-  padding: 4px 7px;
-  border-radius: 999px;
-  background: #fef3c7;
-  color: #92400e;
-  font-size: 9px;
-  font-style: normal;
-  font-weight: 950;
-  text-transform: uppercase;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
-}
-
-/* Connected site-map location dots for AreaMapPage */
-.area-map-location-dot-layer {
+.area-opening-soft-focus {
   position: absolute !important;
   inset: 0 !important;
-  z-index: 7 !important;
+  opacity: 0 !important;
+  backdrop-filter: blur(10px) brightness(1.14) !important;
+  -webkit-backdrop-filter: blur(10px) brightness(1.14) !important;
+  animation: streetviewSoftFocus 820ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes streetviewAreaRushForward {
+  0% { transform: scale(1) translate3d(0, 0, 0); filter: blur(0) brightness(1); opacity: 1; }
+  45% { transform: scale(1.14) translate3d(0, -1.5%, 0); filter: blur(5px) brightness(1.08); opacity: 1; }
+  100% { transform: scale(1.34) translate3d(0, -3.5%, 0); filter: blur(12px) brightness(1.18); opacity: 0.92; }
+}
+
+@keyframes streetviewBrightHaze {
+  0% { opacity: 0; transform: scale(0.96); }
+  40% { opacity: 0.56; }
+  100% { opacity: 0.72; transform: scale(1.08); }
+}
+
+@keyframes streetviewSpeedLines {
+  0% { opacity: 0; transform: translateX(-12%) scaleX(1.35) skewX(-10deg); }
+  32% { opacity: 0.55; }
+  100% { opacity: 0.2; transform: translateX(18%) scaleX(2.25) skewX(-10deg); }
+}
+
+@keyframes streetviewSoftFocus {
+  0% { opacity: 0; }
+  42% { opacity: 0.52; }
+  100% { opacity: 0.68; }
+}
+
+/* ---------- Kill old dark / text transition layers ---------- */
+.street-scene-transition-overlay,
+.street-scene-transition-card,
+.street-scene-transition-image,
+.street-scene-transition-scrim,
+.street-transition-curtain,
+.street-transition-overlay,
+.street-view-transition-overlay,
+.streetview-transition-overlay,
+.street-speed-warp-overlay,
+.street-warp-transition-overlay,
+.viewer-transition-overlay,
+.viewer-speed-warp-overlay,
+.street-blur-transition-overlay,
+.street-transition-layer {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: transparent !important;
+  box-shadow: none !important;
+}
+
+.street-scene-transition-card,
+.street-scene-transition-card *,
+.street-scene-transition-scrim {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* ---------- Bright speed transition only, no black screen ---------- */
+.street-viewer-shell,
+.street-pannellum-stage,
+.pnlm-container,
+.pnlm-render-container,
+.pnlm-dragfix {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+.street-pannellum-stage {
+  transform-origin: center center !important;
+  will-change: transform, filter, opacity !important;
+}
+
+.street-viewer-shell.is-scene-blurring .street-pannellum-stage,
+.street-viewer-shell.is-speed-transitioning .street-pannellum-stage,
+.street-viewer-shell.is-transitioning .street-pannellum-stage,
+.street-viewer-shell.is-moving .street-pannellum-stage,
+.street-viewer-shell.is-warping .street-pannellum-stage {
+  filter: blur(14px) brightness(1.14) saturate(1.06) !important;
+  transform: scale(1.16) !important;
+  opacity: 0.96 !important;
+  transition: filter 180ms ease, transform 260ms cubic-bezier(0.18, 0.86, 0.28, 1), opacity 160ms ease !important;
+}
+
+.street-viewer-shell:not(.is-scene-blurring):not(.is-speed-transitioning):not(.is-transitioning):not(.is-moving):not(.is-warping) .street-pannellum-stage {
+  filter: blur(0) brightness(1) saturate(1) !important;
+  transform: scale(1) !important;
+  opacity: 1 !important;
+  transition: filter 260ms ease, transform 300ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms ease !important;
+}
+
+.street-blur-transition-layer,
+.street-speed-transition-layer,
+.street-bright-speed-cover {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 70 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at center, rgba(255,255,255,0.46), rgba(255,255,255,0.14) 38%, transparent 72%),
+    linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent) !important;
+  backdrop-filter: blur(6px) brightness(1.12) !important;
+  -webkit-backdrop-filter: blur(6px) brightness(1.12) !important;
+  animation: streetBrightWarp 520ms cubic-bezier(0.2, 0.82, 0.22, 1) both !important;
+}
+
+.street-blur-transition-layer::before,
+.street-blur-transition-layer::after,
+.street-speed-transition-layer::before,
+.street-speed-transition-layer::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: -18% !important;
+  pointer-events: none !important;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.42) 45%, transparent 62%),
+    repeating-linear-gradient(90deg, transparent 0 72px, rgba(255,255,255,0.18) 73px 77px, transparent 78px 150px) !important;
+  transform: translateX(-22%) scaleX(1.4) !important;
+  filter: blur(9px) !important;
+  opacity: 0.82 !important;
+  animation: streetSpeedLines 680ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+@keyframes streetBrightWarp {
+  0% { opacity: 0; transform: scale(1); }
+  35% { opacity: 1; transform: scale(1.025); }
+  100% { opacity: 0; transform: scale(1.06); }
+}
+
+@keyframes streetSpeedLines {
+  0% { opacity: 0; transform: translateX(-30%) scaleX(1.6); }
+  22% { opacity: 0.92; }
+  100% { opacity: 0; transform: translateX(32%) scaleX(2.15); }
+}
+
+/* Hide Pannellum default loading / black loading UI. */
+.pnlm-load-box,
+.pnlm-load-button,
+.pnlm-loading,
+.pnlm-lbar,
+.pnlm-lbar-fill,
+.pnlm-lbox,
+.pnlm-loader,
+.pnlm-lmsg,
+.pnlm-load-box p,
+.pnlm-load-box div {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* ---------- Raw minimap only ---------- */
+.street-minimap-card,
+.street-minimap-card.raw-only,
+.street-minimap-card.raw-minimap-card {
+  position: fixed !important;
+  left: 22px !important;
+  bottom: 22px !important;
+  z-index: 80 !important;
+  width: 310px !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.16) !important;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.30) !important;
+}
+
+.street-minimap-header,
+.street-minimap-svg,
+.street-minimap-area,
+.street-minimap-center-ring,
+.street-minimap-world svg,
+.raw-minimap-world svg,
+.street-minimap-card svg,
+.street-minimap-window svg {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
   pointer-events: none !important;
 }
 
-.area-map-location-dot {
+.street-minimap-window,
+.street-minimap-window.raw-minimap-window {
+  position: relative !important;
+  width: 310px !important;
+  height: 175px !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  border: 0 !important;
+}
+
+.street-minimap-world,
+.street-minimap-world.raw-minimap-world {
   position: absolute !important;
-  width: 14px !important;
-  height: 14px !important;
-  transform: translate(-50%, -50%) !important;
-  border: 2px solid #ffffff !important;
-  border-radius: 999px !important;
-  background: #22c55e !important;
-  box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.22), 0 8px 18px rgba(2, 6, 23, 0.34) !important;
-  cursor: pointer !important;
-  pointer-events: auto !important;
-  padding: 0 !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 520px !important;
+  height: 292.5px !important;
+  transform-origin: 0 0 !important;
+  transition: transform 420ms ease !important;
+  background: #ffffff !important;
 }
 
-.area-map-location-dot:hover {
-  width: 19px !important;
-  height: 19px !important;
-  background: #16a34a !important;
-  box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.24), 0 10px 22px rgba(2, 6, 23, 0.42) !important;
-}
-
-
-/* =========================================================
-   MAP DOT + HOTSPOT FINAL OVERRIDES
-   ========================================================= */
-
-/* =========================================================
-   STREET VIEW MAP DOT PATCH
-   Source of truth: Admin Config saves scene.mapPoint + scene.minimap.
-   This patch makes the saved dots visible in Admin Map, Public Map, and Mark-in-Map modal.
-   ========================================================= */
-
-.site-location-dot-layer,
-.admin-location-dot-layer {
+.street-minimap-image,
+.street-minimap-image.raw-minimap-image {
   position: absolute !important;
   inset: 0 !important;
-  z-index: 12 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: fill !important;
+  opacity: 1 !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
   pointer-events: none !important;
+  background: #ffffff !important;
 }
 
-.site-location-dot,
-.admin-location-dot {
+.street-minimap-dot {
+  display: none !important;
+}
+
+.street-minimap-dot.is-active,
+.street-minimap-dot.only-current-dot,
+.street-minimap-dot.is-active.only-current-dot,
+.street-minimap-current-dot,
+.street-current-location-dot {
+  display: block !important;
   position: absolute !important;
-  width: 15px !important;
-  height: 15px !important;
+  width: 16px !important;
+  height: 16px !important;
   transform: translate(-50%, -50%) !important;
   border: 3px solid #ffffff !important;
   border-radius: 999px !important;
   background: #22c55e !important;
-  box-shadow:
-    0 0 0 5px rgba(34, 197, 94, 0.25),
-    0 8px 18px rgba(15, 23, 42, 0.32) !important;
-  pointer-events: auto !important;
-  cursor: pointer !important;
+  box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.24), 0 8px 18px rgba(15, 23, 42, 0.32) !important;
   padding: 0 !important;
-  z-index: 13 !important;
+  z-index: 8 !important;
+  pointer-events: none !important;
 }
 
-.site-location-dot:hover,
-.admin-location-dot:hover {
-  width: 21px !important;
-  height: 21px !important;
-  background: #16a34a !important;
+/* ---------- Public/admin map: do not show all 360 dots outside Mark-in-Map modal ---------- */
+.site-location-dot-layer,
+.area-map-location-dot-layer,
+.site-location-dot,
+.area-map-location-dot,
+.map-floating-dot-count,
+.area-map-card .admin-config-site-dot-v2,
+.simple-map-card .admin-config-site-dot-v2,
+.area-map-card .street-minimap-dot,
+.simple-map-card .street-minimap-dot {
+  display: none !important;
+  pointer-events: none !important;
 }
 
-.map-floating-dot-count {
+/* Keep the Mark-in-Map modal dots visible. */
+.admin-config-map-modal-v2 .admin-config-site-dot-v2,
+.admin-map-placement-modal .admin-config-map-dot {
+  display: block !important;
+}
+
+/* ---------- Cleaner viewer controls ---------- */
+.street-viewer-controls-clean {
+  position: fixed !important;
+  right: 22px !important;
+  top: 94px !important;
+  z-index: 95 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding: 8px !important;
+  border-radius: 18px !important;
+  background: rgba(17, 24, 39, 0.92) !important;
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.32) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+.street-viewer-controls-clean button,
+.pnlm-controls-container .pnlm-control,
+.pnlm-fullscreen-toggle-button {
+  width: 34px !important;
+  height: 34px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
   display: grid !important;
   place-items: center !important;
-  min-width: 74px !important;
-  padding: 8px 10px !important;
-  border-radius: 16px !important;
-  background: rgba(255, 255, 255, 0.92) !important;
-  color: #10204d !important;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12) !important;
-}
-
-.map-floating-dot-count strong {
-  font-size: 18px !important;
+  padding: 0 !important;
+  background: rgba(15, 23, 42, 0.86) !important;
+  color: #ffffff !important;
+  font-size: 19px !important;
   line-height: 1 !important;
   font-weight: 950 !important;
+  cursor: pointer !important;
 }
 
-.map-floating-dot-count span {
-  margin-top: 3px !important;
+.street-viewer-controls-clean button:hover,
+.pnlm-controls-container .pnlm-control:hover,
+.pnlm-fullscreen-toggle-button:hover {
+  background: rgba(30, 41, 59, 0.95) !important;
+}
+
+/* ---------- Horizontal animated chevron hotspot arrow ---------- */
+.pnlm-street-arrow-hotspot,
+.admin-config-pnlm-hotspot-shell-v2,
+.pnlm-google-arrow-hotspot,
+.pnlm-custom-next-hotspot {
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+}
+
+.street-arrow-only-button,
+.admin-config-pnlm-hotspot-button-v2,
+.viewer-arrow-only {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 74px !important;
+  height: 50px !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  padding: 0 9px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  color: #0f766e !important;
+  cursor: pointer !important;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.34) !important;
+  pointer-events: auto !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+}
+
+.street-arrow-only-button::before,
+.admin-config-pnlm-hotspot-button-v2::before,
+.viewer-arrow-only::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  border-radius: inherit !important;
+  background: linear-gradient(90deg, rgba(15, 118, 110, 0), rgba(15, 118, 110, 0.12), rgba(15, 118, 110, 0)) !important;
+  opacity: 0 !important;
+  transform: translateX(-100%) !important;
+  pointer-events: none !important;
+}
+
+.street-arrow-only-button:hover::before,
+.admin-config-pnlm-hotspot-button-v2:hover::before,
+.viewer-arrow-only:hover::before {
+  opacity: 1 !important;
+  animation: streetArrowSweep 850ms ease-in-out infinite !important;
+}
+
+.street-arrow-only-button .street-arrow-chevron,
+.admin-config-pnlm-hotspot-button-v2 .street-arrow-chevron,
+.viewer-arrow-only .street-arrow-chevron {
+  display: inline-block !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-top: 6px solid currentColor !important;
+  border-right: 6px solid currentColor !important;
+  transform: rotate(45deg) !important;
+  margin-left: -4px !important;
+  opacity: 0.92 !important;
+}
+
+.street-arrow-only-button:hover .street-arrow-chevron,
+.admin-config-pnlm-hotspot-button-v2:hover .street-arrow-chevron,
+.viewer-arrow-only:hover .street-arrow-chevron {
+  animation: streetChevronRun 780ms ease-in-out infinite !important;
+}
+
+.street-arrow-only-button .street-arrow-chevron:nth-child(1),
+.admin-config-pnlm-hotspot-button-v2 .street-arrow-chevron:nth-child(1),
+.viewer-arrow-only .street-arrow-chevron:nth-child(1) {
+  opacity: 0.45 !important;
+  animation-delay: 0ms !important;
+}
+
+.street-arrow-only-button .street-arrow-chevron:nth-child(2),
+.admin-config-pnlm-hotspot-button-v2 .street-arrow-chevron:nth-child(2),
+.viewer-arrow-only .street-arrow-chevron:nth-child(2) {
+  opacity: 0.7 !important;
+  animation-delay: 90ms !important;
+}
+
+.street-arrow-only-button .street-arrow-chevron:nth-child(3),
+.admin-config-pnlm-hotspot-button-v2 .street-arrow-chevron:nth-child(3),
+.viewer-arrow-only .street-arrow-chevron:nth-child(3) {
+  opacity: 1 !important;
+  animation-delay: 180ms !important;
+}
+
+.street-arrow-only-button > span:not(.street-arrow-chevron),
+.admin-config-pnlm-hotspot-button-v2 > span:not(.street-arrow-chevron),
+.viewer-arrow-only > span:not(.street-arrow-chevron) {
+  display: none !important;
+}
+
+@keyframes streetChevronRun {
+  0% { transform: rotate(45deg) translate(-2px, 2px); opacity: 0.3; }
+  45% { transform: rotate(45deg) translate(2px, -2px); opacity: 1; }
+  100% { transform: rotate(45deg) translate(6px, -6px); opacity: 0.25; }
+}
+
+@keyframes streetArrowSweep {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(110%); }
+}
+
+@media (max-width: 760px) {
+  .street-arrow-only-button,
+  .admin-config-pnlm-hotspot-button-v2,
+  .viewer-arrow-only {
+    width: 64px !important;
+    height: 46px !important;
+    border-radius: 14px !important;
+  }
+
+  .street-arrow-only-button .street-arrow-chevron,
+  .admin-config-pnlm-hotspot-button-v2 .street-arrow-chevron,
+  .viewer-arrow-only .street-arrow-chevron {
+    width: 16px !important;
+    height: 16px !important;
+    border-top-width: 5px !important;
+    border-right-width: 5px !important;
+  }
+
+  .street-minimap-card,
+  .street-minimap-card.raw-only,
+  .street-minimap-card.raw-minimap-card {
+    width: 250px !important;
+    left: 12px !important;
+    bottom: 12px !important;
+  }
+
+  .street-minimap-window,
+  .street-minimap-window.raw-minimap-window {
+    width: 250px !important;
+    height: 145px !important;
+  }
+
+  .street-viewer-controls-clean {
+    right: 12px !important;
+    top: 84px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .area-page.area-opening .simple-map-card,
+  .area-opening-haze,
+  .area-opening-speed-lines,
+  .area-opening-soft-focus,
+  .street-blur-transition-layer,
+  .street-speed-transition-layer,
+  .street-bright-speed-cover,
+  .street-blur-transition-layer::before,
+  .street-blur-transition-layer::after,
+  .street-speed-transition-layer::before,
+  .street-speed-transition-layer::after,
+  .street-viewer-shell.is-scene-blurring .street-pannellum-stage,
+  .street-viewer-shell.is-speed-transitioning .street-pannellum-stage,
+  .street-viewer-shell.is-transitioning .street-pannellum-stage,
+  .street-viewer-shell.is-moving .street-pannellum-stage,
+  .street-viewer-shell.is-warping .street-pannellum-stage {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   STREETVIEW CLEAN VIEWER + ADMIN MAP CLEANUP PATCH
+   Import once in App.jsx or in the updated components included in this ZIP.
+   ========================================================= */
+
+/* Admin / public map pages: do not show all 360 map dots while mapping areas. */
+.area-map-location-dot-layer,
+.admin-location-dot-layer,
+.site-location-dot-layer,
+.map-floating-dot-count {
+  display: none !important;
+}
+
+/* Keep polygons clickable, but remove excessive marker noise. */
+.area-map-card .street-minimap-dot,
+.simple-map-card .street-minimap-dot,
+.area-map-card .admin-config-site-dot-v2,
+.simple-map-card .admin-config-site-dot-v2 {
+  display: none !important;
+}
+
+/* Viewer shell must own fullscreen so controls/minimap do not float oddly. */
+.street-viewer-shell {
+  position: relative !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+}
+
+.street-viewer-shell:fullscreen {
+  background: #ffffff !important;
+}
+
+.street-pannellum-stage {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: #ffffff !important;
+}
+
+/* Hide default Pannellum controls/loading visuals. We use our own controls. */
+.pnlm-controls-container,
+.pnlm-load-box,
+.pnlm-lbox,
+.pnlm-loading,
+.pnlm-load-button {
+  display: none !important;
+}
+
+.street-viewer-controls-clean {
+  position: fixed !important;
+  right: 22px !important;
+  top: 94px !important;
+  z-index: 95 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding: 8px !important;
+  border-radius: 18px !important;
+  background: rgba(17, 24, 39, 0.92) !important;
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.32) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+.street-viewer-controls-clean button {
+  width: 34px !important;
+  height: 34px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+  color: #10204d !important;
+  font-size: 19px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+}
+
+.street-viewer-controls-clean button:hover {
+  background: #dbeafe !important;
+}
+
+/* In fullscreen keep controls attached to the screen edge, not floating mid-image. */
+.street-viewer-shell:fullscreen .street-viewer-controls-clean {
+  right: 24px !important;
+  top: 94px !important;
+}
+
+.street-location-pill {
+  position: fixed !important;
+  top: 26px !important;
+  right: 22px !important;
+  z-index: 90 !important;
+}
+
+/* Raw minimap only: no header, no colored polygon, white edges. */
+.street-minimap-card.raw-only {
+  position: fixed !important;
+  left: 22px !important;
+  bottom: 22px !important;
+  z-index: 80 !important;
+  width: 310px !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.32) !important;
+  border: 1px solid rgba(15, 23, 42, 0.16) !important;
+}
+
+.street-minimap-card.raw-only .street-minimap-header,
+.street-minimap-card.raw-only .street-minimap-svg,
+.street-minimap-card.raw-only .street-minimap-area,
+.street-minimap-card.raw-only .street-minimap-center-ring {
+  display: none !important;
+}
+
+.street-minimap-card.raw-only .street-minimap-window {
+  position: relative !important;
+  width: 310px !important;
+  height: 175px !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+}
+
+.street-minimap-card.raw-only .street-minimap-world {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 520px !important;
+  height: 292.5px !important;
+  transform-origin: 0 0 !important;
+  transition: transform 420ms ease !important;
+  background: #ffffff !important;
+}
+
+.street-minimap-card.raw-only .street-minimap-image {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: fill !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  background: #ffffff !important;
+}
+
+.street-minimap-card.raw-only .street-minimap-dot {
+  position: absolute !important;
+  width: 18px !important;
+  height: 18px !important;
+  transform: translate(-50%, -50%) !important;
+  border: 3px solid #ffffff !important;
+  border-radius: 999px !important;
+  background: #22c55e !important;
+  box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.26), 0 8px 20px rgba(0, 0, 0, 0.26) !important;
+  z-index: 5 !important;
+  pointer-events: none !important;
+}
+
+.street-minimap-card.raw-only .street-minimap-dot:not(.is-active) {
+  display: none !important;
+}
+
+/* Center the custom Pannellum arrow on the clicked coordinate. */
+.pnlm-street-arrow-hotspot {
+  width: 0 !important;
+  height: 0 !important;
+  margin-left: 0 !important;
+  margin-top: 0 !important;
+  background: transparent !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+  background-image: none !important;
+}
+
+.street-arrow-only-button {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 54px !important;
+  height: 54px !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: #ffffff !important;
+  color: #0f766e !important;
+  cursor: pointer !important;
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.35) !important;
+  pointer-events: auto !important;
+}
+
+.street-arrow-only-button span {
+  display: block !important;
+  line-height: 1 !important;
+  font-size: 29px !important;
+  font-weight: 950 !important;
+  transform: none !important;
+}
+
+/* Bright fast movement, no black fade. */
+.street-viewer-shell::after {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 70 !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.12) 55%, rgba(255, 255, 255, 0)) !important;
+  transition: opacity 160ms ease !important;
+}
+
+.street-viewer-shell.is-speed-transitioning .street-pannellum-stage {
+  filter: blur(12px) brightness(1.16) saturate(1.05) !important;
+  transform: scale(1.08) !important;
+  transition: transform 300ms ease, filter 300ms ease !important;
+}
+
+.street-viewer-shell.is-speed-transitioning::after {
+  opacity: 1 !important;
+}
+
+@media (max-width: 760px) {
+  .street-viewer-controls-clean {
+    right: 12px !important;
+    top: 84px !important;
+  }
+
+  .street-minimap-card.raw-only {
+    width: 250px !important;
+    left: 12px !important;
+    bottom: 12px !important;
+  }
+
+  .street-minimap-card.raw-only .street-minimap-window {
+    width: 250px !important;
+    height: 145px !important;
+  }
+}
+
+/* =========================================================
+   FINAL ONE-FILE SAFETY OVERRIDES
+   Keep this at the VERY BOTTOM of src/styles/admin.css.
+   This makes the single-file setup work with:
+   - AdminPage.jsx area mapping classes
+   - AdminAreaConfigPage.jsx -v2 classes
+   - StreetViewer.jsx viewer/minimap/classes
+   ========================================================= */
+
+/* ---------- Never let old generic modal/button rules flatten v2 modals ---------- */
+.admin-config-modal-backdrop-v2 {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2000 !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 20px !important;
+  background: rgba(15, 23, 42, 0.36) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.admin-config-add-modal-v2,
+.admin-config-link-modal-v2,
+.admin-config-map-modal-v2 {
+  overflow: hidden !important;
+  border-radius: 26px !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  color: #07152f !important;
+  box-shadow: 0 34px 90px rgba(15, 23, 42, 0.32) !important;
+  border: 1px solid rgba(148, 163, 184, 0.24) !important;
+}
+
+.admin-config-add-modal-v2 {
+  width: min(540px, 94vw) !important;
+  max-height: 88vh !important;
+  padding: 22px !important;
+}
+
+.admin-config-link-modal-v2 {
+  width: min(820px, 94vw) !important;
+  max-height: 88vh !important;
+  padding: 22px !important;
+}
+
+.admin-config-map-modal-v2 {
+  width: min(1040px, 94vw) !important;
+  max-height: 91vh !important;
+  padding: 18px !important;
+}
+
+.admin-config-modal-header-v2 {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  margin-bottom: 14px !important;
+}
+
+.admin-config-modal-header-v2 span {
+  display: block !important;
+  color: #64748b !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+}
+
+.admin-config-modal-header-v2 strong {
+  display: block !important;
+  margin-top: 4px !important;
+  color: #07152f !important;
+  font-size: 25px !important;
+  line-height: 1.02 !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.045em !important;
+}
+
+.admin-config-modal-header-v2 button {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+  font-size: 25px !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+}
+
+/* ---------- Admin config v2 layout ---------- */
+.admin-config-page-v2 {
+  width: 100vw !important;
+  height: 100vh !important;
+  display: grid !important;
+  grid-template-rows: 58px minmax(0, 1fr) !important;
+  overflow: hidden !important;
+  background: linear-gradient(135deg, #eef5ff 0%, #f8fbff 55%, #e6efff 100%) !important;
+  color: #07152f !important;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+.admin-config-topbar-v2 {
+  height: 58px !important;
+  display: grid !important;
+  grid-template-columns: minmax(250px, 1fr) auto auto !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 8px 14px !important;
+  background: linear-gradient(135deg, #10204d, #1d4ed8) !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 26px rgba(15, 35, 80, 0.18) !important;
+}
+
+.admin-config-workspace-v2 {
+  min-height: 0 !important;
+  height: auto !important;
+  display: grid !important;
+  grid-template-columns: 260px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  padding: 14px !important;
+  overflow: hidden !important;
+}
+
+.admin-config-image-rail-v2 {
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  padding: 12px !important;
+  border-radius: 22px !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  border: 1px solid rgba(148, 163, 184, 0.24) !important;
+  box-shadow: 0 16px 36px rgba(15, 35, 80, 0.1) !important;
+  overflow: hidden !important;
+}
+
+.admin-config-center-stage-v2 {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  gap: 10px !important;
+  padding: 14px !important;
+  border-radius: 24px !important;
+  background: rgba(255, 255, 255, 0.84) !important;
+  border: 1px solid rgba(148, 163, 184, 0.24) !important;
+  box-shadow: 0 16px 36px rgba(15, 35, 80, 0.1) !important;
+  overflow: hidden !important;
+}
+
+.admin-config-main-preview-v2 {
+  position: relative !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  border-radius: 21px !important;
+  background: #020617 !important;
+  border: 1px solid rgba(148, 163, 184, 0.35) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 18px 42px rgba(15, 23, 42, 0.16) !important;
+}
+
+.admin-config-pannellum-wrap-v2,
+.admin-config-pannellum-mount-v2 {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  background: #020617 !important;
+}
+
+/* ---------- Uploaded images text list ---------- */
+.admin-config-text-location-list-v2 {
+  min-height: 0 !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  padding-right: 2px !important;
+  scrollbar-width: thin !important;
+}
+
+.admin-config-location-row-v2 {
+  width: 100% !important;
+  min-height: 38px !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  border: 1px solid rgba(148, 163, 184, 0.28) !important;
+  border-radius: 13px !important;
+  padding: 7px 8px !important;
+  background: rgba(255, 255, 255, 0.84) !important;
+  color: #10204d !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  text-align: left !important;
+}
+
+.admin-config-location-row-v2:hover {
+  background: #eff6ff !important;
+  border-color: #93c5fd !important;
+}
+
+.admin-config-location-row-v2.active {
+  background: #dbeafe !important;
+  border-color: #2563eb !important;
+  box-shadow: inset 0 0 0 1px #2563eb !important;
+}
+
+.admin-config-location-row-v2 strong {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-location-index-v2 {
+  width: 28px !important;
+  height: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  background: #e0ecff !important;
+  color: #1d4ed8 !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-location-row-v2.active .admin-config-location-index-v2 {
+  background: #2563eb !important;
+  color: white !important;
+}
+
+.admin-config-location-badges-v2 {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.admin-config-location-badges-v2 em {
+  display: inline-flex !important;
+  min-height: 18px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 3px 6px !important;
+  border-radius: 999px !important;
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  font-size: 8px !important;
+  font-style: normal !important;
+  font-weight: 950 !important;
+}
+
+/* ---------- Mark in Map modal ---------- */
+.admin-config-map-toolbar-v2 {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin: -6px 0 12px !important;
+}
+
+.admin-config-map-help-v2 {
+  margin: 0 !important;
+  min-width: 0 !important;
+  color: #64748b !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+}
+
+.admin-config-map-zoom-controls-v2 {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 6px !important;
+  border-radius: 999px !important;
+  background: #eff6ff !important;
+  border: 1px solid #cbdafa !important;
+}
+
+.admin-config-map-zoom-controls-v2 button {
+  min-width: 32px !important;
+  height: 30px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 0 10px !important;
+  background: white !important;
+  color: #10204d !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+
+.admin-config-map-zoom-controls-v2 button.danger {
+  min-width: auto !important;
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+.admin-config-map-zoom-controls-v2 span {
+  min-width: 48px !important;
+  text-align: center !important;
+  color: #10204d !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-map-viewport-v2 {
+  position: relative !important;
+  width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  max-height: 68vh !important;
+  overflow: hidden !important;
+  border-radius: 20px !important;
+  background: #ffffff !important;
+  border: 1px solid #cbdafa !important;
+  cursor: crosshair !important;
+  overscroll-behavior: contain !important;
+  touch-action: none !important;
+  user-select: none !important;
+}
+
+.admin-config-map-viewport-v2.is-panning {
+  cursor: grabbing !important;
+}
+
+.admin-config-map-viewport-v2 .admin-config-map-canvas-v2 {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  transform-origin: 0 0 !important;
+  will-change: transform !important;
+  cursor: inherit !important;
+}
+
+.admin-config-map-viewport-v2 .admin-config-map-canvas-v2 > img,
+.admin-config-map-viewport-v2 .admin-config-map-canvas-v2 > svg {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.admin-config-map-viewport-v2 .admin-config-map-canvas-v2 > img {
+  object-fit: fill !important;
+  object-position: center center !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
+/* Smaller map dots in mark-in-map */
+.admin-config-map-viewport-v2 .admin-config-site-dot-v2,
+.admin-config-site-dot-v2 {
+  position: absolute !important;
+  z-index: 6 !important;
+  display: block !important;
+  width: 7px !important;
+  height: 7px !important;
+  transform: translate(-50%, -50%) scale(calc(1 / var(--admin-map-zoom, 1))) !important;
+  transform-origin: center center !important;
+  border-radius: 999px !important;
+  background: #22c55e !important;
+  border: 2px solid white !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22), 0 5px 12px rgba(15, 23, 42, 0.22) !important;
+  pointer-events: none !important;
+}
+
+.admin-config-map-viewport-v2 .admin-config-site-dot-v2.is-selected,
+.admin-config-site-dot-v2.is-selected {
+  width: 10px !important;
+  height: 10px !important;
+  background: #2563eb !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.23), 0 5px 12px rgba(15, 23, 42, 0.24) !important;
+}
+
+.admin-config-map-area-overlay-v2 {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+}
+
+.admin-config-map-area-overlay-v2 polygon {
+  fill: rgba(37, 99, 235, 0.16) !important;
+  stroke: rgba(37, 99, 235, 0.86) !important;
+  stroke-width: 0.35 !important;
+  vector-effect: non-scaling-stroke !important;
+}
+
+/* ---------- Mark Locations picker ---------- */
+.admin-config-text-target-list-v2 {
+  max-height: 62vh !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding-right: 3px !important;
+}
+
+.admin-config-target-row-v2 {
+  width: 100% !important;
+  min-height: 46px !important;
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  border: 1px solid #dbeafe !important;
+  border-radius: 15px !important;
+  padding: 9px 11px !important;
+  background: #f8fbff !important;
+  color: #10204d !important;
+  text-align: left !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+}
+
+.admin-config-target-row-v2:hover {
+  border-color: #2563eb !important;
+  background: #eff6ff !important;
+}
+
+.admin-config-target-row-v2 span {
+  width: 30px !important;
+  height: 26px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  background: #e0ecff !important;
+  color: #1d4ed8 !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-target-row-v2 strong {
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-target-row-v2 em {
+  padding: 4px 8px !important;
+  border-radius: 999px !important;
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  font-size: 9px !important;
+  font-style: normal !important;
+  font-weight: 950 !important;
+  text-transform: uppercase !important;
+}
+
+/* ---------- Edit modal ---------- */
+.admin-config-edit-modal-v2 {
+  width: min(620px, 94vw) !important;
+}
+
+.admin-config-edit-map-v2,
+.admin-config-edit-links-v2 {
+  margin-top: 12px !important;
+  padding: 13px !important;
+  border-radius: 18px !important;
+  border: 1px solid #dbeafe !important;
+  background: #f8fbff !important;
+}
+
+.admin-config-edit-map-v2 {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.admin-config-edit-map-v2 span,
+.admin-config-edit-links-title-v2 span {
+  display: block !important;
+  margin-bottom: 3px !important;
+  color: #64748b !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+
+.admin-config-edit-map-v2 strong,
+.admin-config-edit-link-row-v2 strong {
+  display: block !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  color: #10204d !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-edit-links-title-v2 {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 10px !important;
+}
+
+.admin-config-edit-link-row-v2 {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 0 !important;
+  border-top: 1px solid #e0ecff !important;
+}
+
+.admin-config-edit-links-title-v2 button,
+.admin-config-edit-link-row-v2 button,
+.admin-config-edit-map-v2 button {
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 7px 10px !important;
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+}
+
+/* ---------- Viewer / minimap / controls ---------- */
+.street-viewer-shell,
+.street-pannellum-stage,
+.pnlm-container,
+.pnlm-render-container,
+.pnlm-dragfix {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+.street-viewer-shell {
+  position: relative !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+.street-pannellum-stage {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform-origin: center center !important;
+  will-change: transform, filter, opacity !important;
+}
+
+.pnlm-controls-container,
+.pnlm-load-box,
+.pnlm-lbox,
+.pnlm-loading,
+.pnlm-load-button,
+.pnlm-lbar,
+.pnlm-lbar-fill,
+.pnlm-lmsg {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.street-viewer-controls-clean {
+  position: fixed !important;
+  right: 22px !important;
+  top: 94px !important;
+  z-index: 95 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding: 8px !important;
+  border-radius: 18px !important;
+  background: rgba(17, 24, 39, 0.92) !important;
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.32) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+.street-viewer-controls-clean button {
+  width: 34px !important;
+  height: 34px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+  color: #10204d !important;
+  font-size: 19px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+}
+
+.street-minimap-card.raw-only,
+.street-minimap-card {
+  position: fixed !important;
+  left: 22px !important;
+  bottom: 22px !important;
+  z-index: 80 !important;
+  width: 310px !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.30) !important;
+  border: 1px solid rgba(15, 23, 42, 0.16) !important;
+}
+
+.street-minimap-header,
+.street-minimap-svg,
+.street-minimap-area,
+.street-minimap-center-ring,
+.street-minimap-world svg,
+.street-minimap-world polygon {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.street-minimap-window {
+  position: relative !important;
+  width: 310px !important;
+  height: 175px !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+}
+
+.street-minimap-world {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 520px !important;
+  height: 292.5px !important;
+  transform-origin: 0 0 !important;
+  transition: transform 420ms ease !important;
+  background: #ffffff !important;
+}
+
+.street-minimap-image {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: fill !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  background: #ffffff !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+}
+
+.street-minimap-dot {
+  display: none !important;
+}
+
+.street-minimap-dot.is-active,
+.street-minimap-dot.only-current-dot,
+.street-minimap-dot.is-active.only-current-dot {
+  display: block !important;
+  position: absolute !important;
+  width: 16px !important;
+  height: 16px !important;
+  transform: translate(-50%, -50%) !important;
+  border: 3px solid #ffffff !important;
+  border-radius: 999px !important;
+  background: #22c55e !important;
+  box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.24), 0 8px 18px rgba(15, 23, 42, 0.32) !important;
+  padding: 0 !important;
+  z-index: 8 !important;
+  pointer-events: none !important;
+}
+
+/* Hide all public/admin 360 map dots outside Mark-in-Map modal. */
+.site-location-dot-layer,
+.area-map-location-dot-layer,
+.site-location-dot,
+.area-map-location-dot,
+.map-floating-dot-count,
+.area-map-card .admin-config-site-dot-v2,
+.simple-map-card .admin-config-site-dot-v2,
+.area-map-card .street-minimap-dot,
+.simple-map-card .street-minimap-dot {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.admin-config-map-modal-v2 .admin-config-site-dot-v2 {
+  display: block !important;
+}
+
+/* ---------- Bright transition only; no dark card/text overlay ---------- */
+.street-scene-transition-overlay,
+.street-scene-transition-card,
+.street-scene-transition-image,
+.street-scene-transition-scrim,
+.street-transition-curtain,
+.street-transition-overlay,
+.street-view-transition-overlay,
+.streetview-transition-overlay,
+.street-speed-warp-overlay,
+.street-warp-transition-overlay,
+.viewer-transition-overlay,
+.viewer-speed-warp-overlay,
+.street-blur-transition-overlay,
+.street-transition-layer {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: transparent !important;
+  box-shadow: none !important;
+}
+
+.street-scene-transition-card,
+.street-scene-transition-card *,
+.street-scene-transition-scrim {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.street-viewer-shell.is-speed-transitioning .street-pannellum-stage,
+.street-viewer-shell.is-scene-blurring .street-pannellum-stage,
+.street-viewer-shell.is-transitioning .street-pannellum-stage,
+.street-viewer-shell.is-moving .street-pannellum-stage,
+.street-viewer-shell.is-warping .street-pannellum-stage {
+  filter: blur(14px) brightness(1.16) saturate(1.06) !important;
+  transform: scale(1.12) !important;
+  opacity: 0.98 !important;
+  transition: filter 180ms ease, transform 260ms cubic-bezier(0.18, 0.86, 0.28, 1), opacity 160ms ease !important;
+}
+
+.street-viewer-shell::after {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 70 !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.12) 55%, rgba(255, 255, 255, 0)) !important;
+  transition: opacity 160ms ease !important;
+}
+
+.street-viewer-shell.is-speed-transitioning::after,
+.street-viewer-shell.is-scene-blurring::after,
+.street-viewer-shell.is-transitioning::after,
+.street-viewer-shell.is-moving::after,
+.street-viewer-shell.is-warping::after {
+  opacity: 1 !important;
+}
+
+/* ---------- Horizontal chevron hotspot arrow for admin + viewer ---------- */
+.pnlm-street-arrow-hotspot,
+.admin-config-pnlm-hotspot-shell-v2,
+.pnlm-google-arrow-hotspot,
+.pnlm-custom-next-hotspot {
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+}
+
+.street-arrow-only-button,
+.admin-config-pnlm-hotspot-button-v2,
+.viewer-arrow-only {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 74px !important;
+  height: 50px !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  padding: 0 9px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  color: #0f766e !important;
+  cursor: pointer !important;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.34) !important;
+  pointer-events: auto !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+}
+
+.street-arrow-only-button::before,
+.admin-config-pnlm-hotspot-button-v2::before,
+.viewer-arrow-only::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  border-radius: inherit !important;
+  background: linear-gradient(90deg, rgba(15, 118, 110, 0), rgba(15, 118, 110, 0.12), rgba(15, 118, 110, 0)) !important;
+  opacity: 0 !important;
+  transform: translateX(-100%) !important;
+  pointer-events: none !important;
+}
+
+.street-arrow-only-button:hover::before,
+.admin-config-pnlm-hotspot-button-v2:hover::before,
+.viewer-arrow-only:hover::before {
+  opacity: 1 !important;
+  animation: streetArrowSweep 850ms ease-in-out infinite !important;
+}
+
+.street-arrow-only-button .street-arrow-chevron,
+.admin-config-pnlm-hotspot-button-v2 .street-arrow-chevron,
+.viewer-arrow-only .street-arrow-chevron {
+  display: inline-block !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-top: 6px solid currentColor !important;
+  border-right: 6px solid currentColor !important;
+  transform: rotate(45deg) !important;
+  margin-left: -4px !important;
+  opacity: 0.92 !important;
+}
+
+.street-arrow-only-button:hover .street-arrow-chevron,
+.admin-config-pnlm-hotspot-button-v2:hover .street-arrow-chevron,
+.viewer-arrow-only:hover .street-arrow-chevron {
+  animation: streetChevronRun 780ms ease-in-out infinite !important;
+}
+
+.street-arrow-only-button > span:not(.street-arrow-chevron),
+.admin-config-pnlm-hotspot-button-v2 > span:not(.street-arrow-chevron),
+.viewer-arrow-only > span:not(.street-arrow-chevron) {
+  display: none !important;
+}
+
+@keyframes streetChevronRun {
+  0% { transform: rotate(45deg) translate(-2px, 2px); opacity: 0.3; }
+  45% { transform: rotate(45deg) translate(2px, -2px); opacity: 1; }
+  100% { transform: rotate(45deg) translate(6px, -6px); opacity: 0.25; }
+}
+
+@keyframes streetArrowSweep {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(110%); }
+}
+
+@media (max-width: 760px) {
+  .admin-config-workspace-v2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-config-image-rail-v2 {
+    max-height: 230px !important;
+  }
+
+  .street-minimap-card.raw-only,
+  .street-minimap-card {
+    width: 250px !important;
+    left: 12px !important;
+    bottom: 12px !important;
+  }
+
+  .street-minimap-window {
+    width: 250px !important;
+    height: 145px !important;
+  }
+
+  .street-viewer-controls-clean {
+    right: 12px !important;
+    top: 84px !important;
+  }
+}
+
+
+/* =========================================================
+   FINAL NO-OVERLAP V2 DESIGN RESTORE
+   Keep this block at the VERY BOTTOM of src/styles/admin.css.
+   It restores the current JSX classes from:
+   - AdminAreaConfigPage.jsx  -> admin-config-*-v2
+   - AdminPage.jsx            -> admin-side/admin-map classes
+   - StreetViewer.jsx         -> street-viewer/minimap/classes
+   ========================================================= */
+
+/* ---------- Scoped reset for the current Location Configuration page ---------- */
+.admin-config-page-v2,
+.admin-config-page-v2 * {
+  box-sizing: border-box !important;
+}
+
+.admin-config-page-v2 button,
+.admin-config-page-v2 input,
+.admin-config-page-v2 select,
+.admin-config-page-v2 textarea {
+  font: inherit !important;
+}
+
+.admin-config-page-v2 button {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  cursor: pointer !important;
+}
+
+/* ---------- Location Configuration shell ---------- */
+.admin-config-page-v2 {
+  width: 100vw !important;
+  height: 100vh !important;
+  display: grid !important;
+  grid-template-rows: 58px minmax(0, 1fr) !important;
+  overflow: hidden !important;
+  background: linear-gradient(135deg, #eef5ff 0%, #f8fbff 55%, #e6efff 100%) !important;
+  color: #07152f !important;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+.admin-config-topbar-v2 {
+  height: 58px !important;
+  display: grid !important;
+  grid-template-columns: minmax(280px, 1fr) auto auto !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 8px 14px !important;
+  background: linear-gradient(135deg, #10204d 0%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 26px rgba(15, 35, 80, 0.18) !important;
+}
+
+.admin-config-topbar-brand-v2 {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+}
+
+.admin-config-logo-v2 {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.13) !important;
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+}
+
+.admin-config-topbar-brand-v2 span,
+.admin-config-topbar-meta-v2 span {
+  display: block !important;
+  margin: 0 0 1px !important;
+  color: rgba(255, 255, 255, 0.72) !important;
   font-size: 9px !important;
   font-weight: 950 !important;
-  letter-spacing: 0.08em !important;
+  letter-spacing: 0.13em !important;
   text-transform: uppercase !important;
+  line-height: 1.15 !important;
+}
+
+.admin-config-topbar-brand-v2 strong {
+  display: block !important;
+  margin: 0 !important;
+  color: #ffffff !important;
+  font-size: 17px !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.035em !important;
+  line-height: 1.05 !important;
+}
+
+.admin-config-topbar-meta-v2 {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  min-width: 0 !important;
+}
+
+.admin-config-topbar-meta-v2 div {
+  min-width: 96px !important;
+}
+
+.admin-config-topbar-meta-v2 strong {
+  display: block !important;
+  max-width: 145px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  line-height: 1.15 !important;
+}
+
+.admin-config-topbar-actions-v2 {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+}
+
+.admin-config-topbar-actions-v2 button {
+  min-height: 32px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 7px 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #10204d !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+}
+
+.admin-config-topbar-actions-v2 button.danger {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+.admin-config-workspace-v2 {
+  min-height: 0 !important;
+  height: auto !important;
+  display: grid !important;
+  grid-template-columns: 260px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  padding: 14px !important;
+  overflow: hidden !important;
+}
+
+.admin-config-image-rail-v2 {
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  padding: 12px !important;
+  border-radius: 22px !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  border: 1px solid rgba(148, 163, 184, 0.24) !important;
+  box-shadow: 0 16px 36px rgba(15, 35, 80, 0.1) !important;
+  overflow: hidden !important;
+}
+
+.admin-config-center-stage-v2 {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  gap: 10px !important;
+  padding: 14px !important;
+  border-radius: 24px !important;
+  background: rgba(255, 255, 255, 0.84) !important;
+  border: 1px solid rgba(148, 163, 184, 0.24) !important;
+  box-shadow: 0 16px 36px rgba(15, 35, 80, 0.1) !important;
+  overflow: hidden !important;
+}
+
+/* ---------- Left rail: search + batch upload + text list ---------- */
+.admin-config-search-v2 {
+  display: block !important;
+  width: 100% !important;
+}
+
+.admin-config-search-v2 span {
+  display: block !important;
+  margin: 0 0 6px !important;
   color: #64748b !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+
+.admin-config-search-v2 input {
+  width: 100% !important;
+  height: 38px !important;
+  border: 1px solid #c9d8f7 !important;
+  border-radius: 14px !important;
+  padding: 0 13px !important;
+  outline: none !important;
+  background: #f8fbff !important;
+  color: #07152f !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  box-shadow: none !important;
+}
+
+.admin-config-search-v2 input:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12) !important;
+}
+
+.admin-config-add-card-v2 {
+  width: 100% !important;
+  min-height: 72px !important;
+  border: 0 !important;
+  border-radius: 17px !important;
+  padding: 11px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 11px !important;
+  text-align: left !important;
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 52%, #60a5fa 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 18px 34px rgba(37, 99, 235, 0.34) !important;
+}
+
+.admin-config-add-card-v2:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.38) !important;
+}
+
+.admin-config-add-card-v2 b {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 13px !important;
+  background: #ffffff !important;
+  color: #1d4ed8 !important;
+  font-size: 32px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+}
+
+.admin-config-add-card-v2 div {
+  min-width: 0 !important;
+}
+
+.admin-config-add-card-v2 strong {
+  display: block !important;
+  margin: 0 !important;
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  line-height: 1.1 !important;
+}
+
+.admin-config-add-card-v2 small {
+  display: block !important;
+  margin: 3px 0 0 !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  line-height: 1.15 !important;
+}
+
+.admin-config-rail-title-v2 {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  padding: 2px 2px 0 !important;
+  color: #10204d !important;
+}
+
+.admin-config-rail-title-v2 span {
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+
+.admin-config-rail-title-v2 strong {
+  min-width: 36px !important;
+  height: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-text-location-list-v2 {
+  min-height: 0 !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  padding: 0 2px 0 0 !important;
+  scrollbar-width: thin !important;
+}
+
+.admin-config-location-row-v2 {
+  width: 100% !important;
+  min-height: 38px !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  border: 1px solid rgba(148, 163, 184, 0.28) !important;
+  border-radius: 13px !important;
+  padding: 7px 8px !important;
+  background: rgba(255, 255, 255, 0.84) !important;
+  color: #10204d !important;
+  box-shadow: none !important;
+  text-align: left !important;
+}
+
+.admin-config-location-row-v2.active {
+  background: #dbeafe !important;
+  border-color: #2563eb !important;
+  box-shadow: inset 0 0 0 1px #2563eb !important;
+}
+
+.admin-config-location-index-v2 {
+  width: 28px !important;
+  height: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  background: #e0ecff !important;
+  color: #1d4ed8 !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-location-row-v2.active .admin-config-location-index-v2 {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+.admin-config-location-row-v2 strong {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  color: #07152f !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-location-badges-v2 {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.admin-config-location-badges-v2 em {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 18px !important;
+  padding: 3px 6px !important;
+  border-radius: 999px !important;
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  font-size: 8px !important;
+  font-style: normal !important;
+  font-weight: 950 !important;
+  white-space: nowrap !important;
+}
+
+.admin-config-empty-list-v2 {
+  padding: 16px !important;
+  border-radius: 16px !important;
+  background: #eff6ff !important;
+  color: #64748b !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+  text-align: center !important;
+}
+
+.admin-config-load-more-v2 {
+  min-height: 38px !important;
+  border: 0 !important;
+  border-radius: 13px !important;
+  background: #e0ecff !important;
+  color: #1e3a8a !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+}
+
+/* ---------- Stage header and preview ---------- */
+.admin-config-stage-header-v2 {
+  min-height: 34px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.admin-config-stage-header-v2 > strong {
+  display: block !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  color: #07152f !important;
+  font-size: 23px !important;
+  line-height: 1.08 !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.045em !important;
 }
 
 .admin-config-stage-right-v2 {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
+  min-width: 0 !important;
 }
 
 .admin-config-save-flash-v2 {
@@ -2170,19 +3831,591 @@ button.danger,
   white-space: nowrap !important;
 }
 
-.admin-config-map-mark-v2 {
-  position: absolute !important;
-  top: 8px !important;
-  right: 8px !important;
-  z-index: 4 !important;
-  padding: 4px 7px !important;
+.admin-config-mode-pill-v2 {
+  max-width: 420px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  padding: 8px 11px !important;
   border-radius: 999px !important;
-  background: #22c55e !important;
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-mode-pill-v2:empty {
+  display: none !important;
+}
+
+.admin-config-main-preview-v2 {
+  position: relative !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  border-radius: 21px !important;
+  background: #020617 !important;
+  border: 1px solid rgba(148, 163, 184, 0.35) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), 0 18px 42px rgba(15,23,42,0.16) !important;
+}
+
+.admin-config-pannellum-wrap-v2,
+.admin-config-pannellum-mount-v2 {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  background: #020617 !important;
+}
+
+.admin-config-empty-preview-v2 {
+  width: 100% !important;
+  height: 100% !important;
+  display: grid !important;
+  place-items: center !important;
+  text-align: center !important;
   color: #ffffff !important;
-  font-size: 8px !important;
+}
+
+.admin-config-pannellum-controls-v2 {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  z-index: 45 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px !important;
+  border-radius: 999px !important;
+  background: rgba(15, 23, 42, 0.76) !important;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.32) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.admin-config-pannellum-controls-v2 button {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+  color: #10204d !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+}
+
+.admin-config-picking-banner-v2 {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 14px !important;
+  z-index: 30 !important;
+  transform: translateX(-50%) !important;
+  max-width: calc(100% - 28px) !important;
+  padding: 9px 13px !important;
+  border-radius: 999px !important;
+  background: rgba(15, 23, 42, 0.88) !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.admin-config-preview-actions-bar-v2 {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(118px, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.admin-config-preview-actions-bar-v2 button {
+  min-height: 40px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 9px 12px !important;
+  background: #e0ecff !important;
+  color: #1e3a8a !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+}
+
+.admin-config-preview-actions-bar-v2 button.active {
+  background: #bfdbfe !important;
+  color: #10204d !important;
+  box-shadow: inset 0 0 0 2px #2563eb !important;
+}
+
+.admin-config-preview-actions-bar-v2 button.danger {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+/* ---------- Admin config modals ---------- */
+.admin-config-modal-backdrop-v2 {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1600 !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 20px !important;
+  background: rgba(15, 23, 42, 0.38) !important;
+  backdrop-filter: blur(7px) !important;
+}
+
+.admin-config-add-modal-v2,
+.admin-config-link-modal-v2,
+.admin-config-map-modal-v2 {
+  overflow: hidden !important;
+  border-radius: 24px !important;
+  background: #ffffff !important;
+  color: #07152f !important;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.32) !important;
+  border: 1px solid rgba(148, 163, 184, 0.24) !important;
+}
+
+.admin-config-add-modal-v2 {
+  width: min(560px, 94vw) !important;
+  max-height: 88vh !important;
+  padding: 20px !important;
+}
+
+.admin-config-link-modal-v2 {
+  width: min(820px, 94vw) !important;
+  max-height: 88vh !important;
+  padding: 20px !important;
+}
+
+.admin-config-map-modal-v2 {
+  width: min(1040px, 94vw) !important;
+  max-height: 90vh !important;
+  padding: 18px !important;
+}
+
+.admin-config-edit-modal-v2 {
+  width: min(650px, 94vw) !important;
+}
+
+.admin-config-modal-header-v2 {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  margin: 0 0 16px !important;
+}
+
+.admin-config-modal-header-v2 span {
+  display: block !important;
+  margin: 0 !important;
+  color: #64748b !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+}
+
+.admin-config-modal-header-v2 strong {
+  display: block !important;
+  margin: 3px 0 0 !important;
+  color: #07152f !important;
+  font-size: 24px !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.045em !important;
+  line-height: 1.1 !important;
+}
+
+.admin-config-modal-header-v2 button {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  border: 0 !important;
+  border-radius: 13px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  background: #e0ecff !important;
+  color: #1e3a8a !important;
+  font-size: 23px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+}
+
+.admin-config-form-field-v2 {
+  display: block !important;
+  margin: 0 0 12px !important;
+}
+
+.admin-config-form-field-v2 span {
+  display: block !important;
+  margin: 0 0 6px !important;
+  color: #64748b !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+}
+
+.admin-config-form-field-v2 input {
+  width: 100% !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 14px !important;
+  padding: 12px 13px !important;
+  outline: none !important;
+  background: #ffffff !important;
+  color: #07152f !important;
+  font-weight: 850 !important;
+  box-shadow: none !important;
+}
+
+.admin-config-upload-box-v2 {
+  min-height: 118px !important;
+  display: grid !important;
+  place-items: center !important;
+  text-align: center !important;
+  padding: 16px !important;
+  border-radius: 18px !important;
+  border: 2px dashed #9bbcf5 !important;
+  background: #f8fbff !important;
+}
+
+.admin-config-upload-box-v2 input {
+  display: none !important;
+}
+
+.admin-config-upload-box-v2 b {
+  color: #10204d !important;
+  font-size: 16px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-upload-box-v2 span {
+  color: #64748b !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+}
+
+.admin-config-upload-progress-v2 {
+  margin-top: 12px !important;
+  padding: 12px !important;
+  border-radius: 16px !important;
+  background: #eff6ff !important;
+  border: 1px solid #cbdafa !important;
+}
+
+.admin-config-upload-progress-v2 strong,
+.admin-config-upload-progress-v2 span {
+  display: block !important;
+  color: #10204d !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-upload-progress-v2 span {
+  margin-top: 2px !important;
+  color: #64748b !important;
+  font-weight: 850 !important;
+}
+
+.admin-config-upload-progress-v2 div {
+  height: 7px !important;
+  overflow: hidden !important;
+  margin-top: 8px !important;
+  border-radius: 999px !important;
+  background: #dbeafe !important;
+}
+
+.admin-config-upload-progress-v2 i {
+  display: block !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+  background: linear-gradient(90deg, #2563eb, #60a5fa) !important;
+}
+
+.admin-config-modal-actions-v2 {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 9px !important;
+  margin-top: 16px !important;
+}
+
+.admin-config-modal-actions-v2 button {
+  min-height: 40px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  padding: 10px 15px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #e0ecff !important;
+  color: #1e3a8a !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+}
+
+.admin-config-modal-actions-v2 button.primary {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+.admin-config-text-target-list-v2 {
+  max-height: 62vh !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding-right: 3px !important;
+}
+
+.admin-config-target-row-v2 {
+  width: 100% !important;
+  min-height: 46px !important;
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  border: 1px solid #dbeafe !important;
+  border-radius: 15px !important;
+  padding: 9px 11px !important;
+  background: #f8fbff !important;
+  color: #10204d !important;
+  text-align: left !important;
+  box-shadow: none !important;
+}
+
+.admin-config-target-row-v2:hover {
+  border-color: #2563eb !important;
+  background: #eff6ff !important;
+}
+
+.admin-config-target-row-v2 span {
+  width: 30px !important;
+  height: 26px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  background: #e0ecff !important;
+  color: #1d4ed8 !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-target-row-v2 strong {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  color: #07152f !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-target-row-v2 em {
+  padding: 4px 8px !important;
+  border-radius: 999px !important;
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  font-size: 9px !important;
   font-style: normal !important;
   font-weight: 950 !important;
-  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+.admin-config-edit-map-v2,
+.admin-config-edit-links-v2 {
+  margin-top: 12px !important;
+  padding: 13px !important;
+  border-radius: 18px !important;
+  border: 1px solid #dbeafe !important;
+  background: #f8fbff !important;
+}
+
+.admin-config-edit-map-v2 {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.admin-config-edit-map-v2 span,
+.admin-config-edit-links-title-v2 span {
+  display: block !important;
+  color: #64748b !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+
+.admin-config-edit-map-v2 strong,
+.admin-config-edit-link-row-v2 strong {
+  display: block !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  color: #10204d !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-edit-map-v2 button,
+.admin-config-edit-links-title-v2 button,
+.admin-config-edit-link-row-v2 button {
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 8px 11px !important;
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+}
+
+.admin-config-edit-links-title-v2 {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 10px !important;
+}
+
+.admin-config-edit-links-v2 p {
+  margin: 0 !important;
+  color: #64748b !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+}
+
+.admin-config-edit-link-row-v2 {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 0 !important;
+  border-top: 1px solid #e0ecff !important;
+}
+
+/* ---------- Mark in Map modal ---------- */
+.admin-config-map-toolbar-v2 {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin: -6px 0 12px !important;
+}
+
+.admin-config-map-help-v2 {
+  margin: 0 !important;
+  min-width: 0 !important;
+  color: #64748b !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+}
+
+.admin-config-map-zoom-controls-v2 {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 6px !important;
+  border-radius: 999px !important;
+  background: #eff6ff !important;
+  border: 1px solid #cbdafa !important;
+}
+
+.admin-config-map-zoom-controls-v2 button {
+  min-width: 32px !important;
+  height: 30px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 0 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #ffffff !important;
+  color: #10204d !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+}
+
+.admin-config-map-zoom-controls-v2 button.danger {
+  min-width: auto !important;
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+.admin-config-map-zoom-controls-v2 span {
+  min-width: 48px !important;
+  text-align: center !important;
+  color: #10204d !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+}
+
+.admin-config-map-viewport-v2 {
+  position: relative !important;
+  width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  max-height: 68vh !important;
+  overflow: hidden !important;
+  border-radius: 20px !important;
+  background: #ffffff !important;
+  border: 1px solid #cbdafa !important;
+  cursor: crosshair !important;
+  overscroll-behavior: contain !important;
+  touch-action: none !important;
+  user-select: none !important;
+}
+
+.admin-config-map-viewport-v2.is-panning {
+  cursor: grabbing !important;
+}
+
+.admin-config-map-viewport-v2 .admin-config-map-canvas-v2 {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  transform-origin: 0 0 !important;
+  will-change: transform !important;
+  cursor: inherit !important;
+}
+
+.admin-config-map-viewport-v2 .admin-config-map-canvas-v2 > img,
+.admin-config-map-viewport-v2 .admin-config-map-canvas-v2 > svg {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.admin-config-map-viewport-v2 .admin-config-map-canvas-v2 > img {
+  object-fit: fill !important;
+  object-position: center center !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
 }
 
 .admin-config-map-area-overlay-v2 {
@@ -2191,102 +4424,238 @@ button.danger,
   width: 100% !important;
   height: 100% !important;
   pointer-events: none !important;
+  z-index: 3 !important;
 }
 
 .admin-config-map-area-overlay-v2 polygon {
-  fill: rgba(37, 99, 235, 0.18) !important;
-  stroke: rgba(37, 99, 235, 0.92) !important;
-  stroke-width: 0.35 !important;
+  fill: rgba(37, 99, 235, 0.14) !important;
+  stroke: rgba(37, 99, 235, 0.72) !important;
+  stroke-width: 0.28 !important;
   vector-effect: non-scaling-stroke !important;
 }
 
 .admin-config-site-dot-v2 {
   position: absolute !important;
-  width: 14px !important;
-  height: 14px !important;
-  transform: translate(-50%, -50%) !important;
-  border: 3px solid white !important;
+  z-index: 6 !important;
+  width: 5px !important;
+  height: 5px !important;
+  transform: translate(-50%, -50%) scale(calc(1 / var(--admin-map-zoom, 1))) !important;
+  transform-origin: center center !important;
   border-radius: 999px !important;
   background: #22c55e !important;
-  box-shadow:
-    0 0 0 5px rgba(34, 197, 94, 0.28),
-    0 8px 18px rgba(15, 23, 42, 0.28) !important;
+  border: 1.5px solid #ffffff !important;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.20), 0 4px 10px rgba(15, 23, 42, 0.18) !important;
   pointer-events: none !important;
-  z-index: 6 !important;
 }
 
 .admin-config-site-dot-v2.is-selected {
-  width: 20px !important;
-  height: 20px !important;
+  width: 7px !important;
+  height: 7px !important;
   background: #2563eb !important;
-  box-shadow:
-    0 0 0 7px rgba(37, 99, 235, 0.25),
-    0 8px 18px rgba(15, 23, 42, 0.34) !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.22), 0 5px 12px rgba(15, 23, 42, 0.22) !important;
 }
 
-.admin-config-map-canvas-v2 {
+/* ---------- Viewer + minimap cleanup ---------- */
+.street-viewer-shell {
   position: relative !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
 }
 
-.admin-config-map-canvas-v2 img {
+.street-viewer-shell:fullscreen {
+  background: #ffffff !important;
+}
+
+.street-pannellum-stage {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: #ffffff !important;
+  transform-origin: center center !important;
+  will-change: transform, filter, opacity !important;
+}
+
+.pnlm-controls-container,
+.pnlm-load-box,
+.pnlm-lbox,
+.pnlm-loading,
+.pnlm-load-button,
+.pnlm-lbar,
+.pnlm-lbar-fill,
+.pnlm-lmsg {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.street-viewer-controls-clean {
+  position: fixed !important;
+  right: 22px !important;
+  top: 94px !important;
+  z-index: 95 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding: 8px !important;
+  border-radius: 18px !important;
+  background: rgba(17, 24, 39, 0.92) !important;
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.32) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+.street-viewer-controls-clean button {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+  color: #10204d !important;
+  font-size: 19px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+}
+
+.street-location-pill {
+  position: fixed !important;
+  top: 26px !important;
+  right: 22px !important;
+  z-index: 90 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 14px 18px !important;
+  border-radius: 999px !important;
+  background: rgba(17, 24, 39, 0.90) !important;
+  color: #ffffff !important;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.35) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+.street-location-pill span {
+  color: rgba(255, 255, 255, 0.68) !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+}
+
+.street-location-pill strong {
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+}
+
+.street-minimap-card.raw-only,
+.street-minimap-card {
+  position: fixed !important;
+  left: 22px !important;
+  bottom: 22px !important;
+  z-index: 80 !important;
+  width: 310px !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.32) !important;
+  border: 1px solid rgba(15, 23, 42, 0.16) !important;
+}
+
+.street-minimap-header,
+.street-minimap-svg,
+.street-minimap-area,
+.street-minimap-center-ring,
+.street-minimap-card svg,
+.street-minimap-window svg,
+.street-minimap-world svg,
+.raw-minimap-world svg {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
   pointer-events: none !important;
 }
 
-.admin-config-pnlm-hotspot-button-v2,
-.street-arrow-only-button {
-  pointer-events: auto !important;
-}
-
-/* =========================================================
-   HOTFIX: Mark-in-Map cursor alignment
-   Forces the map image, polygon overlay, and saved dots to use
-   the exact same 0-100 coordinate space as the click handler.
-   This prevents the dot from appearing offset to the left.
-   ========================================================= */
-.admin-config-map-canvas-v2 {
+.street-minimap-window {
   position: relative !important;
+  width: 310px !important;
+  height: 175px !important;
   overflow: hidden !important;
-  background: #020617 !important;
+  background: #ffffff !important;
 }
 
-.admin-config-map-canvas-v2 > img {
+.street-minimap-world {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 520px !important;
+  height: 292.5px !important;
+  transform-origin: 0 0 !important;
+  transition: transform 420ms ease !important;
+  background: #ffffff !important;
+}
+
+.street-minimap-image {
   position: absolute !important;
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
   object-fit: fill !important;
-  object-position: center center !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  background: #ffffff !important;
+}
+
+.street-minimap-dot {
+  display: none !important;
+}
+
+.street-minimap-dot.is-active {
   display: block !important;
-  pointer-events: none !important;
-  user-select: none !important;
-}
-
-.admin-config-map-canvas-v2 .admin-config-map-area-overlay-v2 {
   position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  pointer-events: none !important;
-  z-index: 3 !important;
-}
-
-.admin-config-map-canvas-v2 .admin-config-site-dot-v2 {
-  position: absolute !important;
+  width: 15px !important;
+  height: 15px !important;
   transform: translate(-50%, -50%) !important;
-  z-index: 6 !important;
+  border: 3px solid #ffffff !important;
+  border-radius: 999px !important;
+  background: #22c55e !important;
+  box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.24), 0 8px 18px rgba(15, 23, 42, 0.30) !important;
+  padding: 0 !important;
+  z-index: 8 !important;
   pointer-events: none !important;
 }
 
-/* =========================================================
-   FINAL HOTSPOT CURSOR ALIGNMENT OVERRIDE
-   This MUST stay at the very bottom of this one CSS file.
-   ========================================================= */
+/* ---------- No public/admin map dot noise outside Mark-in-Map modal ---------- */
+.site-location-dot-layer,
+.area-map-location-dot-layer,
+.site-location-dot,
+.area-map-location-dot,
+.map-floating-dot-count,
+.area-map-card .admin-config-site-dot-v2,
+.simple-map-card .admin-config-site-dot-v2,
+.area-map-card .street-minimap-dot,
+.simple-map-card .street-minimap-dot {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.admin-config-map-modal-v2 .admin-config-site-dot-v2 {
+  display: block !important;
+}
+
+/* ---------- Hotspot arrow center + horizontal chevrons support ---------- */
 .pnlm-street-arrow-hotspot,
-.admin-config-pnlm-hotspot-shell-v2 {
+.admin-config-pnlm-hotspot-shell-v2,
+.pnlm-google-arrow-hotspot,
+.pnlm-custom-next-hotspot {
   width: 0 !important;
   height: 0 !important;
-  margin-left: 0 !important;
-  margin-top: 0 !important;
+  margin: 0 !important;
   background: transparent !important;
   background-image: none !important;
   overflow: visible !important;
@@ -2294,54 +4663,268 @@ button.danger,
 }
 
 .street-arrow-only-button,
-.admin-config-pnlm-hotspot-button-v2 {
+.admin-config-pnlm-hotspot-button-v2,
+.viewer-arrow-only {
   position: absolute !important;
   left: 0 !important;
   top: 0 !important;
-  width: 56px !important;
-  height: 56px !important;
+  width: 54px !important;
+  height: 54px !important;
   transform: translate(-50%, -50%) !important;
   margin: 0 !important;
   border: 0 !important;
   border-radius: 999px !important;
   display: grid !important;
   place-items: center !important;
-  background: white !important;
+  background: #ffffff !important;
   color: #0f766e !important;
   cursor: pointer !important;
   box-shadow: 0 16px 38px rgba(15, 23, 42, 0.35) !important;
   pointer-events: auto !important;
-  font-size: 29px !important;
+  font-size: 28px !important;
   font-weight: 950 !important;
   line-height: 1 !important;
 }
 
-.street-arrow-only-button span {
+.street-arrow-only-button span,
+.admin-config-pnlm-hotspot-button-v2 span,
+.viewer-arrow-only span {
   display: block !important;
   line-height: 1 !important;
-  font-size: 29px !important;
+  font-size: 28px !important;
   font-weight: 950 !important;
   transform: none !important;
 }
 
-.pnlm-street-arrow-hotspot.pnlm-hotspot,
-.admin-config-pnlm-hotspot-shell-v2.pnlm-hotspot {
-  background-image: none !important;
+.street-arrow-only-button .street-arrow-chevron,
+.admin-config-pnlm-hotspot-button-v2 .street-arrow-chevron,
+.viewer-arrow-only .street-arrow-chevron {
+  display: inline-block !important;
+  width: 17px !important;
+  height: 17px !important;
+  border-top: 5px solid currentColor !important;
+  border-right: 5px solid currentColor !important;
+  transform: rotate(45deg) !important;
+  margin-left: -4px !important;
 }
 
-.site-location-dot-layer,
-.area-map-location-dot-layer,
-.site-location-dot,
-.area-map-location-dot,
-.map-floating-dot-count {
-  display: none !important;
+.street-viewer-shell.is-speed-transitioning .street-pannellum-stage,
+.street-viewer-shell.is-scene-blurring .street-pannellum-stage,
+.street-viewer-shell.is-transitioning .street-pannellum-stage,
+.street-viewer-shell.is-moving .street-pannellum-stage,
+.street-viewer-shell.is-warping .street-pannellum-stage {
+  filter: blur(12px) brightness(1.16) saturate(1.05) !important;
+  transform: scale(1.08) !important;
+  transition: transform 300ms ease, filter 300ms ease !important;
+}
+
+.street-viewer-shell::after {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 70 !important;
   pointer-events: none !important;
+  opacity: 0 !important;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.62), rgba(255,255,255,0.12) 55%, rgba(255,255,255,0)) !important;
+  transition: opacity 160ms ease !important;
 }
 
-/* Keep admin map-dot UI visible */
-.admin-location-dot-layer,
-.admin-location-dot,
-.admin-config-site-dot-v2,
-.admin-config-map-mark-v2 {
-  display: initial;
+.street-viewer-shell.is-speed-transitioning::after,
+.street-viewer-shell.is-scene-blurring::after,
+.street-viewer-shell.is-transitioning::after,
+.street-viewer-shell.is-moving::after,
+.street-viewer-shell.is-warping::after {
+  opacity: 1 !important;
+}
+
+/* ---------- Area map -> 360 bright preload transition ---------- */
+.area-page.area-opening {
+  background: #f8fbff !important;
+  overflow: hidden !important;
+}
+
+.area-page.area-opening .simple-map-card {
+  transform-origin: center center !important;
+  animation: streetviewAreaRushForward 820ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  will-change: transform, filter, opacity !important;
+}
+
+.area-page.area-opening .area-map-image,
+.area-page.area-opening .area-map-svg {
+  filter: blur(7px) brightness(1.16) saturate(1.04) !important;
+}
+
+.area-opening-transition-layer {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 5000 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+.area-opening-haze {
+  position: absolute !important;
+  inset: -12% !important;
+  opacity: 0 !important;
+  background: radial-gradient(circle at 50% 48%, rgba(255,255,255,0.72), rgba(255,255,255,0.22) 34%, rgba(255,255,255,0.02) 70%) !important;
+  animation: streetviewBrightHaze 820ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.area-opening-speed-lines {
+  position: absolute !important;
+  inset: -20% !important;
+  opacity: 0 !important;
+  background: repeating-linear-gradient(90deg, transparent 0, transparent 42px, rgba(255,255,255,0.35) 52px, transparent 70px) !important;
+  transform: scaleX(1.8) skewX(-10deg) !important;
+  filter: blur(8px) !important;
+  animation: streetviewSpeedLines 820ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.area-opening-soft-focus {
+  position: absolute !important;
+  inset: 0 !important;
+  opacity: 0 !important;
+  backdrop-filter: blur(10px) brightness(1.14) !important;
+  -webkit-backdrop-filter: blur(10px) brightness(1.14) !important;
+  animation: streetviewSoftFocus 820ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes streetviewAreaRushForward {
+  0% { transform: scale(1) translate3d(0, 0, 0); filter: blur(0) brightness(1); opacity: 1; }
+  45% { transform: scale(1.14) translate3d(0, -1.5%, 0); filter: blur(5px) brightness(1.08); opacity: 1; }
+  100% { transform: scale(1.34) translate3d(0, -3.5%, 0); filter: blur(12px) brightness(1.18); opacity: 0.92; }
+}
+
+@keyframes streetviewBrightHaze {
+  0% { opacity: 0; transform: scale(0.96); }
+  40% { opacity: 0.56; }
+  100% { opacity: 0.72; transform: scale(1.08); }
+}
+
+@keyframes streetviewSpeedLines {
+  0% { opacity: 0; transform: translateX(-12%) scaleX(1.35) skewX(-10deg); }
+  32% { opacity: 0.55; }
+  100% { opacity: 0.2; transform: translateX(18%) scaleX(2.25) skewX(-10deg); }
+}
+
+@keyframes streetviewSoftFocus {
+  0% { opacity: 0; }
+  42% { opacity: 0.52; }
+  100% { opacity: 0.68; }
+}
+
+@media (max-width: 900px) {
+  .admin-config-topbar-v2 {
+    height: auto !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-config-workspace-v2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-config-image-rail-v2 {
+    max-height: 245px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-config-preview-actions-bar-v2 {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .street-minimap-card.raw-only,
+  .street-minimap-card {
+    width: 250px !important;
+    left: 12px !important;
+    bottom: 12px !important;
+  }
+
+  .street-minimap-window {
+    width: 250px !important;
+    height: 145px !important;
+  }
+
+  .street-viewer-controls-clean {
+    right: 12px !important;
+    top: 84px !important;
+  }
+}
+
+/* =========================================================
+   FINAL FIX: PANNELLUM IMAGE VISIBILITY
+   Keep this at the VERY BOTTOM of admin.css.
+
+   Issue fixed:
+   - Panorama area turns white but hotspots/buttons still show.
+   Cause:
+   - Older combined CSS gave Pannellum overlay layers like .pnlm-dragfix
+     a white background. That layer sits above the rendered panorama.
+   ========================================================= */
+
+.admin-config-pannellum-wrap-v2,
+.admin-config-pannellum-mount-v2,
+.admin-config-pannellum-mount-v2 .pnlm-container,
+.admin-config-pannellum-mount-v2 .pnlm-render-container,
+.admin-config-pannellum-mount-v2 .pnlm-panorama-info,
+.street-pannellum-stage,
+.street-pannellum-stage .pnlm-container,
+.street-pannellum-stage .pnlm-render-container {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* This one must NEVER have a white background; it is an invisible drag layer. */
+.pnlm-dragfix,
+.admin-config-pannellum-mount-v2 .pnlm-dragfix,
+.street-pannellum-stage .pnlm-dragfix {
+  background: transparent !important;
+  background-color: transparent !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+  pointer-events: auto !important;
+}
+
+/* Let the actual WebGL/canvas renderer show again. */
+.pnlm-render-container,
+.pnlm-render-container canvas,
+.admin-config-pannellum-mount-v2 canvas,
+.street-pannellum-stage canvas {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Keep the wrapper dark behind the panorama, but don't cover the panorama. */
+.admin-config-main-preview-v2,
+.admin-config-pannellum-wrap-v2,
+.admin-config-pannellum-mount-v2,
+.street-pannellum-stage {
+  background: #020617 !important;
+  background-color: #020617 !important;
+}
+
+.admin-config-pannellum-mount-v2 .pnlm-container,
+.street-pannellum-stage .pnlm-container {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Keep controls/hotspots above panorama after restoring renderer layers. */
+.admin-config-pannellum-controls-v2 {
+  z-index: 60 !important;
+}
+
+.admin-config-pnlm-hotspot-shell-v2,
+.pnlm-street-arrow-hotspot,
+.pnlm-hotspot {
+  z-index: 55 !important;
 }

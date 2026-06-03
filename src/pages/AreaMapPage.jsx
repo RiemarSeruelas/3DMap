@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { getEffectiveFactoryMapsAsync } from "../utils/streetViewAdminStorage";
-import "../styles/streetview-clean-viewer-map-admin.css";
+import "../styles/admin.css";
 
 function getSceneTitle(scene, fallback = "Untitled Location") {
   return scene?.title || scene?.name || scene?.label || fallback;

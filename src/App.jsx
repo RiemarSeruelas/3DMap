@@ -7,8 +7,6 @@ import StreetViewPage from "./pages/StreetViewPage";
 import AdminPage from "./pages/AdminPage";
 import AdminAreaConfigPage from "./pages/AdminAreaConfigPage";
 import "./styles/admin.css";
-import "./styles/AdminAreaConfigPage.css";
-import "./styles/streetview-scene-transition.css";
 import { hydrateFactoryMapsFromPublicJson } from "./utils/streetViewAdminStorage";
 
 function ProtectedRoute({ children, role }) {

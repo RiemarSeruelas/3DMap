@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import "pannellum/build/pannellum.css";
 import "pannellum";
-import "../styles/streetview-clean-viewer-map-admin.css";
+import "../styles/admin.css";
 
 const MAP_WORLD_WIDTH = 520;
 const MAP_WORLD_HEIGHT = 292.5;

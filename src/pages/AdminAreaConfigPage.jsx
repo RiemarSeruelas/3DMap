@@ -10,7 +10,7 @@ import {
   uploadPanoramaAsset,
   createUniqueId,
 } from "../utils/streetViewAdminStorage";
-import "../styles/AdminAreaConfigPage.css";
+import "../styles/admin.css";
 
 const CARD_PAGE_SIZE = 40;
 const MAP_ZOOM_MIN = 1;
