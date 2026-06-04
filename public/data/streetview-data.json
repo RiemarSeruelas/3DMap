@@ -1,5 +1,5 @@
 {
-  "savedAt": "2026-06-04T01:30:08.738Z",
+  "savedAt": "2026-06-04T06:30:27.228Z",
   "factoryMaps": {
     "savoury": {
       "id": "savoury",
@@ -27,8 +27,14 @@
                 "label": "Savoury_Left7-3",
                 "panorama": "/uploads/panos/savoury-left7-3-20260603075146-866694c1.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left7-3-thumb-20260603075146-3d8bc313.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 67.66,
+                  "y": 24.84
+                },
+                "minimap": {
+                  "x": 67.66,
+                  "y": 24.84
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left7-2",
@@ -56,8 +62,14 @@
                 "label": "Savoury_Right2-1",
                 "panorama": "/uploads/panos/savoury-right2-1-20260603075147-b002bfd3.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right2-1-thumb-20260603075147-4b0a1ddb.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 12.08,
+                  "y": 70.1
+                },
+                "minimap": {
+                  "x": 12.08,
+                  "y": 70.1
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-opening4",
@@ -96,8 +108,14 @@
                 "label": "Savoury_Left3-3",
                 "panorama": "/uploads/panos/savoury-left3-4-20260603075147-878f3f66.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left3-4-thumb-20260603075147-3f6613a9.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 27.74,
+                  "y": 15.74
+                },
+                "minimap": {
+                  "x": 27.74,
+                  "y": 15.74
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left3-3",
@@ -125,8 +143,14 @@
                 "label": "Savoury_Left6-1",
                 "panorama": "/uploads/panos/savoury-left6-1-20260603075148-c6ca0d86.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left6-1-thumb-20260603075148-7aec929a.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 54.29,
+                  "y": 46.06
+                },
+                "minimap": {
+                  "x": 54.29,
+                  "y": 46.06
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left6-2",
@@ -176,8 +200,14 @@
                 "label": "Savoury_Left6-2",
                 "panorama": "/uploads/panos/savoury-left6-2-20260603075148-9fa60b60.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left6-2-thumb-20260603075148-cb388337.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 53.39,
+                  "y": 32.85
+                },
+                "minimap": {
+                  "x": 53.39,
+                  "y": 32.85
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left6-1",
@@ -205,8 +235,14 @@
                 "label": "Savoury_Left7-1",
                 "panorama": "/uploads/panos/savoury-left7-1-20260603075149-1e85f295.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left7-1-thumb-20260603075149-652d20a9.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 64.47,
+                  "y": 48.01
+                },
+                "minimap": {
+                  "x": 64.47,
+                  "y": 48.01
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-opening8",
@@ -256,8 +292,14 @@
                 "label": "Savoury_Right1-1",
                 "panorama": "/uploads/panos/savoury-right1-1-20260603075149-639d74a0.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right1-1-thumb-20260603075149-03a53181.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 4.09,
+                  "y": 68.37
+                },
+                "minimap": {
+                  "x": 4.09,
+                  "y": 68.37
+                },
                 "hotspots": [
                   {
                     "id": "to-jessicasavoury-opening1-1",
@@ -285,8 +327,14 @@
                 "label": "Savoury_Right1-2",
                 "panorama": "/uploads/panos/savoury-right1-2-20260603075150-9af987c5.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right1-2-thumb-20260603075150-1f7e61bc.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 4.09,
+                  "y": 75.52
+                },
+                "minimap": {
+                  "x": 4.09,
+                  "y": 75.52
+                },
                 "hotspots": [
                   {
                     "id": "to-jessicasavoury-opening1-2",
@@ -314,8 +362,14 @@
                 "label": "Savoury_Left2-6",
                 "panorama": "/uploads/panos/savoury-left2-6-20260603075150-873d38af.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left2-6-thumb-20260603075150-65187109.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 20.86,
+                  "y": 27.43
+                },
+                "minimap": {
+                  "x": 20.86,
+                  "y": 27.43
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left2-5",
@@ -354,8 +408,14 @@
                 "label": "Savoury_Left3-2",
                 "panorama": "/uploads/panos/savoury-left3-3-20260603075151-744082d6.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left3-3-thumb-20260603075151-51de36c6.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 26.35,
+                  "y": 27.65
+                },
+                "minimap": {
+                  "x": 26.35,
+                  "y": 27.65
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left3-2",
@@ -394,8 +454,14 @@
                 "label": "Savoury_Left5-3",
                 "panorama": "/uploads/panos/savoury-left5-3-20260603075151-391b8373.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left5-3-thumb-20260603075151-1c0c66a0.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 46.61,
+                  "y": 20.29
+                },
+                "minimap": {
+                  "x": 46.61,
+                  "y": 20.29
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left5-2",
@@ -423,8 +489,14 @@
                 "label": "Savoury_Left6-3",
                 "panorama": "/uploads/panos/savoury-left6-3-20260603075152-2dc17c63.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left6-3-thumb-20260603075152-b930c884.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 52.89,
+                  "y": 20.72
+                },
+                "minimap": {
+                  "x": 52.89,
+                  "y": 20.72
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left6-1",
@@ -452,8 +524,14 @@
                 "label": "Savoury_Left7-2",
                 "panorama": "/uploads/panos/savoury-left7-2-20260603075152-14c26774.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left7-2-thumb-20260603075152-17cfa5f7.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 66.77,
+                  "y": 37.83
+                },
+                "minimap": {
+                  "x": 66.77,
+                  "y": 37.83
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left7-3",
@@ -492,8 +570,14 @@
                 "label": "Savoury_Right4-1",
                 "panorama": "/uploads/panos/savoury-right4-1-20260603075153-caff1d91.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right4-1-thumb-20260603075153-b5abe198.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 32.83,
+                  "y": 70.75
+                },
+                "minimap": {
+                  "x": 32.83,
+                  "y": 70.75
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-right4-2",
@@ -532,8 +616,14 @@
                 "label": "Savoury_Left4-2",
                 "panorama": "/uploads/panos/savoury-left4-2-20260603075153-66329af3.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left4-2-thumb-20260603075154-cebb5c9a.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 35.53,
+                  "y": 22.02
+                },
+                "minimap": {
+                  "x": 35.53,
+                  "y": 22.02
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left4-1",
@@ -561,8 +651,14 @@
                 "label": "Savoury_Left5-2",
                 "panorama": "/uploads/panos/savoury-left5-2-20260603075154-38422a2f.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left5-2-thumb-20260603075154-666ed9f6.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 45.71,
+                  "y": 34.37
+                },
+                "minimap": {
+                  "x": 45.71,
+                  "y": 34.37
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left5-1",
@@ -601,8 +697,14 @@
                 "label": "Savoury_Left7-4",
                 "panorama": "/uploads/panos/savoury-left7-4-20260603075154-fc9b50a9.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left7-4-thumb-20260603075154-3f66030b.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 62.97,
+                  "y": 30.68
+                },
+                "minimap": {
+                  "x": 62.97,
+                  "y": 30.68
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left7-1",
@@ -630,8 +732,14 @@
                 "label": "Savoury_Right7-1",
                 "panorama": "/uploads/panos/savoury-right7-1-20260603075155-6808347f.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right7-1-thumb-20260603075156-faf933c5.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 65.87,
+                  "y": 72.27
+                },
+                "minimap": {
+                  "x": 65.87,
+                  "y": 72.27
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-right7-2",
@@ -670,8 +778,14 @@
                 "label": "Savoury_Left2-1",
                 "panorama": "/uploads/panos/savoury-left2-1-20260603075156-ebddae5e.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left2-1-thumb-20260603075156-148f687f.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 13.27,
+                  "y": 42.81
+                },
+                "minimap": {
+                  "x": 13.27,
+                  "y": 42.81
+                },
                 "hotspots": [
                   {
                     "id": "to-jessicasavoury-opening1-2",
@@ -710,8 +824,14 @@
                 "label": "Savoury_Left2-5",
                 "panorama": "/uploads/panos/savoury-left2-5-20260603075156-020d5fcc.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left2-5-thumb-20260603075156-065a6524.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 20.36,
+                  "y": 11.41
+                },
+                "minimap": {
+                  "x": 20.36,
+                  "y": 11.41
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left2-4",
@@ -750,8 +870,14 @@
                 "label": "Savoury_Left4-1",
                 "panorama": "/uploads/panos/savoury-left4-1-20260603075157-604318b7.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left4-1-thumb-20260603075157-18e3b597.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 34.23,
+                  "y": 43.03
+                },
+                "minimap": {
+                  "x": 34.23,
+                  "y": 43.03
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-opening5",
@@ -790,8 +916,14 @@
                 "label": "Savoury_Left5-1",
                 "panorama": "/uploads/panos/savoury-left5-1-20260603075158-3f721873.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left5-1-thumb-20260603075158-cdeb490f.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 45.11,
+                  "y": 46.93
+                },
+                "minimap": {
+                  "x": 45.11,
+                  "y": 46.93
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-opening6",
@@ -830,8 +962,14 @@
                 "label": "Savoury_Right4-2",
                 "panorama": "/uploads/panos/savoury-right4-2-20260603075158-fc41c8d7.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right4-2-thumb-20260603075158-13cce102.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 32.14,
+                  "y": 82.66
+                },
+                "minimap": {
+                  "x": 32.14,
+                  "y": 82.66
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-right4-1",
@@ -859,8 +997,14 @@
                 "label": "Savoury_Right6-1",
                 "panorama": "/uploads/panos/savoury-right6-1-20260603075159-085f01eb.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right6-1-thumb-20260603075159-eb9069b7.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 53.79,
+                  "y": 69.67
+                },
+                "minimap": {
+                  "x": 53.79,
+                  "y": 69.67
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-opening8",
@@ -899,8 +1043,14 @@
                 "label": "Savoury_Left1-2",
                 "panorama": "/uploads/panos/savoury-left1-2-20260603075159-8311e779.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left1-2-thumb-20260603075159-6b3569e3.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 3.99,
+                  "y": 31.98
+                },
+                "minimap": {
+                  "x": 3.99,
+                  "y": 31.98
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left1-1",
@@ -939,8 +1089,14 @@
                 "label": "Savoury_Left1-4",
                 "panorama": "/uploads/panos/savoury-left1-4-20260603075159-dad7569e.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left1-4-thumb-20260603075200-25ca7289.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 3.99,
+                  "y": 6.43
+                },
+                "minimap": {
+                  "x": 3.99,
+                  "y": 6.43
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left1-3",
@@ -968,8 +1124,14 @@
                 "label": "Savoury_Left3-1",
                 "panorama": "/uploads/panos/savoury-left3-2-20260603075200-4cc56768.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left3-2-thumb-20260603075200-1bd023a9.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 26.05,
+                  "y": 38.7
+                },
+                "minimap": {
+                  "x": 26.05,
+                  "y": 38.7
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-opening3",
@@ -1008,8 +1170,14 @@
                 "label": "Savoury_Next1-1",
                 "panorama": "/uploads/panos/savoury-next1-1-20260603075200-db320aaa.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-next1-1-thumb-20260603075200-21cad811.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 77.15,
+                  "y": 65.55
+                },
+                "minimap": {
+                  "x": 77.15,
+                  "y": 65.55
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-next1",
@@ -1048,8 +1216,14 @@
                 "label": "Savoury_Next1-3",
                 "panorama": "/uploads/panos/savoury-next1-3-20260603075201-8101c129.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-next1-3-thumb-20260603075201-5c55b735.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 85.93,
+                  "y": 65.77
+                },
+                "minimap": {
+                  "x": 85.93,
+                  "y": 65.77
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-next1-1",
@@ -1088,8 +1262,14 @@
                 "label": "Savoury_Right5-1",
                 "panorama": "/uploads/panos/savoury-right5-1-20260603075201-6eeb6854.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right5-1-thumb-20260603075201-7edaa84e.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 41.02,
+                  "y": 77.68
+                },
+                "minimap": {
+                  "x": 41.02,
+                  "y": 77.68
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-opening7",
@@ -1117,8 +1297,14 @@
                 "label": "Savoury_Left2-2",
                 "panorama": "/uploads/panos/savoury-left2-2-20260603075202-c70192fc.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left2-2-thumb-20260603075202-7f9ae82c.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 13.57,
+                  "y": 28.73
+                },
+                "minimap": {
+                  "x": 13.57,
+                  "y": 28.73
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left2-1",
@@ -1157,8 +1343,14 @@
                 "label": "Savoury_Left2-3",
                 "panorama": "/uploads/panos/savoury-left2-3-20260603075202-07284259.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left2-3-thumb-20260603075202-882d125f.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 11.88,
+                  "y": 19.64
+                },
+                "minimap": {
+                  "x": 11.88,
+                  "y": 19.64
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left2-2",
@@ -1197,8 +1389,14 @@
                 "label": "Savoury_Left2-7",
                 "panorama": "/uploads/panos/savoury-left3-1-20260603075203-967ab9fe.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left3-1-thumb-20260603075203-fe0fd1e6.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 19.76,
+                  "y": 38.26
+                },
+                "minimap": {
+                  "x": 19.76,
+                  "y": 38.26
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left2-6",
@@ -1272,8 +1470,14 @@
                 "label": "Savoury_Opening7",
                 "panorama": "/uploads/panos/savoury-opening7-20260603075204-09dbeb0a.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-opening7-thumb-20260603075204-dfecf839.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 53.99,
+                  "y": 59.27
+                },
+                "minimap": {
+                  "x": 53.99,
+                  "y": 59.27
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-opening6",
@@ -1334,8 +1538,14 @@
                 "label": "Savoury_Right2-2",
                 "panorama": "/uploads/panos/savoury-right2-2-20260603075204-c7e91963.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right2-2-thumb-20260603075204-7212ae1d.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 11.78,
+                  "y": 79.2
+                },
+                "minimap": {
+                  "x": 11.78,
+                  "y": 79.2
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-right2-1",
@@ -1363,8 +1573,14 @@
                 "label": "Savoury_Right3-2",
                 "panorama": "/uploads/panos/savoury-right3-2-20260603075205-344813c8.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right3-2-thumb-20260603075205-4d94c2b1.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 19.56,
+                  "y": 74
+                },
+                "minimap": {
+                  "x": 19.56,
+                  "y": 74
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-right3-3",
@@ -1403,8 +1619,14 @@
                 "label": "Savoury_Left1-3",
                 "panorama": "/uploads/panos/savoury-left1-3-20260603075205-984bddb5.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left1-3-thumb-20260603075205-7f322529.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 4.09,
+                  "y": 17.47
+                },
+                "minimap": {
+                  "x": 4.09,
+                  "y": 17.47
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left1-2",
@@ -1443,8 +1665,14 @@
                 "label": "Savoury_Right3-1",
                 "panorama": "/uploads/panos/savoury-right3-1-20260603075206-6a3f045c.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right3-1-thumb-20260603075206-4c7bb028.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 19.26,
+                  "y": 67.72
+                },
+                "minimap": {
+                  "x": 19.26,
+                  "y": 67.72
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-opening5",
@@ -1483,8 +1711,14 @@
                 "label": "Savoury_Right3-3",
                 "panorama": "/uploads/panos/savoury-right3-3-20260603075206-99febcc1.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right3-3-thumb-20260603075206-ea55ce05.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 19.86,
+                  "y": 83.53
+                },
+                "minimap": {
+                  "x": 19.86,
+                  "y": 83.53
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-right3-2",
@@ -1512,8 +1746,14 @@
                 "label": "Savoury_Right6-2",
                 "panorama": "/uploads/panos/savoury-right6-2-20260603075207-e03f680e.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right6-2-thumb-20260603075207-61f5a634.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 53.09,
+                  "y": 81.36
+                },
+                "minimap": {
+                  "x": 53.09,
+                  "y": 81.36
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-right6-1",
@@ -1541,8 +1781,14 @@
                 "label": "Savoury_Left1-1",
                 "panorama": "/uploads/panos/savoury-left1-1-20260603075207-6e1afa98.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left1-1-thumb-20260603075207-d15a0fcb.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 3.69,
+                  "y": 46.71
+                },
+                "minimap": {
+                  "x": 3.69,
+                  "y": 46.71
+                },
                 "hotspots": [
                   {
                     "id": "to-jessicasavoury-opening1-1",
@@ -1581,8 +1827,14 @@
                 "label": "Savoury_Left2-4",
                 "panorama": "/uploads/panos/savoury-left2-4-20260603075208-c813fcac.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-left2-4-thumb-20260603075208-ab20b1c6.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 12.67,
+                  "y": 9.24
+                },
+                "minimap": {
+                  "x": 12.67,
+                  "y": 9.24
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-left2-3",
@@ -1621,8 +1873,14 @@
                 "label": "Savoury_Next1-5",
                 "panorama": "/uploads/panos/savoury-next1-5-20260603075208-96aa1ad2.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-next1-5-thumb-20260603075208-8a418d15.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 89.72,
+                  "y": 83.96
+                },
+                "minimap": {
+                  "x": 89.72,
+                  "y": 83.96
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-next1-4",
@@ -1718,8 +1976,14 @@
                 "label": "Savoury_Opening9",
                 "panorama": "/uploads/panos/savoury-opening9-20260603075209-707cc458.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-opening9-thumb-20260603075209-3521d835.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 66.27,
+                  "y": 59.92
+                },
+                "minimap": {
+                  "x": 66.27,
+                  "y": 59.92
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-opening8",
@@ -1769,8 +2033,14 @@
                 "label": "Savoury_Right7-2",
                 "panorama": "/uploads/panos/savoury-right7-2-20260603075210-c9268aec.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-right7-2-thumb-20260603075210-c981edb3.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 64.37,
+                  "y": 88.94
+                },
+                "minimap": {
+                  "x": 64.37,
+                  "y": 88.94
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-right7-1",
@@ -1923,8 +2193,14 @@
                 "label": "Savoury_Next1",
                 "panorama": "/uploads/panos/savoury-next1-20260603075211-04b76689.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-next1-thumb-20260603075211-a3043149.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 70.16,
+                  "y": 58.41
+                },
+                "minimap": {
+                  "x": 70.16,
+                  "y": 58.41
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-opening9",
@@ -1963,8 +2239,14 @@
                 "label": "Savoury_Next1-4",
                 "panorama": "/uploads/panos/savoury-next1-4-20260603075211-d5edc7cd.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-next1-4-thumb-20260603075211-02b90711.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 89.52,
+                  "y": 74.43
+                },
+                "minimap": {
+                  "x": 89.52,
+                  "y": 74.43
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-next1-5",
@@ -2128,8 +2410,14 @@
                 "label": "Savoury_Opening8",
                 "panorama": "/uploads/panos/savoury-opening8-20260603075213-ae218e9e.jpg",
                 "thumbnail": "/uploads/thumbs/savoury-opening8-thumb-20260603075213-747a5e4e.jpg",
-                "mapPoint": null,
-                "minimap": null,
+                "mapPoint": {
+                  "x": 61.38,
+                  "y": 59.27
+                },
+                "minimap": {
+                  "x": 61.38,
+                  "y": 59.27
+                },
                 "hotspots": [
                   {
                     "id": "to-savoury-opening7",
@@ -2191,7 +2479,7 @@
     },
     "dressings": {
       "id": "dressings",
-      "name": "Dressings",
+      "name": "Dressings Block",
       "mapImage": "/uploads/maps/chatgpt-image-jun-2-2026-11-18-32-am-20260602031910-68e988f6.png",
       "areas": [
         {

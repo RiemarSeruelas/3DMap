@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 function LoginPage() {
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("engineering2026");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   function handleLogin(event) {
@@ -38,7 +38,7 @@ function LoginPage() {
 
         <div className="login-title-block">
           <h1>Company Street View</h1>
-          <p>Authorized access only</p>
+          <p></p>
         </div>
 
         <form className="login-form" onSubmit={handleLogin}>
@@ -47,7 +47,7 @@ function LoginPage() {
             <input
               value={username}
               onChange={(event) => setUsername(event.target.value)}
-              placeholder="admin or viewer"
+              placeholder="Enter username"
             />
           </div>
 
@@ -68,10 +68,7 @@ function LoginPage() {
           </button>
         </form>
 
-        <div className="login-hint">
-          <p><strong>Admin:</strong> admin / engineering2026</p>
-          <p><strong>Viewer:</strong> viewer / viewer2026</p>
-        </div>
+       
       </div>
     </div>
   );

@@ -240,13 +240,13 @@ function AdminPage() {
           <div className="admin-start-logo">360</div>
           <p className="admin-eyebrow">STREET VIEW ADMIN</p>
           <h1>Choose Site</h1>
-          <p>Pick a factory block first. After that, you can add or change its map image and create mapped areas.</p>
+          <p></p>
 
           <div className="admin-start-grid">
             {siteOptions.map((siteOption) => (
               <button key={siteOption.id} className="admin-start-site-card" onClick={() => selectSite(siteOption.id)}>
                 <span>{siteOption.name}</span>
-                <small>{siteOption.mapImage ? "Map image available" : "No map image yet"}</small>
+                <small>{siteOption.mapImage ? "Enter Area" : "No map image yet"}</small>
               </button>
             ))}
           </div>
