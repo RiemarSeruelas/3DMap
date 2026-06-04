@@ -94,6 +94,9 @@ function getSceneConnections(mapData, sceneId) {
   const scenes = safeScenes(mapData);
   const currentScene = scenes[sceneId];
 
+  // IMPORTANT:
+  // Admin saves the real links in scene.hotspots.
+  // mapData.connections is only a legacy fallback.
   const sceneHotspotConnections = (currentScene?.hotspots || [])
     .filter((hotspot) => hotspot?.targetSceneId)
     .map((hotspot) => ({
@@ -153,6 +156,14 @@ function StreetViewer({ mapData, site, area }) {
   const shellRef = useRef(null);
   const viewerRef = useRef(null);
   const pannellumInstanceRef = useRef(null);
+
+  /*
+   * Stores the VIEW DIRECTION before moving.
+   *
+   * worldYaw means real direction, not raw panorama yaw.
+   * If all your panoramas are aligned, northOffset can stay 0.
+   * If one panorama is rotated, fix that scene with view.northOffset.
+   */
   const viewMemoryRef = useRef(null);
 
   const requestedSceneId = searchParams.get("scene");
@@ -178,21 +189,26 @@ function StreetViewer({ mapData, site, area }) {
     if (!viewer || !currentScene) return;
 
     const rawYaw = normalizeNumber(viewer.getYaw?.(), 0);
+    const rawPitch = normalizeNumber(viewer.getPitch?.(), 0);
+    const rawHfov = normalizeNumber(viewer.getHfov?.(), normalizeNumber(mapData?.settings?.defaultHfov, 110));
 
     viewMemoryRef.current = {
       worldYaw: toWorldYaw(rawYaw, currentScene),
       rawYaw,
-      pitch: normalizeNumber(viewer.getPitch?.(), 0),
-      hfov: normalizeNumber(viewer.getHfov?.(), normalizeNumber(mapData?.settings?.defaultHfov, 110)),
+      pitch: rawPitch,
+      hfov: rawHfov,
+      fromSceneId: currentSceneIdResolved,
+      savedAt: Date.now(),
     };
   }
 
   async function switchScene(nextSceneId) {
     if (!scenes[nextSceneId] || nextSceneId === currentSceneIdResolved) return;
 
+    // This is the key line: save the view BEFORE changing the panorama.
     rememberCurrentView();
-    setIsTransitioning(true);
 
+    setIsTransitioning(true);
     await preloadImage(scenes[nextSceneId]?.panorama);
 
     setCurrentSceneId(nextSceneId);
@@ -225,7 +241,58 @@ function StreetViewer({ mapData, site, area }) {
     }
 
     const remembered = viewMemoryRef.current;
-    const rememberedYawForThisScene = remembered ? toSceneYaw(remembered.worldYaw, currentScene) : null;
+
+    const targetYaw = normalizeYaw(
+      remembered
+        ? toSceneYaw(remembered.worldYaw, currentScene)
+        : normalizeNumber(currentScene?.view?.initialYaw, 0)
+    );
+
+    const targetPitch = clamp(
+      normalizeNumber(
+        remembered?.pitch,
+        normalizeNumber(currentScene?.view?.initialPitch, 0)
+      ),
+      -85,
+      85
+    );
+
+    const targetHfov = clamp(
+      normalizeNumber(
+        remembered?.hfov,
+        normalizeNumber(currentScene?.view?.initialHfov, normalizeNumber(mapData?.settings?.defaultHfov, 110))
+      ),
+      35,
+      120
+    );
+
+    function applyRememberedView(viewer) {
+      if (!viewer) return;
+
+      // Pannellum sometimes applies default/initial yaw after image load.
+      // So we force the remembered yaw/pitch/hfov more than once.
+      try {
+        viewer.setYaw?.(targetYaw, false);
+        viewer.setPitch?.(targetPitch, false);
+        viewer.setHfov?.(targetHfov, false);
+      } catch {}
+
+      window.setTimeout(() => {
+        try {
+          viewer.setYaw?.(targetYaw, false);
+          viewer.setPitch?.(targetPitch, false);
+          viewer.setHfov?.(targetHfov, false);
+        } catch {}
+      }, 80);
+
+      window.setTimeout(() => {
+        try {
+          viewer.setYaw?.(targetYaw, false);
+          viewer.setPitch?.(targetPitch, false);
+          viewer.setHfov?.(targetHfov, false);
+        } catch {}
+      }, 220);
+    }
 
     const viewer = pannellumGlobal.viewer(viewerRef.current, {
       type: "equirectangular",
@@ -237,15 +304,9 @@ function StreetViewer({ mapData, site, area }) {
       draggable: true,
       mouseZoom: true,
       keyboardZoom: true,
-      hfov: normalizeNumber(
-        remembered?.hfov,
-        normalizeNumber(currentScene?.view?.initialHfov, normalizeNumber(mapData?.settings?.defaultHfov, 110))
-      ),
-      yaw: normalizeNumber(
-        rememberedYawForThisScene,
-        normalizeNumber(currentScene?.view?.initialYaw, 0)
-      ),
-      pitch: normalizeNumber(remembered?.pitch, normalizeNumber(currentScene?.view?.initialPitch, 0)),
+      hfov: targetHfov,
+      yaw: targetYaw,
+      pitch: targetPitch,
       hotSpots: sceneConnections
         .filter((connection) => scenes[connection.to])
         .map((connection) => {
@@ -271,6 +332,13 @@ function StreetViewer({ mapData, site, area }) {
     });
 
     pannellumInstanceRef.current = viewer;
+
+    // Force the remembered view immediately and again after the panorama loads.
+    applyRememberedView(viewer);
+
+    try {
+      viewer.on?.("load", () => applyRememberedView(viewer));
+    } catch {}
 
     return () => {
       if (pannellumInstanceRef.current) {

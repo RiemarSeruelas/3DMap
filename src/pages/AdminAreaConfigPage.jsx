@@ -79,12 +79,48 @@ function getSceneLinkCount(scene) {
   return (scene?.hotspots || []).filter((hotspot) => hotspot?.targetSceneId).length;
 }
 
+function normalizeAdminNumber(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function clampAdminNumber(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function normalizeAdminYaw(yaw) {
+  let nextYaw = normalizeAdminNumber(yaw, 0);
+  while (nextYaw > 180) nextYaw -= 360;
+  while (nextYaw < -180) nextYaw += 360;
+  return Number(nextYaw.toFixed(2));
+}
+
+function getAdminSceneNorthOffset(scene) {
+  return normalizeAdminYaw(
+    scene?.view?.northOffset ??
+      scene?.view?.yawOffset ??
+      scene?.northOffset ??
+      scene?.yawOffset ??
+      0
+  );
+}
+
+function adminSceneYawToWorldYaw(sceneYaw, scene) {
+  return normalizeAdminYaw(normalizeAdminNumber(sceneYaw, 0) + getAdminSceneNorthOffset(scene));
+}
+
+function adminWorldYawToSceneYaw(worldYaw, scene) {
+  return normalizeAdminYaw(normalizeAdminNumber(worldYaw, 0) - getAdminSceneNorthOffset(scene));
+}
+
 function PannellumStage({ image, scene, scenesById, isPicking, pickLabel, onPickPoint, onGoToScene }) {
   const mountRef = useRef(null);
   const viewerRef = useRef(null);
+  const viewMemoryRef = useRef(null);
   const onGoToSceneRef = useRef(onGoToScene);
   const onPickPointRef = useRef(onPickPoint);
   const selectedSceneId = scene?.id || "";
+
   const hotspotSignature = useMemo(() => {
     return (scene?.hotspots || [])
       .filter((hotspot) => hotspot?.targetSceneId)
@@ -100,11 +136,82 @@ function PannellumStage({ image, scene, scenesById, isPicking, pickLabel, onPick
     onPickPointRef.current = onPickPoint;
   }, [onPickPoint]);
 
+  function rememberCurrentAdminView() {
+    const viewer = viewerRef.current;
+    if (!viewer || !scene) return;
+
+    const rawYaw = normalizeAdminNumber(viewer.getYaw?.(), 0);
+    const rawPitch = normalizeAdminNumber(viewer.getPitch?.(), 0);
+    const rawHfov = normalizeAdminNumber(viewer.getHfov?.(), 105);
+
+    viewMemoryRef.current = {
+      worldYaw: adminSceneYawToWorldYaw(rawYaw, scene),
+      rawYaw,
+      pitch: rawPitch,
+      hfov: rawHfov,
+      fromSceneId: scene?.id,
+      savedAt: Date.now(),
+    };
+  }
+
+  function goToSceneWithRememberedView(targetSceneId) {
+    rememberCurrentAdminView();
+    onGoToSceneRef.current?.(targetSceneId);
+  }
+
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount || !image || !window?.pannellum?.viewer) return;
 
     mount.innerHTML = "";
+
+    const remembered = viewMemoryRef.current;
+
+    const targetYaw = normalizeAdminYaw(
+      remembered
+        ? adminWorldYawToSceneYaw(remembered.worldYaw, scene)
+        : normalizeAdminNumber(scene?.view?.initialYaw, 0)
+    );
+
+    const targetPitch = clampAdminNumber(
+      normalizeAdminNumber(remembered?.pitch, normalizeAdminNumber(scene?.view?.initialPitch, 0)),
+      -85,
+      85
+    );
+
+    const targetHfov = clampAdminNumber(
+      normalizeAdminNumber(remembered?.hfov, normalizeAdminNumber(scene?.view?.initialHfov, 105)),
+      35,
+      120
+    );
+
+    function applyRememberedAdminView(viewer) {
+      if (!viewer) return;
+
+      // Pannellum sometimes applies default/initial view after image load.
+      // Force the remembered admin yaw/pitch/hfov more than once.
+      try {
+        viewer.setYaw?.(targetYaw, false);
+        viewer.setPitch?.(targetPitch, false);
+        viewer.setHfov?.(targetHfov, false);
+      } catch {}
+
+      window.setTimeout(() => {
+        try {
+          viewer.setYaw?.(targetYaw, false);
+          viewer.setPitch?.(targetPitch, false);
+          viewer.setHfov?.(targetHfov, false);
+        } catch {}
+      }, 80);
+
+      window.setTimeout(() => {
+        try {
+          viewer.setYaw?.(targetYaw, false);
+          viewer.setPitch?.(targetPitch, false);
+          viewer.setHfov?.(targetHfov, false);
+        } catch {}
+      }, 220);
+    }
 
     const hotSpots = (scene?.hotspots || [])
       .filter((hotspot) => hotspot?.targetSceneId)
@@ -126,7 +233,9 @@ function PannellumStage({ image, scene, scenesById, isPicking, pickLabel, onPick
             button.addEventListener("click", (event) => {
               event.preventDefault();
               event.stopPropagation();
-              onGoToSceneRef.current?.(args.targetSceneId);
+
+              // Save the current admin view BEFORE switching panoramas.
+              goToSceneWithRememberedView(args.targetSceneId);
             });
             hotSpotDiv.appendChild(button);
           },
@@ -145,9 +254,17 @@ function PannellumStage({ image, scene, scenesById, isPicking, pickLabel, onPick
       compass: false,
       keyboardZoom: true,
       mouseZoom: true,
-      hfov: 105,
+      hfov: targetHfov,
+      yaw: targetYaw,
+      pitch: targetPitch,
       hotSpots,
     });
+
+    applyRememberedAdminView(viewerRef.current);
+
+    try {
+      viewerRef.current?.on?.("load", () => applyRememberedAdminView(viewerRef.current));
+    } catch {}
 
     return () => {
       try {
