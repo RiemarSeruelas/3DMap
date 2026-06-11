@@ -6,3 +6,9 @@ uploads/panos/*.png filter=lfs diff=lfs merge=lfs -text
 uploads/thumbs/*.jpg filter=lfs diff=lfs merge=lfs -text
 uploads/thumbs/*.jpeg filter=lfs diff=lfs merge=lfs -text
 uploads/thumbs/*.png filter=lfs diff=lfs merge=lfs -text
+public/uploads/panos/*.jpg filter=lfs diff=lfs merge=lfs -text
+public/uploads/panos/*.jpeg filter=lfs diff=lfs merge=lfs -text
+public/uploads/panos/*.png filter=lfs diff=lfs merge=lfs -text
+public/uploads/thumbs/*.jpg filter=lfs diff=lfs merge=lfs -text
+public/uploads/thumbs/*.jpeg filter=lfs diff=lfs merge=lfs -text
+public/uploads/thumbs/*.png filter=lfs diff=lfs merge=lfs -text
