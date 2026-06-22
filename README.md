@@ -1,49 +1,99 @@
-# Docker usage
+# Docker usage with local upload volume
 
-Build the image:
+This setup runs the StreetView app in Docker and saves uploaded images locally on the host PC/server.
+
+## Folder used for uploaded images
+
+Create this folder on the host PC/server:
+
+```bash
+mkdir C:\StreetViewData\uploads
+mkdir C:\StreetViewData\uploads\panos
+mkdir C:\StreetViewData\uploads\thumbs
+mkdir C:\StreetViewData\uploads\maps
+```
+
+The app inside Docker uses:
+
+```text
+/app/public/uploads
+```
+
+Docker will map it to the host folder:
+
+```text
+C:\StreetViewData\uploads
+```
+
+So uploaded files will be saved here:
+
+```text
+C:\StreetViewData\uploads\panos
+C:\StreetViewData\uploads\thumbs
+C:\StreetViewData\uploads\maps
+```
+
+## Build the image
 
 ```bash
 docker build -t streetview-app .
 ```
 
-Run the container:
+## Run the container with local upload storage
 
 ```bash
-docker run -p 5055:5055 -p 3010:3010 --name streetview-app streetview-app
+docker run --name streetview-app -p 5055:5055 -p 3010:3010 -v "C:\StreetViewData\uploads:/app/public/uploads" streetview-app
 ```
 
-Open in browser:
+## Open in browser
 
 ```text
 http://SERVER_IP:5055
 ```
 
-To replace an existing container:
-
-```bash
-docker rm -f streetview-app
-docker run -p 5055:5055 -p 3010:3010 --name streetview-app streetview-app
-```
-
-If running locally, open:
+If running locally:
 
 ```text
 http://localhost:5055
 ```
 
-Notes:
+## To replace an existing container
+
+```bash
+docker rm -f streetview-app
+docker run --name streetview-app -p 5055:5055 -p 3010:3010 -v "C:\StreetViewData\uploads:/app/public/uploads" streetview-app
+```
+
+## Important notes
 
 ```text
 5055 = StreetView web app
 3010 = save/upload server
 ```
 
-Make sure Git LFS files are downloaded before building:
+Uploaded images are not saved inside GitHub when using this volume setup. They are saved locally on the host PC/server in:
+
+```text
+C:\StreetViewData\uploads
+```
+
+Do not delete this folder unless you want to remove the uploaded panoramas, thumbnails, and maps.
+
+## If using Git LFS for existing images
+
+Before building the Docker image, pull the LFS files:
 
 ```bash
 git lfs install
 git lfs pull
 ```
+
+Then build:
+
+```bash
+docker build -t streetview-app .
+```
+
 
 
 # React + Vite
