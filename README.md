@@ -1,3 +1,51 @@
+# Docker usage
+
+Build the image:
+
+```bash
+docker build -t streetview-app .
+```
+
+Run the container:
+
+```bash
+docker run -p 5055:5055 -p 3010:3010 --name streetview-app streetview-app
+```
+
+Open in browser:
+
+```text
+http://SERVER_IP:5055
+```
+
+To replace an existing container:
+
+```bash
+docker rm -f streetview-app
+docker run -p 5055:5055 -p 3010:3010 --name streetview-app streetview-app
+```
+
+If running locally, open:
+
+```text
+http://localhost:5055
+```
+
+Notes:
+
+```text
+5055 = StreetView web app
+3010 = save/upload server
+```
+
+Make sure Git LFS files are downloaded before building:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
