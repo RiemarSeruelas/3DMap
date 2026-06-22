@@ -1,10 +1,8 @@
-# Docker usage with local upload volume
+# Docker usage with local upload storage
 
-This setup runs the StreetView app in Docker and saves uploaded images locally on the host PC/server.
+## 1. Create the upload folders
 
-## Folder used for uploaded images
-
-Create this folder on the host PC/server:
+Run this on the host PC/server:
 
 ```bash
 mkdir C:\StreetViewData\uploads
@@ -13,19 +11,86 @@ mkdir C:\StreetViewData\uploads\thumbs
 mkdir C:\StreetViewData\uploads\maps
 ```
 
-The app inside Docker uses:
+## 2. Build the Docker image
 
-```text
-/app/public/uploads
+Run this inside the project folder:
+
+```bash
+docker build -t streetview-app .
 ```
 
-Docker will map it to the host folder:
+## 3. Run the container
+
+```bash
+docker run --name streetview-app -p 5055:5055 -p 3010:3010 -v "C:\StreetViewData\uploads:/app/public/uploads" streetview-app
+```
+
+## 4. Open in browser
+
+```text
+http://SERVER_IP:5055
+```
+
+For local testing:
+
+```text
+http://localhost:5055
+```
+
+## 5. Replace an existing container
+
+Use this when you already have an old `streetview-app` container:
+
+```bash
+docker rm -f streetview-app
+docker run --name streetview-app -p 5055:5055 -p 3010:3010 -v "C:\StreetViewData\uploads:/app/public/uploads" streetview-app
+```
+
+## 6. If using Git LFS
+
+Before building the Docker image, run:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+Then build the image:
+
+```bash
+docker build -t streetview-app .
+```
+
+---
+
+# Notes
+
+Port usage:
+
+```text
+5055 = StreetView web app
+3010 = save/upload server
+```
+
+Upload storage:
 
 ```text
 C:\StreetViewData\uploads
 ```
 
-So uploaded files will be saved here:
+The app inside Docker uses this folder:
+
+```text
+/app/public/uploads
+```
+
+Docker connects them using this part of the run command:
+
+```bash
+-v "C:\StreetViewData\uploads:/app/public/uploads"
+```
+
+That means files uploaded through the admin page are saved on the host PC/server here:
 
 ```text
 C:\StreetViewData\uploads\panos
@@ -33,66 +98,7 @@ C:\StreetViewData\uploads\thumbs
 C:\StreetViewData\uploads\maps
 ```
 
-## Build the image
-
-```bash
-docker build -t streetview-app .
-```
-
-## Run the container with local upload storage
-
-```bash
-docker run --name streetview-app -p 5055:5055 -p 3010:3010 -v "C:\StreetViewData\uploads:/app/public/uploads" streetview-app
-```
-
-## Open in browser
-
-```text
-http://SERVER_IP:5055
-```
-
-If running locally:
-
-```text
-http://localhost:5055
-```
-
-## To replace an existing container
-
-```bash
-docker rm -f streetview-app
-docker run --name streetview-app -p 5055:5055 -p 3010:3010 -v "C:\StreetViewData\uploads:/app/public/uploads" streetview-app
-```
-
-## Important notes
-
-```text
-5055 = StreetView web app
-3010 = save/upload server
-```
-
-Uploaded images are not saved inside GitHub when using this volume setup. They are saved locally on the host PC/server in:
-
-```text
-C:\StreetViewData\uploads
-```
-
-Do not delete this folder unless you want to remove the uploaded panoramas, thumbnails, and maps.
-
-## If using Git LFS for existing images
-
-Before building the Docker image, pull the LFS files:
-
-```bash
-git lfs install
-git lfs pull
-```
-
-Then build:
-
-```bash
-docker build -t streetview-app .
-```
+Do not delete `C:\StreetViewData\uploads` unless you want to remove the saved panoramas, thumbnails, and maps.
 
 
 
