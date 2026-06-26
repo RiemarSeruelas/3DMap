@@ -57,7 +57,6 @@ http://localhost:5055
 Run inside the project folder:
 
 ```powershell
-cd "C:\Users\Riej\Downloads\3rd Project"
 docker build -t streetview-app .
 ```
 
