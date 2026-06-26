@@ -36,12 +36,6 @@ README.md
 
 ## Run locally on the Docker PC
 
-Open PowerShell in the project folder:
-
-```powershell
-cd "C:\Users\Riej\Downloads\3rd Project"
-```
-
 Build the image:
 
 ```powershell
