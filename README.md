@@ -1,122 +1,177 @@
-# Docker usage with local upload storage
+# StreetView 360 Factory Map
 
-## 1. Create the upload folders
+React/Vite StreetView app with an admin page for uploading 360 images, saving map/tour data, and viewing factory areas.
 
-Run this on the host PC/server:
+## Current Docker setup
 
-```bash
-mkdir C:\StreetViewData\uploads
-mkdir C:\StreetViewData\uploads\panos
-mkdir C:\StreetViewData\uploads\thumbs
-mkdir C:\StreetViewData\uploads\maps
-```
+The app runs on **port 5055**.
 
-## 2. Build the Docker image
+The save/upload server runs inside the same Docker container on **port 3010**, but the browser does not need to access 3010 directly. Vite proxies uploads, saved JSON, and uploaded images through port 5055.
 
-Run this inside the project folder:
-
-```bash
-docker build -t streetview-app .
-```
-
-## 3. Run the container
-
-```bash
-docker run --name streetview-app -p 5055:5055 -p 3010:3010 -v "C:\StreetViewData\uploads:/app/public/uploads" streetview-app
-```
-
-## 4. Open in browser
+Use only:
 
 ```text
 http://SERVER_IP:5055
 ```
 
-For local testing:
+---
+
+## Files related to Docker / save persistence
+
+```text
+Dockerfile
+vite.config.js
+scripts/dev-with-save.cjs
+scripts/save-mapdata-server.cjs
+src/utils/streetViewAdminStorage.js
+src/pages/AdminAreaConfigPage.jsx
+README_DOCKER.md
+```
+
+---
+
+## Install dependencies
+
+```powershell
+npm install
+```
+
+---
+
+## Run without Docker
+
+```powershell
+npm run dev
+```
+
+Open:
 
 ```text
 http://localhost:5055
 ```
 
-## 5. Replace an existing container
+---
 
-Use this when you already have an old `streetview-app` container:
+## Build Docker image
 
-```bash
-docker rm -f streetview-app
-docker run --name streetview-app -p 5055:5055 -p 3010:3010 -v "C:\StreetViewData\uploads:/app/public/uploads" streetview-app
-```
+Run inside the project folder:
 
-## 6. If using Git LFS
-
-Before building the Docker image, run:
-
-```bash
-git lfs install
-git lfs pull
-```
-
-Then build the image:
-
-```bash
+```powershell
+cd "C:\Users\Riej\Downloads\3rd Project"
 docker build -t streetview-app .
 ```
 
 ---
 
-# Notes
+## Run Docker container
 
-Port usage:
+```powershell
+docker rm -f streetview-app
+docker run --name streetview-app -p 5055:5055 -v "${PWD}/public/uploads:/app/public/uploads" -v "${PWD}/public/data:/app/public/data" streetview-app
+```
+
+Open on the Docker PC:
 
 ```text
-5055 = StreetView web app
-3010 = save/upload server
+http://localhost:5055
 ```
 
-Upload storage:
+Open from another PC:
 
 ```text
-C:\StreetViewData\uploads
+http://SERVER_IP:5055
 ```
 
-The app inside Docker uses this folder:
+Example:
 
 ```text
-/app/public/uploads
+http://172.27.5.1:5055
 ```
 
-Docker connects them using this part of the run command:
+---
 
-```bash
--v "C:\StreetViewData\uploads:/app/public/uploads"
+## Windows Firewall
+
+Run this on the Docker PC in Command Prompt as Administrator:
+
+```cmd
+netsh advfirewall firewall add rule name="StreetView App 5055" dir=in action=allow protocol=TCP localport=5055
 ```
 
-That means files uploaded through the admin page are saved on the host PC/server here:
+---
+
+## Test if the save/upload proxy works
+
+Open:
 
 ```text
-C:\StreetViewData\uploads\panos
-C:\StreetViewData\uploads\thumbs
-C:\StreetViewData\uploads\maps
+http://localhost:5055/health
 ```
 
-Do not delete `C:\StreetViewData\uploads` unless you want to remove the saved panoramas, thumbnails, and maps.
+or from another PC:
 
+```text
+http://SERVER_IP:5055/health
+```
 
+If you see JSON, the internal save server and Vite proxy are working.
 
-# React + Vite
+---
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Where files are saved
 
-Currently, two official plugins are available:
+Uploaded panoramas:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```text
+public/uploads/panos
+```
 
-## React Compiler
+Generated thumbnails:
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+```text
+public/uploads/thumbs
+```
 
-Note: This will impact Vite dev & build performances.
+Map images:
 
-## Expanding the ESLint configuration
+```text
+public/uploads/maps
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Saved tour/map data:
+
+```text
+public/data/streetview-data.json
+```
+
+The Docker command mounts these folders so your files stay on the host PC even after rebuilding the container.
+
+---
+
+## Useful commands
+
+Check running containers:
+
+```powershell
+docker ps
+```
+
+View logs:
+
+```powershell
+docker logs streetview-app
+```
+
+Stop/remove container:
+
+```powershell
+docker rm -f streetview-app
+```
+
+Rebuild after code changes:
+
+```powershell
+docker build -t streetview-app .
+docker rm -f streetview-app
+docker run --name streetview-app -p 5055:5055 -v "${PWD}/public/uploads:/app/public/uploads" -v "${PWD}/public/data:/app/public/data" streetview-app
+```

@@ -21,6 +21,19 @@ function hasUsableMaps(value) {
   return value && typeof value === "object" && Object.keys(value).length > 0;
 }
 
+function getSaveApiBase() {
+  if (typeof window === "undefined") return "http://localhost:3010";
+
+  const override = window.__STREETVIEW_SAVE_API_BASE__;
+  if (typeof override === "string" && override.trim()) {
+    return override.trim().replace(/\/$/, "");
+  }
+
+  // Same-origin mode: browser calls /api/admin/... on port 5055.
+  // Vite proxies those requests to the internal save server on 3010.
+  return "";
+}
+
 function normalizeNumber(value, fallback = 0) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
@@ -153,7 +166,7 @@ export async function uploadAdminImage(file, kind = "panos") {
   const dataUrl = await fileToDataUrl(file);
 
   try {
-    const response = await fetch("http://localhost:3010/api/admin/upload-asset", {
+    const response = await fetch(`${getSaveApiBase()}/api/admin/upload-asset`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -169,7 +182,7 @@ export async function uploadAdminImage(file, kind = "panos") {
     }
 
     const payload = await response.json();
-    return payload.publicPath || dataUrl;
+    return payload.publicPath || payload.path || payload.url || dataUrl;
   } catch (error) {
     console.warn("[streetview-admin] Image upload server unavailable. Falling back to temporary Base64.", error);
     return dataUrl;
@@ -200,7 +213,7 @@ export async function uploadPanoramaAsset(file) {
 
 async function syncMapsToDataFile(nextMaps) {
   try {
-    const response = await fetch("http://localhost:3010/api/admin/save-mapdata", {
+    const response = await fetch(`${getSaveApiBase()}/api/admin/save-mapdata`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ factoryMaps: nextMaps }),
@@ -216,7 +229,9 @@ async function syncMapsToDataFile(nextMaps) {
       memoryFactoryMaps = normalizeMaps(payload.factoryMaps);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryFactoryMaps));
-      } catch {}
+      } catch (error) {
+        console.error("[streetview-admin] Failed to save maps to localStorage.", error);
+      }
     }
 
     window.dispatchEvent(new CustomEvent("streetview-admin-js-save-status", { detail: { ok: true, savedTo: payload.savedTo } }));

@@ -8,7 +8,14 @@ RUN npm install
 
 COPY . .
 
+# Only expose the StreetView web app.
+# The save/upload server still runs inside the container on 3010,
+# but Vite proxies /api, /uploads, and /data through port 5055.
 EXPOSE 5055
-EXPOSE 3010
 
-CMD ["sh", "-c", "node scripts/save-mapdata-server.cjs & npx vite --host 0.0.0.0 --port 5055"]
+ENV VITE_HOST=0.0.0.0
+ENV VITE_PORT=5055
+ENV SAVE_HOST=127.0.0.1
+ENV SAVE_PORT=3010
+
+CMD ["npm", "run", "dev"]

@@ -2,6 +2,16 @@ node_modules
 dist
 .git
 .gitignore
-Dockerfile
 npm-debug.log
 .DS_Store
+
+# Keep uploads/data OUT of the Docker image when using volume mounts.
+# They will come from the host folder instead:
+#   C:\StreetViewData\uploads -> /app/public/uploads
+#   C:\StreetViewData\data    -> /app/public/data
+public/uploads/panos/*
+public/uploads/thumbs/*
+public/uploads/maps/*
+!public/uploads/panos/.gitkeep
+!public/uploads/thumbs/.gitkeep
+!public/uploads/maps/.gitkeep

@@ -13,6 +13,9 @@
     "dev:save": "node scripts/save-mapdata-server.cjs"
   },
   "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "multer": "^2.2.0",
     "pannellum": "^2.5.7",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

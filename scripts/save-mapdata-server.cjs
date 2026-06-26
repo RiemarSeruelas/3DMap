@@ -1,156 +1,240 @@
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
-const crypto = require("crypto");
+#!/usr/bin/env node
+const express = require("express");
+const fs = require("node:fs");
+const path = require("node:path");
+const crypto = require("node:crypto");
 
-const PORT = Number(process.env.STREETVIEW_SAVE_PORT || 3010);
-const rootDir = process.cwd();
+let multer;
+try {
+  multer = require("multer");
+} catch (err) {
+  console.error("[streetview-admin] Missing dependency: multer");
+  console.error("Run: npm install multer");
+  process.exit(1);
+}
+
+const app = express();
+
+const PORT = Number(process.env.SAVE_PORT || process.env.SAVE_SERVER_PORT || 3010);
+const HOST = process.env.SAVE_HOST || process.env.SAVE_SERVER_HOST || "0.0.0.0";
+
+const rootDir = path.resolve(__dirname, "..");
 const publicDir = path.join(rootDir, "public");
-const dataDir = path.join(publicDir, "data");
-const uploadRoot = path.join(publicDir, "uploads");
-const jsonOutputPath = path.join(dataDir, "streetview-data.json");
+const dataDir = process.env.STREETVIEW_DATA_DIR || path.join(publicDir, "data");
+const uploadsDir = process.env.STREETVIEW_UPLOADS_DIR || path.join(publicDir, "uploads");
+const dataFile = path.join(dataDir, "streetview-data.json");
 
-function send(res, status, data) {
-  res.writeHead(status, {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-  });
-  res.end(JSON.stringify(data));
+const allowedUploadKinds = new Set(["panos", "thumbs", "maps"]);
+
+function ensureDir(dir) {
+  fs.mkdirSync(dir, { recursive: true });
 }
 
-function readBody(req, limitBytes = 120 * 1024 * 1024) {
-  return new Promise((resolve, reject) => {
-    let body = "";
-    req.on("data", (chunk) => {
-      body += chunk;
-      if (body.length > limitBytes) {
-        reject(new Error("Payload too large"));
-        req.destroy();
-      }
-    });
-    req.on("end", () => resolve(body));
-    req.on("error", reject);
-  });
+function ensureStorage() {
+  ensureDir(dataDir);
+  ensureDir(uploadsDir);
+  ensureDir(path.join(uploadsDir, "panos"));
+  ensureDir(path.join(uploadsDir, "thumbs"));
+  ensureDir(path.join(uploadsDir, "maps"));
+
+  if (!fs.existsSync(dataFile)) {
+    fs.writeFileSync(dataFile, JSON.stringify({ factoryMaps: {} }, null, 2), "utf8");
+  }
 }
 
-function safeName(name = "image") {
-  const ext = path.extname(name).toLowerCase().replace(/[^.a-z0-9]/g, "") || ".jpg";
-  const base = path
-    .basename(name, ext)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "") || "image";
-  return { base, ext };
+function cors(req, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") return res.sendStatus(204);
+  next();
 }
 
-function extensionFromMime(mime = "image/jpeg", fallback = ".jpg") {
-  if (mime.includes("png")) return ".png";
-  if (mime.includes("webp")) return ".webp";
-  if (mime.includes("gif")) return ".gif";
-  if (mime.includes("jpeg") || mime.includes("jpg")) return ".jpg";
-  return fallback || ".jpg";
+function safeBaseName(name) {
+  const parsed = path.parse(String(name || "upload"));
+  const clean =
+    parsed.name
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80) || "upload";
+  const ext = (parsed.ext || ".jpg").toLowerCase().replace(/[^a-z0-9.]/g, "") || ".jpg";
+  return `${clean}${ext}`;
 }
 
-function parseDataUrl(dataUrl) {
-  const match = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/s.exec(dataUrl || "");
-  if (!match) return null;
-  return { mime: match[1], buffer: Buffer.from(match[2], "base64") };
-}
-
-function cleanUploadKind(kind = "panos") {
-  if (kind === "maps") return "maps";
-  if (kind === "thumbs") return "thumbs";
-  return "panos";
-}
-
-function writeDataUrlImage({ dataUrl, filename = "image.jpg", kind = "panos" }) {
-  const parsed = parseDataUrl(dataUrl);
-  if (!parsed) throw new Error("Invalid image data URL");
-
-  const cleanKind = cleanUploadKind(kind);
-  const { base, ext } = safeName(filename);
-  const finalExt = extensionFromMime(parsed.mime, ext);
+function uniqueFileName(originalName) {
+  const safe = safeBaseName(originalName);
+  const parsed = path.parse(safe);
   const stamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
-  const hash = crypto.createHash("sha1").update(parsed.buffer).digest("hex").slice(0, 8);
-  const fileName = `${base}-${stamp}-${hash}${finalExt}`;
-  const folder = path.join(uploadRoot, cleanKind);
-  const fullPath = path.join(folder, fileName);
-
-  fs.mkdirSync(folder, { recursive: true });
-  fs.writeFileSync(fullPath, parsed.buffer);
-  return `/uploads/${cleanKind}/${fileName}`;
+  const id = crypto.randomBytes(4).toString("hex");
+  return `${parsed.name}-${stamp}-${id}${parsed.ext}`;
 }
 
-function sanitizeImages(value, context = { kind: "panos", name: "image.jpg" }) {
-  if (Array.isArray(value)) return value.map((item) => sanitizeImages(item, context));
-  if (!value || typeof value !== "object") return value;
+function getSafeKind(value) {
+  const requested = String(value || "panos").toLowerCase();
+  return allowedUploadKinds.has(requested) ? requested : "panos";
+}
 
-  const next = {};
-  for (const [key, raw] of Object.entries(value)) {
-    if ((key === "panorama" || key === "mapImage" || key === "thumbnail") && typeof raw === "string" && raw.startsWith("data:image/")) {
-      const kind = key === "mapImage" ? "maps" : key === "thumbnail" ? "thumbs" : "panos";
-      const name = `${value.id || value.name || key}.jpg`;
-      next[key] = writeDataUrlImage({ dataUrl: raw, filename: name, kind });
-      continue;
-    }
+function publicPathFor(kind, filename) {
+  return `/uploads/${kind}/${filename}`;
+}
 
-    next[key] = sanitizeImages(raw, {
-      kind: key === "mapImage" ? "maps" : key === "thumbnail" ? "thumbs" : context.kind,
-      name: value.id || value.name || context.name,
-    });
+function saveDataUrlUpload({ filename, kind, dataUrl }) {
+  if (!dataUrl || typeof dataUrl !== "string") {
+    throw new Error("Missing dataUrl");
   }
-  return next;
-}
 
-function writeJson(factoryMaps) {
-  fs.mkdirSync(dataDir, { recursive: true });
-  fs.writeFileSync(jsonOutputPath, JSON.stringify({ savedAt: new Date().toISOString(), factoryMaps }, null, 2), "utf8");
-}
-
-const server = http.createServer(async (req, res) => {
-  try {
-    if (req.method === "OPTIONS") return send(res, 200, { ok: true });
-
-    if (req.method === "POST" && req.url === "/api/admin/upload-asset") {
-      const payload = JSON.parse((await readBody(req)) || "{}");
-      if (!payload.dataUrl || !payload.filename) {
-        return send(res, 400, { ok: false, error: "filename and dataUrl are required" });
-      }
-      const publicPath = writeDataUrlImage({ dataUrl: payload.dataUrl, filename: payload.filename, kind: payload.kind });
-      return send(res, 200, { ok: true, publicPath });
-    }
-
-    if (req.method === "POST" && req.url === "/api/admin/save-mapdata") {
-      const payload = JSON.parse((await readBody(req)) || "{}");
-      if (!payload.factoryMaps || typeof payload.factoryMaps !== "object") {
-        return send(res, 400, { ok: false, error: "factoryMaps object is required" });
-      }
-      const sanitizedMaps = sanitizeImages(payload.factoryMaps);
-      writeJson(sanitizedMaps);
-      console.log(`[streetview-admin] Saved ${jsonOutputPath}`);
-      return send(res, 200, { ok: true, savedTo: jsonOutputPath, factoryMaps: sanitizedMaps });
-    }
-
-    if (req.method === "GET" && req.url === "/api/admin/health") return send(res, 200, { ok: true });
-    return send(res, 404, { ok: false, error: "Not found" });
-  } catch (error) {
-    return send(res, 500, { ok: false, error: error.message });
+  const match = dataUrl.match(/^data:(.*?);base64,(.*)$/);
+  if (!match) {
+    throw new Error("Invalid dataUrl format");
   }
+
+  const mime = match[1] || "image/jpeg";
+  const base64 = match[2];
+
+  let safeFilename = filename || "upload.jpg";
+  if (!path.extname(safeFilename)) {
+    if (mime.includes("png")) safeFilename += ".png";
+    else if (mime.includes("webp")) safeFilename += ".webp";
+    else safeFilename += ".jpg";
+  }
+
+  const safeKind = getSafeKind(kind);
+  const targetDir = path.join(uploadsDir, safeKind);
+  ensureDir(targetDir);
+
+  const finalName = uniqueFileName(safeFilename);
+  const finalPath = path.join(targetDir, finalName);
+  fs.writeFileSync(finalPath, Buffer.from(base64, "base64"));
+
+  return {
+    ok: true,
+    kind: safeKind,
+    filename: finalName,
+    publicPath: publicPathFor(safeKind, finalName),
+    path: publicPathFor(safeKind, finalName),
+    url: publicPathFor(safeKind, finalName),
+    size: fs.statSync(finalPath).size,
+    originalName: filename || safeFilename,
+  };
+}
+
+ensureStorage();
+
+app.use(cors);
+app.use(express.json({ limit: "500mb" }));
+app.use(express.urlencoded({ extended: true, limit: "500mb" }));
+app.use("/uploads", express.static(uploadsDir));
+app.use("/data", express.static(dataDir));
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination(req, file, cb) {
+      const kind = getSafeKind(req.body?.kind || req.query?.kind || req.body?.type || req.query?.type);
+      const targetDir = path.join(uploadsDir, kind);
+      ensureDir(targetDir);
+      req.savedUploadKind = kind;
+      cb(null, targetDir);
+    },
+    filename(req, file, cb) {
+      cb(null, uniqueFileName(file.originalname));
+    },
+  }),
+  limits: { fileSize: 1024 * 1024 * 500 },
 });
 
-server.listen(PORT, () => {
-  fs.mkdirSync(path.join(uploadRoot, "panos"), { recursive: true });
-  fs.mkdirSync(path.join(uploadRoot, "maps"), { recursive: true });
-  fs.mkdirSync(path.join(uploadRoot, "thumbs"), { recursive: true });
-  fs.mkdirSync(dataDir, { recursive: true });
+app.get("/", (req, res) => {
+  res.json({
+    ok: true,
+    service: "streetview-admin-save-server",
+    health: "/health",
+    uploadRoutes: ["/upload-asset", "/api/upload-asset", "/api/admin/upload-asset"],
+    saveRoutes: ["/save-mapdata", "/api/save-mapdata", "/api/admin/save-mapdata"],
+  });
+});
 
-  if (!fs.existsSync(jsonOutputPath)) {
-    fs.writeFileSync(jsonOutputPath, JSON.stringify({ savedAt: null, factoryMaps: null }, null, 2), "utf8");
+app.get("/health", (req, res) => {
+  res.json({ ok: true, dataFile, uploadsDir });
+});
+
+app.get("/streetview-data.json", (req, res) => {
+  res.sendFile(dataFile);
+});
+
+app.get("/data/streetview-data.json", (req, res) => {
+  res.sendFile(dataFile);
+});
+
+function handleSaveMapData(req, res) {
+  try {
+    ensureStorage();
+
+    const body = req.body;
+    if (!body || typeof body !== "object") {
+      return res.status(400).json({ ok: false, error: "Invalid JSON body" });
+    }
+
+    const tmpFile = `${dataFile}.tmp`;
+    fs.writeFileSync(tmpFile, JSON.stringify(body, null, 2), "utf8");
+    fs.renameSync(tmpFile, dataFile);
+
+    return res.json({
+      ok: true,
+      file: dataFile,
+      savedTo: dataFile,
+      factoryMaps: body.factoryMaps || body,
+    });
+  } catch (err) {
+    console.error("[streetview-admin] save-mapdata failed:", err);
+    return res.status(500).json({ ok: false, error: err.message });
   }
+}
 
-  console.log(`[streetview-admin] Save server running on http://localhost:${PORT}`);
-  console.log(`[streetview-admin] Data: ${jsonOutputPath}`);
-  console.log(`[streetview-admin] Uploads: ${uploadRoot}`);
+function handleUploadAsset(req, res) {
+  try {
+    ensureStorage();
+
+    if (req.file) {
+      const kind = req.savedUploadKind || "panos";
+      const publicPath = publicPathFor(kind, req.file.filename);
+      return res.json({
+        ok: true,
+        kind,
+        filename: req.file.filename,
+        publicPath,
+        path: publicPath,
+        url: publicPath,
+        size: req.file.size,
+        originalName: req.file.originalname,
+      });
+    }
+
+    if (req.body?.dataUrl) {
+      const saved = saveDataUrlUpload({
+        filename: req.body.filename,
+        kind: req.body.kind || req.body.type,
+        dataUrl: req.body.dataUrl,
+      });
+      return res.json(saved);
+    }
+
+    return res.status(400).json({ ok: false, error: "No file or dataUrl uploaded" });
+  } catch (err) {
+    console.error("[streetview-admin] upload-asset failed:", err);
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+}
+
+app.post("/save-mapdata", handleSaveMapData);
+app.post("/api/save-mapdata", handleSaveMapData);
+app.post("/api/admin/save-mapdata", handleSaveMapData);
+
+app.post("/upload-asset", upload.single("file"), handleUploadAsset);
+app.post("/api/upload-asset", upload.single("file"), handleUploadAsset);
+app.post("/api/admin/upload-asset", upload.single("file"), handleUploadAsset);
+
+app.listen(PORT, HOST, () => {
+  console.log(`[streetview-admin] Save server running on http://${HOST}:${PORT}`);
+  console.log(`[streetview-admin] Data: ${dataFile}`);
+  console.log(`[streetview-admin] Uploads: ${uploadsDir}`);
 });

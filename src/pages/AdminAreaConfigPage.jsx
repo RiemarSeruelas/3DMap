@@ -17,8 +17,45 @@ const MAP_ZOOM_MIN = 1;
 const MAP_ZOOM_MAX = 4;
 const MAP_ZOOM_STEP = 0.35;
 
+function getSaveAssetBase() {
+  if (typeof window === "undefined") return "http://localhost:3010";
+
+  const override = window.__STREETVIEW_SAVE_API_BASE__;
+  if (typeof override === "string" && override.trim()) {
+    return override.trim().replace(/\/$/, "");
+  }
+
+  // Same-origin mode: /uploads and /data load through the Vite proxy on port 5055.
+  return "";
+}
+
+function resolveAssetUrl(value) {
+  if (!value) return "";
+  if (typeof value !== "string") return value;
+
+  const cleanValue = value.trim();
+  if (!cleanValue) return "";
+
+  if (
+    cleanValue.startsWith("http://") ||
+    cleanValue.startsWith("https://") ||
+    cleanValue.startsWith("data:") ||
+    cleanValue.startsWith("blob:")
+  ) {
+    return cleanValue;
+  }
+
+  // Files uploaded by the admin save server load from the same app port.
+  // Vite proxies these paths internally to the save server.
+  if (cleanValue.startsWith("/uploads/") || cleanValue.startsWith("/data/")) {
+    return `${getSaveAssetBase()}${cleanValue}`;
+  }
+
+  return cleanValue;
+}
+
 function getSceneImage(scene) {
-  return scene?.panorama || scene?.image || scene?.url || scene?.publicPath || "";
+  return resolveAssetUrl(scene?.panorama || scene?.image || scene?.url || scene?.publicPath || "");
 }
 
 function getSceneTitle(scene, fallback = "Untitled Location") {
@@ -26,17 +63,17 @@ function getSceneTitle(scene, fallback = "Untitled Location") {
 }
 
 function getSiteMapImage(site, area, tour) {
-  return (
+  return resolveAssetUrl(
     site?.mapImage ||
-    site?.image ||
-    site?.map ||
-    site?.floorMap ||
-    site?.siteMap ||
-    area?.mapImage ||
-    area?.image ||
-    area?.map ||
-    tour?.mapImage ||
-    ""
+      site?.image ||
+      site?.map ||
+      site?.floorMap ||
+      site?.siteMap ||
+      area?.mapImage ||
+      area?.image ||
+      area?.map ||
+      tour?.mapImage ||
+      ""
   );
 }
 
