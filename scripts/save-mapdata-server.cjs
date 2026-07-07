@@ -13,6 +13,14 @@ try {
   process.exit(1);
 }
 
+let sharp = null;
+try {
+  sharp = require("sharp");
+} catch (err) {
+  console.warn("[streetview-admin] Optional dependency sharp is missing. Upload compression is disabled.");
+  console.warn("Run: npm install sharp");
+}
+
 const app = express();
 
 const PORT = Number(process.env.SAVE_PORT || process.env.SAVE_SERVER_PORT || 3010);
@@ -24,7 +32,7 @@ const dataDir = process.env.STREETVIEW_DATA_DIR || path.join(publicDir, "data");
 const uploadsDir = process.env.STREETVIEW_UPLOADS_DIR || path.join(publicDir, "uploads");
 const dataFile = path.join(dataDir, "streetview-data.json");
 
-const allowedUploadKinds = new Set(["panos", "thumbs", "maps"]);
+const allowedUploadKinds = new Set(["panos", "thumbs", "maps", "machines"]);
 
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
@@ -36,6 +44,7 @@ function ensureStorage() {
   ensureDir(path.join(uploadsDir, "panos"));
   ensureDir(path.join(uploadsDir, "thumbs"));
   ensureDir(path.join(uploadsDir, "maps"));
+  ensureDir(path.join(uploadsDir, "machines"));
 
   if (!fs.existsSync(dataFile)) {
     fs.writeFileSync(dataFile, JSON.stringify({ factoryMaps: {} }, null, 2), "utf8");
@@ -62,12 +71,13 @@ function safeBaseName(name) {
   return `${clean}${ext}`;
 }
 
-function uniqueFileName(originalName) {
+function uniqueFileName(originalName, forcedExt = null) {
   const safe = safeBaseName(originalName);
   const parsed = path.parse(safe);
   const stamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
   const id = crypto.randomBytes(4).toString("hex");
-  return `${parsed.name}-${stamp}-${id}${parsed.ext}`;
+  const ext = forcedExt || parsed.ext || ".jpg";
+  return `${parsed.name}-${stamp}-${id}${ext}`;
 }
 
 function getSafeKind(value) {
@@ -79,7 +89,60 @@ function publicPathFor(kind, filename) {
   return `/uploads/${kind}/${filename}`;
 }
 
-function saveDataUrlUpload({ filename, kind, dataUrl }) {
+function getCompressionProfile(kind) {
+  if (kind === "thumbs") return { maxWidth: 520, quality: 76, ext: ".jpg" };
+  if (kind === "maps") return { maxWidth: 4096, quality: 84, ext: ".jpg" };
+  if (kind === "machines") return { maxWidth: 1800, quality: 82, ext: ".jpg" };
+  return { maxWidth: 8192, quality: 80, ext: ".jpg" };
+}
+
+async function compressImageBuffer(buffer, kind, mimetype = "") {
+  if (!sharp || !mimetype.startsWith("image/")) {
+    return { buffer, ext: null, compressed: false };
+  }
+
+  const profile = getCompressionProfile(kind);
+
+  try {
+    let pipeline = sharp(buffer, { limitInputPixels: false }).rotate();
+    const metadata = await pipeline.metadata();
+
+    if (metadata.width && metadata.width > profile.maxWidth) {
+      pipeline = pipeline.resize({ width: profile.maxWidth, withoutEnlargement: true });
+    }
+
+    const output = await pipeline.jpeg({ quality: profile.quality, mozjpeg: true }).toBuffer();
+    return { buffer: output, ext: profile.ext, compressed: true };
+  } catch (err) {
+    console.warn("[streetview-admin] Image compression failed. Saving original upload.", err.message);
+    return { buffer, ext: null, compressed: false };
+  }
+}
+
+async function saveBufferUpload({ filename, kind, buffer, mimetype }) {
+  const safeKind = getSafeKind(kind);
+  const targetDir = path.join(uploadsDir, safeKind);
+  ensureDir(targetDir);
+
+  const processed = await compressImageBuffer(buffer, safeKind, mimetype || "");
+  const finalName = uniqueFileName(filename || "upload.jpg", processed.ext);
+  const finalPath = path.join(targetDir, finalName);
+  fs.writeFileSync(finalPath, processed.buffer);
+
+  return {
+    ok: true,
+    kind: safeKind,
+    filename: finalName,
+    publicPath: publicPathFor(safeKind, finalName),
+    path: publicPathFor(safeKind, finalName),
+    url: publicPathFor(safeKind, finalName),
+    size: fs.statSync(finalPath).size,
+    originalName: filename || finalName,
+    compressed: processed.compressed,
+  };
+}
+
+async function saveDataUrlUpload({ filename, kind, dataUrl }) {
   if (!dataUrl || typeof dataUrl !== "string") {
     throw new Error("Missing dataUrl");
   }
@@ -99,24 +162,12 @@ function saveDataUrlUpload({ filename, kind, dataUrl }) {
     else safeFilename += ".jpg";
   }
 
-  const safeKind = getSafeKind(kind);
-  const targetDir = path.join(uploadsDir, safeKind);
-  ensureDir(targetDir);
-
-  const finalName = uniqueFileName(safeFilename);
-  const finalPath = path.join(targetDir, finalName);
-  fs.writeFileSync(finalPath, Buffer.from(base64, "base64"));
-
-  return {
-    ok: true,
-    kind: safeKind,
-    filename: finalName,
-    publicPath: publicPathFor(safeKind, finalName),
-    path: publicPathFor(safeKind, finalName),
-    url: publicPathFor(safeKind, finalName),
-    size: fs.statSync(finalPath).size,
-    originalName: filename || safeFilename,
-  };
+  return saveBufferUpload({
+    filename: safeFilename,
+    kind,
+    buffer: Buffer.from(base64, "base64"),
+    mimetype: mime,
+  });
 }
 
 ensureStorage();
@@ -124,22 +175,20 @@ ensureStorage();
 app.use(cors);
 app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ extended: true, limit: "500mb" }));
-app.use("/uploads", express.static(uploadsDir));
+app.use(
+  "/uploads",
+  express.static(uploadsDir, {
+    maxAge: "30d",
+    immutable: true,
+    setHeaders(res) {
+      res.setHeader("Cache-Control", "public, max-age=2592000, immutable");
+    },
+  })
+);
 app.use("/data", express.static(dataDir));
 
 const upload = multer({
-  storage: multer.diskStorage({
-    destination(req, file, cb) {
-      const kind = getSafeKind(req.body?.kind || req.query?.kind || req.body?.type || req.query?.type);
-      const targetDir = path.join(uploadsDir, kind);
-      ensureDir(targetDir);
-      req.savedUploadKind = kind;
-      cb(null, targetDir);
-    },
-    filename(req, file, cb) {
-      cb(null, uniqueFileName(file.originalname));
-    },
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 1024 * 1024 * 500 },
 });
 
@@ -154,7 +203,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/health", (req, res) => {
-  res.json({ ok: true, dataFile, uploadsDir });
+  res.json({ ok: true, dataFile, uploadsDir, sharpCompression: Boolean(sharp) });
 });
 
 app.get("/streetview-data.json", (req, res) => {
@@ -190,27 +239,22 @@ function handleSaveMapData(req, res) {
   }
 }
 
-function handleUploadAsset(req, res) {
+async function handleUploadAsset(req, res) {
   try {
     ensureStorage();
 
     if (req.file) {
-      const kind = req.savedUploadKind || "panos";
-      const publicPath = publicPathFor(kind, req.file.filename);
-      return res.json({
-        ok: true,
-        kind,
-        filename: req.file.filename,
-        publicPath,
-        path: publicPath,
-        url: publicPath,
-        size: req.file.size,
-        originalName: req.file.originalname,
+      const saved = await saveBufferUpload({
+        filename: req.file.originalname,
+        kind: req.body?.kind || req.query?.kind || req.body?.type || req.query?.type,
+        buffer: req.file.buffer,
+        mimetype: req.file.mimetype,
       });
+      return res.json(saved);
     }
 
     if (req.body?.dataUrl) {
-      const saved = saveDataUrlUpload({
+      const saved = await saveDataUrlUpload({
         filename: req.body.filename,
         kind: req.body.kind || req.body.type,
         dataUrl: req.body.dataUrl,
@@ -237,4 +281,5 @@ app.listen(PORT, HOST, () => {
   console.log(`[streetview-admin] Save server running on http://${HOST}:${PORT}`);
   console.log(`[streetview-admin] Data: ${dataFile}`);
   console.log(`[streetview-admin] Uploads: ${uploadsDir}`);
+  console.log(`[streetview-admin] Sharp compression: ${sharp ? "enabled" : "disabled"}`);
 });

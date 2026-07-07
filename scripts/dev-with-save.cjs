@@ -10,6 +10,7 @@ function getArg(name, fallback) {
   return fallback;
 }
 
+const rootDir = path.resolve(__dirname, "..");
 const host = getArg("--host", process.env.VITE_HOST || "0.0.0.0");
 const port = getArg("--port", process.env.VITE_PORT || "5055");
 
@@ -17,18 +18,20 @@ console.log("[streetview-admin] Starting save server + Vite app...");
 console.log(`[streetview-admin] Vite host: ${host}`);
 console.log(`[streetview-admin] Vite port: ${port}`);
 
-const saveServer = spawn(process.execPath, [path.join("scripts", "save-mapdata-server.cjs")], {
+const saveServer = spawn(process.execPath, [path.join(rootDir, "scripts", "save-mapdata-server.cjs")], {
+  cwd: rootDir,
   stdio: "inherit",
   shell: false,
   env: {
     ...process.env,
-    SAVE_HOST: process.env.SAVE_HOST || process.env.SAVE_SERVER_HOST || "127.0.0.1",
-    SAVE_PORT: process.env.SAVE_PORT || process.env.SAVE_SERVER_PORT || "3010",
+    SAVE_HOST: process.env.SAVE_HOST || "127.0.0.1",
+    SAVE_PORT: process.env.SAVE_PORT || "3010",
   },
 });
 
-const viteBin = process.platform === "win32" ? "npx.cmd" : "npx";
-const vite = spawn(viteBin, ["vite", "--host", host, "--port", String(port)], {
+const viteBin = path.join(rootDir, "node_modules", "vite", "bin", "vite.js");
+const vite = spawn(process.execPath, [viteBin, "--host", host, "--port", String(port)], {
+  cwd: rootDir,
   stdio: "inherit",
   shell: false,
   env: process.env,
@@ -39,6 +42,16 @@ function shutdown(code = 0) {
   if (!vite.killed) vite.kill("SIGTERM");
   process.exit(code);
 }
+
+saveServer.on("error", (error) => {
+  console.error("[streetview-admin] Failed to start save server:", error);
+  shutdown(1);
+});
+
+vite.on("error", (error) => {
+  console.error("[streetview-admin] Failed to start Vite:", error);
+  shutdown(1);
+});
 
 saveServer.on("exit", (code) => {
   if (code && code !== 0) {

@@ -10,7 +10,7 @@ COPY . .
 
 # Only expose the StreetView web app.
 # The save/upload server still runs inside the container on 3010,
-# but Vite proxies /api, /uploads, and /data through port 5055.
+# but Vite proxies /api, /uploads, /data, and /health through port 5055.
 EXPOSE 5055
 
 ENV VITE_HOST=0.0.0.0

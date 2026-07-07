@@ -55,10 +55,37 @@ function normalizeSceneView(scene = {}) {
   };
 }
 
+function normalizePoint(point = {}) {
+  return {
+    pitch: normalizeNumber(point.pitch, 0),
+    yaw: normalizeNumber(point.yaw, 0),
+    x: normalizeNumber(point.x, 50),
+    y: normalizeNumber(point.y, 50),
+  };
+}
+
+function normalizeMachineArea(area = {}) {
+  return {
+    ...area,
+    id: area.id || createId(area.machineName || area.name || "machine-area"),
+    type: "machineArea",
+    machineName: area.machineName || area.name || "Machine",
+    machineType: area.machineType || "",
+    hazard: area.hazard || "",
+    safetyNote: area.safetyNote || "",
+    description: area.description || "",
+    image: area.image || area.machineImage || "",
+    hoverImage: area.hoverImage || area.openImage || area.overlayImage || "",
+    points: Array.isArray(area.points) ? area.points.map(normalizePoint).slice(0, 8) : [],
+  };
+}
+
 function normalizeScene(scene = {}) {
   return {
     ...scene,
     hotspots: Array.isArray(scene.hotspots) ? scene.hotspots : [],
+    machineMarkers: Array.isArray(scene.machineMarkers) ? scene.machineMarkers : [],
+    machineAreas: Array.isArray(scene.machineAreas) ? scene.machineAreas.map(normalizeMachineArea) : [],
     mapPoint: scene.mapPoint || scene.minimap || null,
     minimap: scene.minimap || scene.mapPoint || null,
     view: normalizeSceneView(scene),
@@ -104,15 +131,6 @@ export async function hydrateFactoryMapsFromPublicJson({ force = false } = {}) {
   }
 
   return getEffectiveFactoryMaps();
-}
-
-function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 }
 
 function dataUrlToFile(dataUrl, filename) {
@@ -163,17 +181,14 @@ export function createImageThumbnail(file, { maxWidth = 420, quality = 0.78 } = 
 export async function uploadAdminImage(file, kind = "panos") {
   if (!file) return "";
 
-  const dataUrl = await fileToDataUrl(file);
-
   try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("kind", kind);
+
     const response = await fetch(`${getSaveApiBase()}/api/admin/upload-asset`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        filename: file.name,
-        kind,
-        dataUrl,
-      }),
+      body: formData,
     });
 
     if (!response.ok) {
@@ -182,16 +197,16 @@ export async function uploadAdminImage(file, kind = "panos") {
     }
 
     const payload = await response.json();
-    return payload.publicPath || payload.path || payload.url || dataUrl;
+    return payload.publicPath || payload.path || payload.url || "";
   } catch (error) {
-    console.warn("[streetview-admin] Image upload server unavailable. Falling back to temporary Base64.", error);
-    return dataUrl;
+    console.warn("[streetview-admin] Image upload server unavailable. Falling back to temporary browser URL.", error);
+    return URL.createObjectURL(file);
   }
 }
 
 export async function uploadAssetFile(file, folder = "panos") {
   const publicPath = await uploadAdminImage(file, folder);
-  return { url: publicPath, publicPath, fallback: publicPath?.startsWith("data:image/") || false };
+  return { url: publicPath, publicPath, fallback: publicPath?.startsWith("blob:") || false };
 }
 
 export async function uploadPanoramaAsset(file) {
