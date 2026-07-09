@@ -49,15 +49,34 @@ function normalizeYaw(yaw) {
   return Number(nextYaw.toFixed(2));
 }
 
-function updateLiveFloorArrowRotations(container, viewer, selector = "[data-floor-arrow-yaw]") {
-  if (!container || !viewer?.getYaw) return;
+function bindLiveArrowRotation(button, hotspotYaw, getViewer) {
+  if (!button) return () => {};
 
-  const currentYaw = normalizeYaw(viewer.getYaw());
-  container.querySelectorAll(selector).forEach((arrowButton) => {
-    const hotspotYaw = normalizeNumber(arrowButton.dataset.floorArrowYaw, 0);
-    const rotation = normalizeYaw(hotspotYaw - currentYaw);
-    arrowButton.style.setProperty("--floor-arrow-rotation", `${rotation}deg`);
-  });
+  let frameId = 0;
+  let stopped = false;
+
+  function tick() {
+    if (stopped || !button.isConnected) {
+      window.cancelAnimationFrame(frameId);
+      return;
+    }
+
+    const viewer = getViewer?.();
+    if (viewer?.getYaw) {
+      const currentYaw = normalizeNumber(viewer.getYaw(), 0);
+      const relativeYaw = normalizeYaw(normalizeNumber(hotspotYaw, 0) - currentYaw);
+      button.style.setProperty("--floor-arrow-rotation", `${relativeYaw}deg`);
+    }
+
+    frameId = window.requestAnimationFrame(tick);
+  }
+
+  tick();
+
+  return () => {
+    stopped = true;
+    window.cancelAnimationFrame(frameId);
+  };
 }
 
 
@@ -231,6 +250,19 @@ function getMachineAreaTitle(area = {}) {
   return area.machineName || area.name || "Machine Area";
 }
 
+function getMachineAreaPopupImage(area = {}) {
+  return resolveAssetUrl(area?.image || "");
+}
+
+function getMachineAreaHoverImage(area = {}) {
+  return resolveAssetUrl(area?.hoverImage || "");
+}
+
+function getMachineAreaPatternId(prefix, value) {
+  const safeId = String(value || "machine-area").replace(/[^a-zA-Z0-9_-]/g, "-");
+  return `${prefix}-${safeId}`;
+}
+
 function projectPanoPointToScreen(point, viewer, element) {
   if (!point || !viewer || !element) return null;
 
@@ -301,7 +333,6 @@ function StreetViewer({ mapData, site, area }) {
   const shellRef = useRef(null);
   const viewerRef = useRef(null);
   const pannellumInstanceRef = useRef(null);
-  const arrowRotationFrameRef = useRef(0);
   const viewMemoryRef = useRef(null);
 
   const requestedSceneId = searchParams.get("scene");
@@ -402,16 +433,29 @@ function StreetViewer({ mapData, site, area }) {
   }, []);
 
   useEffect(() => {
+    setProjectedMachineAreas([]);
+    setHoveredMachineArea(null);
+
     let animationFrame = 0;
-    let lastSignature = "";
+    let lastSignature = "__init__";
 
     function updateProjectedMachineAreas() {
       const viewer = pannellumInstanceRef.current;
       const element = viewerRef.current;
+
+      if (!viewer || !element || !machineAreas.length) {
+        if (lastSignature !== "__empty__") {
+          lastSignature = "__empty__";
+          setProjectedMachineAreas([]);
+        }
+        animationFrame = window.requestAnimationFrame(updateProjectedMachineAreas);
+        return;
+      }
+
       const nextProjected = getProjectedMachineAreas(machineAreas, viewer, element);
       const nextSignature = nextProjected
         .map((item) => `${item.id}:${item.pointsAttr}`)
-        .join('|');
+        .join('|') || "__empty__";
 
       if (nextSignature !== lastSignature) {
         lastSignature = nextSignature;
@@ -422,16 +466,17 @@ function StreetViewer({ mapData, site, area }) {
     }
 
     updateProjectedMachineAreas();
-    return () => window.cancelAnimationFrame(animationFrame);
+
+    return () => {
+      setProjectedMachineAreas([]);
+      window.cancelAnimationFrame(animationFrame);
+    };
   }, [machineAreas, currentSceneIdResolved]);
 
   useEffect(() => {
     if (!viewerRef.current || !currentPanorama) return;
     const pannellumGlobal = window.pannellum;
     if (!pannellumGlobal?.viewer) return;
-
-    window.cancelAnimationFrame(arrowRotationFrameRef.current);
-    arrowRotationFrameRef.current = 0;
 
     if (pannellumInstanceRef.current) {
       try {
@@ -511,9 +556,9 @@ function StreetViewer({ mapData, site, area }) {
             button.type = "button";
             button.className = "street-arrow-only-button";
             button.title = args.title;
+            button.setAttribute("aria-label", args.title);
             button.innerHTML = '<span class="street-floor-arrow-core" aria-hidden="true"></span>';
-            button.dataset.floorArrowYaw = String(args.hotspotYaw);
-            button.style.setProperty("--floor-arrow-rotation", "0deg");
+            bindLiveArrowRotation(button, args.hotspotYaw, () => pannellumInstanceRef.current);
             hotSpotDiv.appendChild(button);
           },
           createTooltipArgs: {
@@ -543,25 +588,11 @@ function StreetViewer({ mapData, site, area }) {
     pannellumInstanceRef.current = viewer;
     applyRememberedView(viewer);
 
-    function keepFloorArrowsFacingDirection() {
-      updateLiveFloorArrowRotations(
-        viewerRef.current,
-        viewer,
-        ".street-arrow-only-button[data-floor-arrow-yaw]"
-      );
-      arrowRotationFrameRef.current = window.requestAnimationFrame(keepFloorArrowsFacingDirection);
-    }
-
-    keepFloorArrowsFacingDirection();
-
     try {
       viewer.on?.("load", () => applyRememberedView(viewer));
     } catch {}
 
     return () => {
-      window.cancelAnimationFrame(arrowRotationFrameRef.current);
-      arrowRotationFrameRef.current = 0;
-
       if (pannellumInstanceRef.current) {
         try {
           pannellumInstanceRef.current.destroy();
@@ -627,20 +658,47 @@ function StreetViewer({ mapData, site, area }) {
 
       {projectedMachineAreas.length > 0 && (
         <svg className="machine-area-screen-overlay" aria-hidden="true">
-          {projectedMachineAreas.map((item) => (
-            <polygon
-              key={item.id}
-              className={`machine-area-screen-polygon ${hoveredMachineArea?.id === item.area.id ? "is-active" : ""}`}
-              points={item.pointsAttr}
-              onMouseEnter={() => showMachineArea(item.area)}
-              onMouseLeave={scheduleMachineAreaClose}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                showMachineArea(item.area);
-              }}
-            />
-          ))}
+          <defs>
+            {projectedMachineAreas.map((item) => {
+              const previewImage = getMachineAreaHoverImage(item.area);
+              if (!previewImage) return null;
+              const patternId = getMachineAreaPatternId("viewer-machine-area-fill", item.id);
+              return (
+                <pattern
+                  key={patternId}
+                  id={patternId}
+                  patternUnits="objectBoundingBox"
+                  patternContentUnits="objectBoundingBox"
+                  width="1"
+                  height="1"
+                >
+                  <image href={previewImage} x="0" y="0" width="1" height="1" preserveAspectRatio="xMidYMid slice" />
+                </pattern>
+              );
+            })}
+          </defs>
+
+          {projectedMachineAreas.map((item) => {
+            const isActive = hoveredMachineArea?.id === item.area.id;
+            const previewImage = isActive ? getMachineAreaHoverImage(item.area) : "";
+            const patternId = getMachineAreaPatternId("viewer-machine-area-fill", item.id);
+
+            return (
+              <polygon
+                key={item.id}
+                className={`machine-area-screen-polygon ${isActive ? "is-active" : ""} ${previewImage ? "has-preview-fill" : ""}`}
+                points={item.pointsAttr}
+                style={previewImage ? { fill: `url(#${patternId})` } : undefined}
+                onMouseEnter={() => showMachineArea(item.area)}
+                onMouseLeave={scheduleMachineAreaClose}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  showMachineArea(item.area);
+                }}
+              />
+            );
+          })}
         </svg>
       )}
 
@@ -658,8 +716,8 @@ function StreetViewer({ mapData, site, area }) {
           </div>
           <strong>{getMachineAreaTitle(hoveredMachineArea)}</strong>
           {hoveredMachineArea.machineType && <em>{hoveredMachineArea.machineType}</em>}
-          {(hoveredMachineArea.hoverImage || hoveredMachineArea.image) && (
-            <img src={resolveAssetUrl(hoveredMachineArea.hoverImage || hoveredMachineArea.image)} alt={getMachineAreaTitle(hoveredMachineArea)} />
+          {getMachineAreaPopupImage(hoveredMachineArea) && (
+            <img src={getMachineAreaPopupImage(hoveredMachineArea)} alt={getMachineAreaTitle(hoveredMachineArea)} />
           )}
           {hoveredMachineArea.hazard && <p><b>Hazard:</b> {hoveredMachineArea.hazard}</p>}
           {hoveredMachineArea.safetyNote && <p><b>Safety:</b> {hoveredMachineArea.safetyNote}</p>}

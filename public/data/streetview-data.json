@@ -852,7 +852,45 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [
+                  {
+                    "id": "machine-1",
+                    "type": "machineArea",
+                    "machineName": "1",
+                    "machineType": "1",
+                    "hazard": "1",
+                    "safetyNote": "1",
+                    "description": "1",
+                    "image": "",
+                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-08-at-11.23.14-22am-20260709032931-28cff4a0.jpg",
+                    "points": [
+                      {
+                        "pitch": 0.02,
+                        "yaw": 131.27,
+                        "x": 86.46,
+                        "y": 49.99
+                      },
+                      {
+                        "pitch": 0.13,
+                        "yaw": 151.88,
+                        "x": 92.19,
+                        "y": 49.93
+                      },
+                      {
+                        "pitch": -30.74,
+                        "yaw": 152.7,
+                        "x": 92.42,
+                        "y": 67.08
+                      },
+                      {
+                        "pitch": -24.57,
+                        "yaw": 131.72,
+                        "x": 86.59,
+                        "y": 63.65
+                      }
+                    ]
+                  }
+                ]
               },
               "savoury-left2-5": {
                 "id": "savoury-left2-5",
@@ -1129,7 +1167,45 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [
+                  {
+                    "id": "machine-guard",
+                    "type": "machineArea",
+                    "machineName": "Guard",
+                    "machineType": "Guard",
+                    "hazard": "Gengkiskan",
+                    "safetyNote": "Genggeng",
+                    "description": "geng",
+                    "image": "/uploads/machines/chatgpt-image-jul-2-2026-10_38_16-am-20260707081419-6b44a624.jpg",
+                    "hoverImage": "",
+                    "points": [
+                      {
+                        "pitch": -3.92,
+                        "yaw": -13.38,
+                        "x": 46.28,
+                        "y": 52.18
+                      },
+                      {
+                        "pitch": -3.69,
+                        "yaw": 30.82,
+                        "x": 58.56,
+                        "y": 52.05
+                      },
+                      {
+                        "pitch": -49.12,
+                        "yaw": 30.44,
+                        "x": 58.46,
+                        "y": 77.29
+                      },
+                      {
+                        "pitch": -52.48,
+                        "yaw": -13.14,
+                        "x": 46.35,
+                        "y": 79.16
+                      }
+                    ]
+                  }
+                ]
               },
               "savoury-left1-4": {
                 "id": "savoury-left1-4",

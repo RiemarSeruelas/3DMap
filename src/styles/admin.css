@@ -1590,21 +1590,27 @@ button.danger { background: #fee2e2; color: #991b1b; }
 .admin-config-site-dot-v2 {
   position: absolute;
   z-index: 6;
-  width: 5px;
-  height: 5px;
+  min-width: 0;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  display: grid;
+  place-items: center;
   transform: translate(-50%, -50%) scale(calc(1 / var(--admin-map-zoom, 1)));
   transform-origin: center;
-  border-radius: 999px;
+  border-radius: 50%;
   background: #22c55e;
-  border: 1.5px solid #fff;
-  box-shadow: 0 0 0 2px rgba(34,197,94,0.20), 0 4px 10px rgba(15,23,42,0.18);
-  pointer-events: none;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.18), 0 4px 10px rgba(15,23,42,0.14);
+  cursor: pointer;
+  pointer-events: auto;
 }
 .admin-config-site-dot-v2.is-selected {
-  width: 7px;
-  height: 7px;
+  width: 14px;
+  height: 14px;
   background: var(--admin-blue);
-  box-shadow: 0 0 0 2px rgba(37,99,235,0.22), 0 5px 12px rgba(15,23,42,0.22);
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.18), 0 5px 12px rgba(15,23,42,0.18);
 }
 .admin-config-map-modal-v2 .admin-config-site-dot-v2 { display: block !important; }
 
@@ -1881,8 +1887,8 @@ button.danger { background: #fee2e2; color: #991b1b; }
 
 /* Direction arrows / floor markers
    One source of truth for admin + viewer navigation arrows.
-   The saved hotspot yaw is the real direction around the standing point.
-   JSX updates --floor-arrow-rotation from hotspot yaw minus current viewer yaw. */
+   The saved hotspot position is the fixed yaw around the standing point.
+   The arrow shape uses only the saved direction angle, never a live rotation loop. */
 .pnlm-street-arrow-hotspot,
 .admin-config-pnlm-hotspot-shell-v2,
 .pnlm-google-arrow-hotspot,
@@ -1918,7 +1924,6 @@ button.danger { background: #fee2e2; color: #991b1b; }
   color: transparent !important;
   font-size: 0 !important;
   outline: none !important;
-  --floor-arrow-rotation: 0deg;
   -webkit-tap-highlight-color: transparent !important;
 }
 
@@ -2059,33 +2064,49 @@ button.danger { background: #fee2e2; color: #991b1b; }
 .machine-area-screen-polygon {
   pointer-events: auto;
   cursor: pointer;
-  fill: rgba(72, 214, 255, 0.18);
-  stroke: rgba(72, 214, 255, 0.94);
+  fill: rgba(72, 214, 255, 0.14);
+  stroke: rgba(144, 238, 255, 0.96);
   stroke-width: 2.2px;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 0 10px rgba(72, 214, 255, 0.42));
-  transition: fill 140ms ease, stroke 140ms ease, filter 140ms ease;
+  filter: drop-shadow(0 0 10px rgba(72, 214, 255, 0.34));
+  transition: fill 160ms ease, stroke 160ms ease, filter 160ms ease, opacity 160ms ease;
 }
 
 .machine-area-screen-polygon:hover,
 .machine-area-screen-polygon.is-active {
-  fill: rgba(72, 214, 255, 0.28);
-  stroke: rgba(181, 244, 255, 0.98);
-  filter: drop-shadow(0 0 16px rgba(72, 214, 255, 0.74));
+  fill: rgba(72, 214, 255, 0.24);
+  stroke: rgba(222, 248, 255, 0.98);
+  filter: drop-shadow(0 0 16px rgba(72, 214, 255, 0.62));
+}
+
+.machine-area-screen-polygon.has-preview-fill,
+.machine-area-screen-polygon.has-preview-fill:hover,
+.machine-area-screen-polygon.has-preview-fill.is-active {
+  fill-opacity: 0.92;
+  stroke: rgba(255, 255, 255, 0.98);
+  filter: drop-shadow(0 0 22px rgba(72, 214, 255, 0.70));
 }
 
 .admin-machine-area-screen-overlay .machine-area-screen-polygon {
-  fill: rgba(255, 202, 87, 0.18);
-  stroke: rgba(255, 202, 87, 0.92);
-  filter: drop-shadow(0 0 10px rgba(255, 202, 87, 0.34));
+  fill: rgba(255, 202, 87, 0.16);
+  stroke: rgba(255, 224, 128, 0.96);
+  filter: drop-shadow(0 0 10px rgba(255, 202, 87, 0.28));
 }
 
 .admin-machine-area-screen-overlay .machine-area-screen-polygon:hover,
 .admin-machine-area-screen-overlay .machine-area-screen-polygon.is-active {
-  fill: rgba(255, 202, 87, 0.30);
-  stroke: rgba(255, 250, 230, 0.98);
-  filter: drop-shadow(0 0 16px rgba(255, 202, 87, 0.66));
+  fill: rgba(255, 202, 87, 0.24);
+  stroke: rgba(255, 246, 214, 0.98);
+  filter: drop-shadow(0 0 16px rgba(255, 202, 87, 0.52));
+}
+
+.admin-machine-area-screen-overlay .machine-area-screen-polygon.has-preview-fill,
+.admin-machine-area-screen-overlay .machine-area-screen-polygon.has-preview-fill:hover,
+.admin-machine-area-screen-overlay .machine-area-screen-polygon.has-preview-fill.is-active {
+  fill-opacity: 0.92;
+  stroke: rgba(255, 255, 255, 0.98);
+  filter: drop-shadow(0 0 22px rgba(255, 202, 87, 0.62));
 }
 
 /* Legacy hotspot button styles kept neutral in case older cached data still renders them. */
@@ -2173,12 +2194,14 @@ button.danger { background: #fee2e2; color: #991b1b; }
 .machine-area-info-card img {
   display: block;
   width: 100%;
-  max-height: min(190px, 30vh);
-  object-fit: cover;
-  border-radius: 16px;
+  aspect-ratio: 4 / 3;
+  max-height: min(240px, 34vh);
+  object-fit: contain;
+  border-radius: 18px;
   margin: 10px 0 12px;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.04);
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
 }
 .machine-area-info-card p {
   margin: 8px 0 0;
@@ -2677,4 +2700,14 @@ button.danger { background: #fee2e2; color: #991b1b; }
     width: 112px;
     height: 62px;
   }
+}
+
+
+/* Safety marking toolbar: only Undo + Finish, no max limit. */
+.machine-area-draft-toolbar {
+  justify-content: flex-end;
+}
+
+.machine-area-draft-toolbar .machine-area-point-target-control {
+  display: none !important;
 }

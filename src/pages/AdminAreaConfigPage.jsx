@@ -18,6 +18,8 @@ const MAP_ZOOM_MIN = 1;
 const MAP_ZOOM_MAX = 4;
 const MAP_ZOOM_STEP = 0.35;
 const DIRECTION_MARKER_PITCH = -42;
+const DIRECTION_ORBIT_YAW_RANGE = 68;
+const DIRECTION_ARROW_MAX_ROTATION = 48;
 const EMPTY_MACHINE_FORM = {
   machineName: "",
   machineType: "",
@@ -144,17 +146,6 @@ function normalizeAdminYaw(yaw) {
   return Number(nextYaw.toFixed(2));
 }
 
-function updateLiveAdminFloorArrowRotations(container, viewer, selector = "[data-floor-arrow-yaw]") {
-  if (!container || !viewer?.getYaw) return;
-
-  const currentYaw = normalizeAdminYaw(viewer.getYaw());
-  container.querySelectorAll(selector).forEach((arrowButton) => {
-    const hotspotYaw = normalizeAdminNumber(arrowButton.dataset.floorArrowYaw, 0);
-    const rotation = normalizeAdminYaw(hotspotYaw - currentYaw);
-    arrowButton.style.setProperty("--floor-arrow-rotation", `${rotation}deg`);
-  });
-}
-
 function getAdminSceneNorthOffset(scene) {
   return normalizeAdminYaw(
     scene?.view?.northOffset ??
@@ -173,10 +164,51 @@ function adminWorldYawToSceneYaw(worldYaw, scene) {
   return normalizeAdminYaw(normalizeAdminNumber(worldYaw, 0) - getAdminSceneNorthOffset(scene));
 }
 
+function bindAdminLiveArrowRotation(button, hotspotYaw, getViewer) {
+  if (!button) return () => {};
 
+  let frameId = 0;
+  let stopped = false;
+
+  function tick() {
+    if (stopped || !button.isConnected) {
+      window.cancelAnimationFrame(frameId);
+      return;
+    }
+
+    const viewer = getViewer?.();
+    if (viewer?.getYaw) {
+      const currentYaw = normalizeAdminNumber(viewer.getYaw(), 0);
+      const relativeYaw = normalizeAdminYaw(normalizeAdminNumber(hotspotYaw, 0) - currentYaw);
+      button.style.setProperty("--floor-arrow-rotation", `${relativeYaw}deg`);
+    }
+
+    frameId = window.requestAnimationFrame(tick);
+  }
+
+  tick();
+
+  return () => {
+    stopped = true;
+    window.cancelAnimationFrame(frameId);
+  };
+}
 
 function getMachineAreaTitle(area = {}) {
   return area.machineName || area.name || "Machine Area";
+}
+
+function getMachineAreaPopupImage(area = {}) {
+  return resolveAssetUrl(area?.image || "");
+}
+
+function getMachineAreaHoverImage(area = {}) {
+  return resolveAssetUrl(area?.hoverImage || "");
+}
+
+function getMachineAreaPatternId(prefix, value) {
+  const safeId = String(value || "machine-area").replace(/[^a-zA-Z0-9_-]/g, "-");
+  return `${prefix}-${safeId}`;
 }
 
 function getMachineAreaPoints(area = {}) {
@@ -289,7 +321,6 @@ function PannellumStage({
 }) {
   const mountRef = useRef(null);
   const viewerRef = useRef(null);
-  const arrowRotationFrameRef = useRef(0);
   const viewMemoryRef = useRef(null);
   const onGoToSceneRef = useRef(onGoToScene);
   const onPickPointRef = useRef(onPickPoint);
@@ -434,8 +465,8 @@ function PannellumStage({
             button.className = "admin-config-pnlm-hotspot-button-v2";
             button.innerHTML = '<span class="street-floor-arrow-core" aria-hidden="true"></span>';
             button.title = args.title;
-            button.dataset.floorArrowYaw = String(args.hotspotYaw);
-            button.style.setProperty("--floor-arrow-rotation", "0deg");
+            button.setAttribute("aria-label", args.title);
+            bindAdminLiveArrowRotation(button, args.hotspotYaw, () => viewerRef.current);
             button.addEventListener("click", (event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -464,9 +495,6 @@ function PannellumStage({
       },
     }));
 
-    window.cancelAnimationFrame(arrowRotationFrameRef.current);
-    arrowRotationFrameRef.current = 0;
-
     viewerRef.current = window.pannellum.viewer(mount, {
       type: "equirectangular",
       panorama: image,
@@ -483,25 +511,11 @@ function PannellumStage({
 
     applyRememberedAdminView(viewerRef.current);
 
-    function keepAdminFloorArrowsFacingDirection() {
-      updateLiveAdminFloorArrowRotations(
-        mount,
-        viewerRef.current,
-        ".admin-config-pnlm-hotspot-button-v2[data-floor-arrow-yaw]"
-      );
-      arrowRotationFrameRef.current = window.requestAnimationFrame(keepAdminFloorArrowsFacingDirection);
-    }
-
-    keepAdminFloorArrowsFacingDirection();
-
     try {
       viewerRef.current?.on?.("load", () => applyRememberedAdminView(viewerRef.current));
     } catch {}
 
     return () => {
-      window.cancelAnimationFrame(arrowRotationFrameRef.current);
-      arrowRotationFrameRef.current = 0;
-
       try {
         viewerRef.current?.destroy?.();
       } catch {}
@@ -510,16 +524,29 @@ function PannellumStage({
   }, [image, selectedSceneId, hotspotSignature, scenesById]);
 
   useEffect(() => {
+    setProjectedMachineAreas([]);
+    setHoveredMachineArea(null);
+
     let animationFrame = 0;
-    let lastSignature = "";
+    let lastSignature = "__init__";
 
     function updateProjectedMachineAreas() {
       const viewer = viewerRef.current;
       const element = mountRef.current;
+
+      if (!viewer || !element || !machineAreas.length) {
+        if (lastSignature !== "__empty__") {
+          lastSignature = "__empty__";
+          setProjectedMachineAreas([]);
+        }
+        animationFrame = window.requestAnimationFrame(updateProjectedMachineAreas);
+        return;
+      }
+
       const nextProjected = getProjectedMachineAreas(machineAreas, viewer, element);
       const nextSignature = nextProjected
         .map((item) => `${item.id}:${item.pointsAttr}`)
-        .join('|');
+        .join('|') || "__empty__";
 
       if (nextSignature !== lastSignature) {
         lastSignature = nextSignature;
@@ -530,7 +557,10 @@ function PannellumStage({
     }
 
     updateProjectedMachineAreas();
-    return () => window.cancelAnimationFrame(animationFrame);
+    return () => {
+      setProjectedMachineAreas([]);
+      window.cancelAnimationFrame(animationFrame);
+    };
   }, [machineAreas, selectedSceneId]);
 
   useEffect(() => {
@@ -545,24 +575,31 @@ function PannellumStage({
         const coords = viewerRef.current.mouseEventToCoords(event);
         if (Array.isArray(coords) && coords.length >= 2) {
           if (isDirectionPicking) {
-            const clickPitch = Number(coords[0].toFixed(2));
-            const clickYaw = normalizeAdminYaw(Number(coords[1]));
+            const rect = mount.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const clickOffsetX = event.clientX - centerX;
+            const directionStrength = clampAdminNumber(clickOffsetX / Math.max(1, rect.width * 0.38), -1, 1);
+            const centerYaw = normalizeAdminNumber(viewerRef.current?.getYaw?.(), Number(coords[1]));
+            const directionYaw = normalizeAdminYaw(centerYaw + directionStrength * DIRECTION_ORBIT_YAW_RANGE);
+            const directionAngle = Number((directionStrength * DIRECTION_ARROW_MAX_ROTATION).toFixed(2));
 
+            rememberCurrentAdminView();
             onPickPointRef.current?.({
               pitch: DIRECTION_MARKER_PITCH,
-              yaw: clickYaw,
-              directionYaw: clickYaw,
-              directionAngle: 0,
-              clickPitch,
-              clickYaw,
-              coordinateMode: "direction-floor-yaw",
-              ...toLegacyPercentPoint(DIRECTION_MARKER_PITCH, clickYaw),
+              yaw: directionYaw,
+              directionYaw,
+              directionAngle,
+              clickPitch: Number(coords[0].toFixed(2)),
+              clickYaw: Number(coords[1].toFixed(2)),
+              coordinateMode: "direction-orbit",
+              ...toLegacyPercentPoint(DIRECTION_MARKER_PITCH, directionYaw),
             });
             return;
           }
 
           const pitch = Number(coords[0].toFixed(2));
           const yaw = Number(coords[1].toFixed(2));
+          rememberCurrentAdminView();
           onPickPointRef.current?.({
             pitch,
             yaw,
@@ -582,18 +619,22 @@ function PannellumStage({
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
     if (isDirectionPicking) {
-      const directionYaw = normalizeAdminYaw((x / 100) * 360 - 180);
+      const directionStrength = clampAdminNumber((x - 50) / 38, -1, 1);
+      const directionYaw = normalizeAdminYaw(directionStrength * DIRECTION_ORBIT_YAW_RANGE);
+      const directionAngle = Number((directionStrength * DIRECTION_ARROW_MAX_ROTATION).toFixed(2));
+      rememberCurrentAdminView();
       onPickPointRef.current?.({
         pitch: DIRECTION_MARKER_PITCH,
         yaw: directionYaw,
         directionYaw,
-        directionAngle: 0,
-        coordinateMode: "direction-floor-yaw",
+        directionAngle,
+        coordinateMode: "direction-orbit",
         ...toLegacyPercentPoint(DIRECTION_MARKER_PITCH, directionYaw),
       });
       return;
     }
 
+    rememberCurrentAdminView();
     onPickPointRef.current?.({ ...legacyPercentToPano({ x, y }), x, y });
   }
 
@@ -636,20 +677,47 @@ function PannellumStage({
 
       {projectedMachineAreas.length > 0 && (
         <svg className="machine-area-screen-overlay admin-machine-area-screen-overlay" aria-hidden="true">
-          {projectedMachineAreas.map((item) => (
-            <polygon
-              key={item.id}
-              className={`machine-area-screen-polygon ${hoveredMachineArea?.id === item.area.id ? "is-active" : ""}`}
-              points={item.pointsAttr}
-              onMouseEnter={() => showMachineArea(item.area)}
-              onMouseLeave={scheduleMachineAreaClose}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                showMachineArea(item.area);
-              }}
-            />
-          ))}
+          <defs>
+            {projectedMachineAreas.map((item) => {
+              const previewImage = getMachineAreaHoverImage(item.area);
+              if (!previewImage) return null;
+              const patternId = getMachineAreaPatternId("admin-machine-area-fill", item.id);
+              return (
+                <pattern
+                  key={patternId}
+                  id={patternId}
+                  patternUnits="objectBoundingBox"
+                  patternContentUnits="objectBoundingBox"
+                  width="1"
+                  height="1"
+                >
+                  <image href={previewImage} x="0" y="0" width="1" height="1" preserveAspectRatio="xMidYMid slice" />
+                </pattern>
+              );
+            })}
+          </defs>
+
+          {projectedMachineAreas.map((item) => {
+            const isActive = hoveredMachineArea?.id === item.area.id;
+            const previewImage = isActive ? getMachineAreaHoverImage(item.area) : "";
+            const patternId = getMachineAreaPatternId("admin-machine-area-fill", item.id);
+
+            return (
+              <polygon
+                key={item.id}
+                className={`machine-area-screen-polygon ${isActive ? "is-active" : ""} ${previewImage ? "has-preview-fill" : ""}`}
+                points={item.pointsAttr}
+                style={previewImage ? { fill: `url(#${patternId})` } : undefined}
+                onMouseEnter={() => showMachineArea(item.area)}
+                onMouseLeave={scheduleMachineAreaClose}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  showMachineArea(item.area);
+                }}
+              />
+            );
+          })}
         </svg>
       )}
 
@@ -667,8 +735,8 @@ function PannellumStage({
           </div>
           <strong>{getMachineAreaTitle(hoveredMachineArea)}</strong>
           {hoveredMachineArea.machineType && <em>{hoveredMachineArea.machineType}</em>}
-          {(hoveredMachineArea.hoverImage || hoveredMachineArea.image) && (
-            <img src={resolveAssetUrl(hoveredMachineArea.hoverImage || hoveredMachineArea.image)} alt={getMachineAreaTitle(hoveredMachineArea)} />
+          {getMachineAreaPopupImage(hoveredMachineArea) && (
+            <img src={getMachineAreaPopupImage(hoveredMachineArea)} alt={getMachineAreaTitle(hoveredMachineArea)} />
           )}
           {hoveredMachineArea.hazard && <p><b>Hazard:</b> {hoveredMachineArea.hazard}</p>}
           {hoveredMachineArea.safetyNote && <p><b>Safety:</b> {hoveredMachineArea.safetyNote}</p>}
@@ -735,7 +803,6 @@ function AdminAreaConfigPage() {
   const [machineAreaDraftPoints, setMachineAreaDraftPoints] = useState([]);
   const [isMachineModalOpen, setIsMachineModalOpen] = useState(false);
   const [machineForm, setMachineForm] = useState(EMPTY_MACHINE_FORM);
-  const [machinePointTargetCount, setMachinePointTargetCount] = useState(12);
   const [editingMachineAreaId, setEditingMachineAreaId] = useState(null);
   const [machineImageFile, setMachineImageFile] = useState(null);
   const [machineHoverImageFile, setMachineHoverImageFile] = useState(null);
@@ -1168,11 +1235,7 @@ function AdminAreaConfigPage() {
     if (!selectedScene?.id) return;
 
     if (mode === "mark-machine-area") {
-      setMachineAreaDraftPoints((currentPoints) => {
-        const maxPoints = Math.max(3, Math.min(20, Number(machinePointTargetCount) || 12));
-        if (currentPoints.length >= maxPoints) return currentPoints;
-        return [...currentPoints, point];
-      });
+      setMachineAreaDraftPoints((currentPoints) => [...currentPoints, point]);
       return;
     }
 
@@ -1181,8 +1244,9 @@ function AdminAreaConfigPage() {
       const currentHotspots = selectedScene.hotspots || [];
       const existingHotspot = currentHotspots.find((hotspot) => hotspot?.targetSceneId === pendingTargetSceneId);
 
-      // Navigation markings use the exact clicked panorama yaw as the target direction.
-      // The arrow sits on the floor, then the JSX rotates the arrow live as the viewer turns.
+      // Navigation markings now use the click only as a general direction.
+      // The click chooses only the panorama yaw/direction.
+      // The arrow itself is snapped to a fixed floor pitch, so direction is shown by where it sits around the viewer, not by rotating the glyph.
       const directionPoint = {
         pitch: DIRECTION_MARKER_PITCH,
         yaw: normalizeAdminYaw(point.directionYaw ?? point.yaw),
@@ -1212,7 +1276,7 @@ function AdminAreaConfigPage() {
       setPendingTargetSceneId(null);
       setMode("preview");
     }
-  }, [machinePointTargetCount, mode, pendingTargetSceneId, selectedScene, tour]);
+  }, [mode, pendingTargetSceneId, selectedScene, tour]);
 
   const goToScene = useCallback((targetSceneId) => {
     if (!tour?.scenes?.[targetSceneId]) return;
@@ -1457,24 +1521,13 @@ function AdminAreaConfigPage() {
               {saveMessage && <span className="admin-config-save-flash-v2">{saveMessage}</span>}
               {mode === "mark-machine-area" && (
                 <div className="machine-area-draft-toolbar">
-                  <label className="machine-area-point-target-control">
-                    <span>Max</span>
-                    <input
-                      type="number"
-                      min="3"
-                      max="20"
-                      value={machinePointTargetCount}
-                      onChange={(event) => setMachinePointTargetCount(Math.max(3, Math.min(20, Number(event.target.value) || 12)))}
-                    />
-                  </label>
                   <button type="button" onClick={undoMachineAreaPoint} disabled={!machineAreaDraftPoints.length}>Undo</button>
                   <button type="button" className="primary" onClick={finishMachineAreaDraft} disabled={machineAreaDraftPoints.length < 3}>Finish</button>
                 </div>
               )}
-              {mode !== "preview" && (
+              {mode === "mark-location" && pendingTargetScene && (
                 <div className="admin-config-mode-pill-v2 active">
-                  {mode === "mark-location" && pendingTargetScene && `Click direction toward ${getSceneTitle(pendingTargetScene)}`}
-                  {mode === "mark-machine-area" && `Mark safety area: ${machineAreaDraftPoints.length} point(s). Click Finish when done.`}
+                  {`Click direction toward ${getSceneTitle(pendingTargetScene)}`}
                 </div>
               )}
             </div>
@@ -1516,7 +1569,7 @@ function AdminAreaConfigPage() {
               </button>
               {isMarkingsMenuOpen && (
                 <div className="admin-action-menu">
-                  <button type="button" onClick={() => { setIsMarkingsMenuOpen(false); openMapModal("jump"); }} disabled={!selectedScene}>Map: Add / Remove / Jump</button>
+                  <button type="button" onClick={() => { setIsMarkingsMenuOpen(false); openMapModal("jump"); }} disabled={!selectedScene}>Map Area</button>
                   <button type="button" onClick={() => { setIsMarkingsMenuOpen(false); setIsLocationManagerOpen(true); }} disabled={!selectedScene}>Mark Area</button>
                 </div>
               )}
@@ -1696,7 +1749,7 @@ function AdminAreaConfigPage() {
         <div className="admin-config-modal-backdrop-v2" onMouseDown={() => setIsMapModalOpen(false)}>
           <section className="admin-config-map-modal-v2" onMouseDown={(event) => event.stopPropagation()}>
             <div className="admin-config-modal-header-v2">
-              <div><span>Map</span><strong>{mapModalMode === "place" ? `Place ${getSceneTitle(selectedScene)}` : "Click anywhere to jump to closest location"}</strong></div>
+              <div><span>Map Area</span><strong>{mapModalMode === "place" ? `Place ${getSceneTitle(selectedScene)}` : "Click anywhere to jump to closest location"}</strong></div>
               <button type="button" onClick={() => setIsMapModalOpen(false)}>×</button>
             </div>
 
