@@ -343,6 +343,7 @@ function StreetViewer({ mapData, site, area }) {
 
   const [currentSceneId, setCurrentSceneId] = useState(() => requestedSceneId || getFirstSceneId(mapData));
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isSafetyModeOn, setIsSafetyModeOn] = useState(false);
   const [hoveredMachineArea, setHoveredMachineArea] = useState(null);
   const [projectedMachineAreas, setProjectedMachineAreas] = useState([]);
   const machineHoverCloseTimerRef = useRef(null);
@@ -431,6 +432,13 @@ function StreetViewer({ mapData, site, area }) {
   useEffect(() => {
     return () => cancelMachineAreaClose();
   }, []);
+
+  useEffect(() => {
+    if (!isSafetyModeOn) {
+      cancelMachineAreaClose();
+      setHoveredMachineArea(null);
+    }
+  }, [isSafetyModeOn]);
 
   useEffect(() => {
     setProjectedMachineAreas([]);
@@ -656,7 +664,16 @@ function StreetViewer({ mapData, site, area }) {
         <strong>{labelForScene(currentScene, currentSceneIdResolved)}</strong>
       </div>
 
-      {projectedMachineAreas.length > 0 && (
+      <button
+        type="button"
+        className={`street-safety-toggle ${isSafetyModeOn ? "is-on" : ""}`}
+        onClick={() => setIsSafetyModeOn((current) => !current)}
+        title={isSafetyModeOn ? "Hide safety markings" : "Show safety markings"}
+      >
+        {isSafetyModeOn ? "Safety Off" : "Safety On"}
+      </button>
+
+      {isSafetyModeOn && projectedMachineAreas.length > 0 && (
         <svg className="machine-area-screen-overlay" aria-hidden="true">
           <defs>
             {projectedMachineAreas.map((item) => {
@@ -708,7 +725,7 @@ function StreetViewer({ mapData, site, area }) {
         <button type="button" onClick={toggleFullscreen} title="Fullscreen">⛶</button>
       </div>
 
-      {hoveredMachineArea && (
+      {isSafetyModeOn && hoveredMachineArea && (
         <aside className="machine-area-info-card" onMouseEnter={cancelMachineAreaClose} onMouseLeave={scheduleMachineAreaClose}>
           <div className="machine-area-info-header">
             <span>Safety Area</span>

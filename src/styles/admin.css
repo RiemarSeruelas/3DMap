@@ -2711,3 +2711,51 @@ button.danger { background: #fee2e2; color: #991b1b; }
 .machine-area-draft-toolbar .machine-area-point-target-control {
   display: none !important;
 }
+
+/* =========================================================
+   SAFETY TRIAL TOGGLE
+   Normal public street view stays clean. Safety overlays/cards only show when toggled on.
+   ========================================================= */
+.street-safety-toggle {
+  position: fixed;
+  z-index: 92;
+  min-height: 42px;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 24, 39, 0.88);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0.01em;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.28);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.street-safety-toggle {
+  top: 88px;
+  left: 22px;
+}
+
+
+.street-safety-toggle.is-on {
+  background: linear-gradient(135deg, #15803d, #22c55e);
+  color: #ffffff;
+  box-shadow: 0 16px 40px rgba(34, 197, 94, 0.26);
+}
+
+.street-safety-toggle:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 760px) {
+  .street-safety-toggle {
+    top: 78px;
+    left: 12px;
+  }
+
+}

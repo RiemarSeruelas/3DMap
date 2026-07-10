@@ -308,6 +308,8 @@ function PannellumStage({
   image,
   scene,
   scenesById,
+  mode = "preview",
+  showSafetyLayer = false,
   isPicking,
   pickLabel,
   onPickPoint,
@@ -372,6 +374,13 @@ function PannellumStage({
   useEffect(() => {
     return () => cancelMachineAreaClose();
   }, []);
+
+  useEffect(() => {
+    if (!showSafetyLayer) {
+      cancelMachineAreaClose();
+      setHoveredMachineArea(null);
+    }
+  }, [showSafetyLayer]);
 
   function rememberCurrentAdminView() {
     const viewer = viewerRef.current;
@@ -675,7 +684,7 @@ function PannellumStage({
         <img src={image} alt={getSceneTitle(scene)} className="admin-config-fallback-panorama-v2" />
       )}
 
-      {projectedMachineAreas.length > 0 && (
+      {showSafetyLayer && projectedMachineAreas.length > 0 && (
         <svg className="machine-area-screen-overlay admin-machine-area-screen-overlay" aria-hidden="true">
           <defs>
             {projectedMachineAreas.map((item) => {
@@ -727,7 +736,7 @@ function PannellumStage({
         <button type="button" onClick={toggleFullscreen} title="Fullscreen">⛶</button>
       </div>
 
-      {hoveredMachineArea && (
+      {showSafetyLayer && hoveredMachineArea && (
         <aside className="machine-area-info-card admin-machine-area-info-card" onMouseEnter={cancelMachineAreaClose} onMouseLeave={scheduleMachineAreaClose} onClick={(event) => event.stopPropagation()}>
           <div className="machine-area-info-header">
             <span>Safety Area</span>
@@ -1216,7 +1225,7 @@ function AdminAreaConfigPage() {
       };
 
       saveTour({ ...tour, scenes: { ...tour.scenes, [selectedScene.id]: nextScene } }, existing ? "Safety area updated" : "Safety area saved");
-      setIsMachineModalOpen(false);
+        setIsMachineModalOpen(false);
       setMachineAreaDraftPoints([]);
       setMachineImageFile(null);
       setMachineHoverImageFile(null);
@@ -1538,6 +1547,8 @@ function AdminAreaConfigPage() {
               image={selectedImage}
               scene={selectedScene}
               scenesById={scenesById}
+              mode={mode}
+              showSafetyLayer={mode === "mark-machine-area"}
               isPicking={mode === "mark-location" || mode === "mark-machine-area"}
               pickLabel={
                 mode === "mark-machine-area"
