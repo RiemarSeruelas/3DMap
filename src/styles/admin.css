@@ -2759,3 +2759,1200 @@ button.danger { background: #fee2e2; color: #991b1b; }
   }
 
 }
+
+
+/* =========================================================
+   ADMIN STATION REDESIGN - PHASE 1
+   YouTube-like editing station: thumbnail rail, large movable 360,
+   bottom details/actions, separate tutor/safety workflow entry points.
+   ========================================================= */
+.admin-config-page-v2 {
+  background:
+    radial-gradient(circle at 18% 10%, rgba(37, 99, 235, 0.10), transparent 28%),
+    radial-gradient(circle at 84% 78%, rgba(148, 163, 184, 0.18), transparent 34%),
+    #eef4fb;
+}
+
+.admin-config-topbar-v2 {
+  height: 64px;
+  grid-template-columns: minmax(260px, 1fr) auto auto;
+  padding: 10px 18px;
+  background: rgba(10, 22, 50, 0.96);
+  box-shadow: 0 16px 42px rgba(15, 23, 42, 0.18);
+}
+
+.admin-config-workspace-v2 {
+  grid-template-columns: 380px minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px;
+}
+
+.admin-config-image-rail-v2,
+.admin-config-center-stage-v2 {
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow: 0 22px 56px rgba(15, 23, 42, 0.10);
+}
+
+.admin-config-image-rail-v2 {
+  padding: 14px;
+}
+
+.admin-config-add-card-v2 {
+  min-height: 64px;
+  border-radius: 20px;
+}
+
+.admin-config-text-location-list-v2 {
+  gap: 10px;
+}
+
+.admin-config-location-row-v2.admin-video-thumb-row {
+  min-height: 92px;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 12px;
+  padding: 9px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.045);
+}
+
+.admin-config-location-row-v2.admin-video-thumb-row:hover {
+  border-color: rgba(37, 99, 235, 0.36);
+  background: #f8fbff;
+}
+
+.admin-config-location-row-v2.admin-video-thumb-row.active {
+  background: #eff6ff;
+  border-color: #2563eb;
+  box-shadow: inset 0 0 0 1px #2563eb, 0 12px 26px rgba(37, 99, 235, 0.12);
+}
+
+.admin-thumb-frame-v2 {
+  position: relative;
+  width: 112px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #e0ecff, #ffffff);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  flex: 0 0 auto;
+}
+
+.admin-thumb-frame-v2 img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.admin-thumb-frame-v2 b {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #1d4ed8;
+  font-weight: 950;
+}
+
+.admin-thumb-copy-v2 {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.admin-thumb-copy-v2 strong {
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.admin-thumb-copy-v2 small {
+  margin-top: 7px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.admin-config-center-stage-v2 {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 18px;
+}
+
+.admin-station-header-v3 {
+  min-height: 74px;
+  align-items: center;
+}
+
+.admin-station-title-v3 {
+  min-width: 0;
+}
+
+.admin-station-title-v3 span {
+  display: block;
+  margin-bottom: 3px;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.admin-station-title-v3 strong {
+  display: block;
+  max-width: 720px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #07152f;
+  font-size: clamp(26px, 2.3vw, 38px);
+  line-height: 1.02;
+  letter-spacing: -0.055em;
+}
+
+.admin-station-title-v3 p {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-mode-switch-v3 {
+  display: inline-flex;
+  padding: 5px;
+  border-radius: 999px;
+  background: #edf3fb;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+}
+
+.admin-mode-switch-v3 button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: transparent;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.admin-mode-switch-v3 button.active {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.24);
+}
+
+.admin-mode-switch-v3 button.active.safety {
+  background: #f97316;
+  box-shadow: 0 10px 20px rgba(249, 115, 22, 0.22);
+}
+
+.admin-config-main-preview-v2 {
+  border-radius: 26px;
+}
+
+.admin-station-details-v3 {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.85fr) minmax(260px, 1.15fr) minmax(230px, 1fr) minmax(230px, 1fr) auto;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.admin-station-info-card-v3,
+.admin-station-action-card-v3,
+.admin-station-danger-v3 {
+  min-width: 0;
+  padding: 14px;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
+}
+
+.admin-station-info-card-v3 span,
+.admin-station-action-card-v3 span,
+.admin-station-danger-v3 span {
+  display: block;
+  margin-bottom: 5px;
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.admin-station-info-card-v3 strong,
+.admin-station-action-card-v3 strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #07152f;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.admin-station-info-card-v3 p,
+.admin-station-action-card-v3 p {
+  min-height: 34px;
+  margin: 6px 0 10px;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 750;
+}
+
+.admin-station-info-card-v3 button,
+.admin-station-action-card-v3 button,
+.admin-station-danger-v3 button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 12px;
+  padding: 9px 12px;
+  background: #e0ecff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.admin-station-action-card-v3 div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.admin-station-action-card-v3.is-active {
+  border-color: rgba(37, 99, 235, 0.46);
+  background: linear-gradient(180deg, #ffffff, #eff6ff);
+}
+
+.admin-station-action-card-v3.safety.is-active {
+  border-color: rgba(249, 115, 22, 0.46);
+  background: linear-gradient(180deg, #ffffff, #fff7ed);
+}
+
+.admin-station-action-card-v3.safety button {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.admin-station-danger-v3 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 124px;
+}
+
+.admin-station-danger-v3 button.danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.admin-config-preview-actions-bar-v2 {
+  display: none;
+}
+
+/* Site picker / viewer-style first page refresh */
+.admin-site-start-page,
+.admin-choose-site,
+.choose-site-page,
+.admin-site-picker-page {
+  background:
+    radial-gradient(circle at 18% 28%, rgba(37, 99, 235, 0.18), transparent 22%),
+    radial-gradient(circle at 80% 82%, rgba(139, 92, 246, 0.13), transparent 28%),
+    linear-gradient(135deg, #eaf3ff 0%, #f8fbff 52%, #eef5ff 100%);
+}
+
+.admin-start-card,
+.admin-choose-card,
+.choose-site-card,
+.admin-site-picker-card {
+  width: min(1080px, 92vw);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  text-align: left;
+}
+
+.admin-start-card h1,
+.admin-choose-card h1,
+.choose-site-card h1,
+.admin-site-picker-card h1 {
+  font-size: clamp(56px, 7vw, 92px);
+  color: #07152f;
+}
+
+.admin-start-grid,
+.admin-site-grid,
+.choose-site-grid,
+.site-grid {
+  grid-template-columns: repeat(2, minmax(260px, 360px));
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.admin-start-site-card,
+.admin-site-card,
+.site-card {
+  min-height: 190px;
+  border: 0;
+  border-radius: 30px;
+  padding: 30px;
+  background: linear-gradient(135deg, #0f766e, #07152f 70%);
+  color: #ffffff;
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.20);
+}
+
+.admin-start-site-card:nth-child(even),
+.admin-site-card:nth-child(even),
+.site-card:nth-child(even) {
+  background: linear-gradient(135deg, #4f46e5, #0f2a6d 75%);
+}
+
+.admin-start-site-card span,
+.admin-site-card strong,
+.site-card strong {
+  color: #ffffff;
+  font-size: 27px;
+}
+
+@media (max-width: 1280px) {
+  .admin-config-workspace-v2 {
+    grid-template-columns: 330px minmax(0, 1fr);
+  }
+
+  .admin-station-details-v3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-station-danger-v3 {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-config-workspace-v2 {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-config-image-rail-v2 {
+    max-height: 320px;
+  }
+
+  .admin-station-details-v3 {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-station-danger-v3 {
+    grid-column: auto;
+  }
+}
+
+
+/* =========================================================
+   ADMIN REMAKE V5
+   1) /admin now matches the viewer Select Area screen.
+   2) Area mapping page is removed from AdminPage.
+   3) /admin/config is the admin station: large panorama, right thumbnails, bottom controls.
+   ========================================================= */
+
+/* Admin select page = same spirit as viewer select page */
+.admin-viewer-select-page-v4.admin-select-area-match-viewer {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 18% 25%, rgba(37, 99, 235, 0.18), transparent 27%),
+    radial-gradient(circle at 82% 82%, rgba(139, 92, 246, 0.16), transparent 30%),
+    linear-gradient(135deg, #eaf3ff 0%, #f8fbff 52%, #eef5ff 100%);
+}
+
+.admin-viewer-select-page-v4 .admin-select-logout-v4 {
+  position: fixed;
+  left: 28px;
+  top: 26px;
+  z-index: 30;
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 22px;
+  background: #1f2937;
+  color: #ffffff;
+  font-weight: 950;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.24);
+}
+
+.admin-viewer-select-page-v4 .admin-select-content-v4 {
+  width: min(1080px, 92vw);
+  transform: translateY(-8px);
+}
+
+.admin-viewer-select-page-v4 .admin-select-title-row-v4 {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 22px;
+  margin: 0 auto 38px;
+  width: min(920px, 90vw);
+}
+
+.admin-viewer-select-page-v4 .admin-select-logo-v4 {
+  width: 86px;
+  height: 86px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 950;
+  box-shadow: 0 22px 48px rgba(37, 99, 235, 0.24);
+}
+
+.admin-viewer-select-page-v4 .admin-select-title-row-v4 p {
+  margin: 0 0 4px;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.admin-viewer-select-page-v4 .admin-select-title-row-v4 h1 {
+  margin: 0;
+  color: #07152f;
+  font-size: clamp(52px, 7vw, 86px);
+  line-height: 0.9;
+  font-weight: 950;
+  letter-spacing: -0.07em;
+}
+
+.admin-viewer-select-page-v4 .admin-select-title-row-v4 span {
+  display: block;
+  margin-top: 18px;
+  color: #64748b;
+  font-size: 18px;
+  font-weight: 850;
+}
+
+.admin-viewer-select-page-v4 .admin-select-site-grid-v4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 360px));
+  justify-content: center;
+  gap: 18px;
+}
+
+.admin-viewer-select-page-v4 .admin-select-site-card-v4 {
+  position: relative;
+  min-height: 202px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 30px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  background: linear-gradient(135deg, #064e3b 0%, #07152f 74%);
+  color: #ffffff;
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.20);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.admin-viewer-select-page-v4 .admin-select-site-card-v4:nth-child(even) {
+  background: linear-gradient(135deg, #4f46e5 0%, #0f2a6d 74%);
+}
+
+.admin-viewer-select-page-v4 .admin-select-site-card-v4:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 34px 86px rgba(15, 23, 42, 0.25);
+}
+
+.admin-viewer-select-page-v4 .admin-select-site-card-v4::after {
+  content: "→";
+  position: absolute;
+  right: 28px;
+  top: 26px;
+  color: rgba(255,255,255,0.72);
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.admin-viewer-select-page-v4 .admin-select-site-code-v4 {
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #ffffff;
+  font-weight: 950;
+  font-size: 20px;
+}
+
+.admin-viewer-select-page-v4 .admin-select-site-card-v4 em {
+  margin-top: auto;
+  color: rgba(255,255,255,0.68);
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.admin-viewer-select-page-v4 .admin-select-site-card-v4 strong {
+  margin-top: 7px;
+  color: #ffffff;
+  font-size: 30px;
+  line-height: 1.05;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+}
+
+.admin-viewer-select-page-v4 .admin-select-site-card-v4 small {
+  margin-top: 8px;
+  color: rgba(255,255,255,0.76);
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.admin-viewer-select-page-v4 .admin-select-footer-v4 {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.admin-viewer-select-page-v4 .admin-select-footer-v4 button {
+  border: 0;
+  border-radius: 16px;
+  padding: 13px 18px;
+  background: #dbeafe;
+  color: #1e3a8a;
+  font-weight: 950;
+}
+
+/* YouTube-like admin location configure */
+.youtube-admin-config-page.admin-config-page-v2 {
+  height: 100vh;
+  overflow: hidden;
+  background: #0f0f0f;
+}
+
+.youtube-admin-config-page .admin-config-topbar-v2 {
+  height: 64px;
+  padding: 10px 18px;
+  grid-template-columns: minmax(250px, 1fr) auto auto;
+  background: #0f0f0f;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  box-shadow: none;
+}
+
+.youtube-admin-config-page .admin-config-topbar-brand-v2,
+.youtube-admin-config-page .admin-config-topbar-meta-v2 {
+  color: #ffffff;
+}
+
+.youtube-admin-config-page .admin-config-logo-v2 {
+  background: #ff0033;
+  color: #ffffff;
+  border-radius: 12px;
+}
+
+.youtube-admin-config-page .admin-config-topbar-actions-v2 button {
+  background: #272727;
+  color: #f1f5f9;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.youtube-admin-config-page .admin-config-topbar-actions-v2 button.danger {
+  background: #3a1717;
+  color: #fecaca;
+}
+
+.youtube-admin-config-page .admin-config-workspace-v2 {
+  height: calc(100vh - 64px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 22px;
+  padding: 22px 22px 24px;
+  overflow: hidden;
+}
+
+.youtube-admin-config-page .admin-config-center-stage-v2 {
+  order: 1;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.youtube-admin-config-page .admin-config-image-rail-v2 {
+  order: 2;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: hidden;
+  color: #f8fafc;
+}
+
+.youtube-admin-config-page .admin-config-search-v2 span,
+.youtube-admin-config-page .admin-config-rail-title-v2 span {
+  color: #aaa;
+}
+
+.youtube-admin-config-page .admin-config-search-v2 input {
+  height: 44px;
+  border-radius: 22px;
+  background: #121212;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #ffffff;
+}
+
+.youtube-admin-config-page .admin-config-add-card-v2 {
+  min-height: 54px;
+  border-radius: 16px;
+  background: #272727;
+  box-shadow: none;
+}
+
+.youtube-admin-config-page .admin-config-rail-title-v2 {
+  margin-top: 14px;
+  padding: 0 4px;
+}
+
+.youtube-admin-config-page .admin-config-rail-title-v2 strong {
+  background: #272727;
+  color: #e5e7eb;
+}
+
+.youtube-admin-config-page .admin-config-text-location-list-v2 {
+  height: calc(100% - 170px);
+  overflow-y: auto;
+  padding: 0 4px 18px 0;
+  gap: 10px;
+}
+
+.youtube-admin-config-page .admin-config-location-row-v2.admin-video-thumb-row {
+  min-height: 106px;
+  grid-template-columns: 168px minmax(0, 1fr);
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.youtube-admin-config-page .admin-config-location-row-v2.admin-video-thumb-row:hover,
+.youtube-admin-config-page .admin-config-location-row-v2.admin-video-thumb-row.active {
+  background: #272727;
+  border: 0;
+  box-shadow: none;
+}
+
+.youtube-admin-config-page .admin-thumb-frame-v2 {
+  width: 168px;
+  height: 94px;
+  border-radius: 12px;
+  border: 0;
+  background: #181818;
+}
+
+.youtube-admin-config-page .admin-thumb-copy-v2 strong {
+  color: #f8fafc;
+  font-size: 13px;
+}
+
+.youtube-admin-config-page .admin-thumb-copy-v2 small {
+  color: #aaa;
+}
+
+.youtube-admin-config-page .admin-station-header-v3 {
+  min-height: auto;
+  padding: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.youtube-admin-config-page .admin-station-title-v3 span {
+  color: #aaa;
+}
+
+.youtube-admin-config-page .admin-station-title-v3 strong {
+  color: #f8fafc;
+  max-width: 820px;
+  font-size: clamp(24px, 2.2vw, 36px);
+}
+
+.youtube-admin-config-page .admin-station-title-v3 p {
+  color: #aaa;
+}
+
+.youtube-admin-config-page .admin-mode-switch-v3 {
+  background: #272727;
+  border: 1px solid rgba(255,255,255,0.10);
+  flex: 0 0 auto;
+}
+
+.youtube-admin-config-page .admin-mode-switch-v3 button {
+  color: #d1d5db;
+}
+
+.youtube-admin-config-page .admin-mode-switch-v3 button.active {
+  background: #f8fafc;
+  color: #0f0f0f;
+  box-shadow: none;
+}
+
+.youtube-admin-config-page .admin-mode-switch-v3 button.active.safety {
+  background: #f97316;
+  color: #ffffff;
+}
+
+.youtube-admin-config-page .admin-config-main-preview-v2 {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #000000;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.youtube-admin-config-page .admin-config-pannellum-wrap-v2,
+.youtube-admin-config-page .admin-config-pannellum-mount-v2 {
+  min-height: 0 !important;
+  height: 100% !important;
+  border-radius: 18px;
+  background: #000000;
+}
+
+.youtube-admin-config-page .admin-station-details-v3 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr)) 118px;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.youtube-admin-config-page .admin-station-info-card-v3,
+.youtube-admin-config-page .admin-station-action-card-v3,
+.youtube-admin-config-page .admin-station-danger-v3 {
+  min-height: 138px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #181818;
+  border: 1px solid rgba(255,255,255,0.10);
+  color: #f8fafc;
+  box-shadow: none;
+}
+
+.youtube-admin-config-page .admin-station-info-card-v3 span,
+.youtube-admin-config-page .admin-station-action-card-v3 span,
+.youtube-admin-config-page .admin-station-danger-v3 span {
+  color: #aaa;
+}
+
+.youtube-admin-config-page .admin-station-info-card-v3 strong,
+.youtube-admin-config-page .admin-station-action-card-v3 strong {
+  color: #f8fafc;
+}
+
+.youtube-admin-config-page .admin-station-info-card-v3 p,
+.youtube-admin-config-page .admin-station-action-card-v3 p {
+  color: #aaa;
+}
+
+.youtube-admin-config-page .admin-station-info-card-v3 button,
+.youtube-admin-config-page .admin-station-action-card-v3 button {
+  background: #272727;
+  color: #f8fafc;
+}
+
+.youtube-admin-config-page .admin-station-action-card-v3.is-active {
+  background: #202b42;
+  border-color: rgba(96, 165, 250, 0.38);
+}
+
+.youtube-admin-config-page .admin-station-action-card-v3.safety.is-active {
+  background: #3a2414;
+  border-color: rgba(249, 115, 22, 0.48);
+}
+
+.youtube-admin-config-page .admin-station-action-card-v3.safety button {
+  background: #431407;
+  color: #fed7aa;
+}
+
+.youtube-admin-config-page .admin-station-danger-v3 button.danger {
+  background: #3a1717;
+  color: #fecaca;
+}
+
+/* Keep modals light enough to read over the dark admin station */
+.youtube-admin-config-page .admin-config-modal-backdrop-v2 {
+  background: rgba(0,0,0,0.66);
+}
+
+@media (max-width: 1180px) {
+  .youtube-admin-config-page .admin-config-workspace-v2 {
+    grid-template-columns: minmax(0, 1fr);
+    overflow: auto;
+  }
+
+  .youtube-admin-config-page .admin-config-image-rail-v2 {
+    order: 3;
+    height: 340px;
+  }
+
+  .youtube-admin-config-page .admin-station-details-v3 {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+
+/* =========================================================
+   ADMIN CONFIG V5 TUNE
+   Revert from dark YouTube colors back to the light viewer/admin palette,
+   remove top Tutor/Safety switch, shrink bottom action cards, and give
+   the panorama more room.
+   ========================================================= */
+.youtube-admin-config-page.admin-config-page-v2 {
+  background:
+    radial-gradient(circle at 14% 18%, rgba(37, 99, 235, 0.10), transparent 30%),
+    radial-gradient(circle at 88% 84%, rgba(139, 92, 246, 0.10), transparent 34%),
+    #eef4fb;
+}
+
+.youtube-admin-config-page .admin-config-topbar-v2 {
+  height: 66px;
+  background: #172554;
+  border-bottom: 0;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.14);
+}
+
+.youtube-admin-config-page .admin-config-logo-v2 {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: #ffffff;
+}
+
+.youtube-admin-config-page .admin-config-topbar-actions-v2 button {
+  background: #f8fbff;
+  color: #0f1b35;
+  border: 1px solid rgba(255,255,255,0.20);
+}
+
+.youtube-admin-config-page .admin-config-topbar-actions-v2 button.danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.youtube-admin-config-page .admin-config-workspace-v2 {
+  height: calc(100vh - 66px);
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 18px;
+  padding: 16px 18px 18px;
+}
+
+.youtube-admin-config-page .admin-config-center-stage-v2 {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.youtube-admin-config-page .admin-config-image-rail-v2 {
+  padding: 14px;
+  border-radius: 26px;
+  background: rgba(255,255,255,0.94);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 22px 56px rgba(15, 23, 42, 0.10);
+  color: #07152f;
+}
+
+.youtube-admin-config-page .admin-config-search-v2 span,
+.youtube-admin-config-page .admin-config-rail-title-v2 span {
+  color: #64748b;
+}
+
+.youtube-admin-config-page .admin-config-search-v2 input {
+  height: 44px;
+  border-radius: 18px;
+  background: #f8fbff;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  color: #07152f;
+}
+
+.youtube-admin-config-page .admin-config-add-card-v2 {
+  min-height: 62px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #2563eb, #60a5fa);
+  color: #ffffff;
+  box-shadow: 0 16px 32px rgba(37, 99, 235, 0.16);
+}
+
+.youtube-admin-config-page .admin-config-rail-title-v2 strong {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.youtube-admin-config-page .admin-config-text-location-list-v2 {
+  height: calc(100% - 176px);
+}
+
+.youtube-admin-config-page .admin-config-location-row-v2.admin-video-thumb-row {
+  min-height: 92px;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 11px;
+  padding: 7px;
+  border-radius: 17px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.20);
+  color: #07152f;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+}
+
+.youtube-admin-config-page .admin-config-location-row-v2.admin-video-thumb-row:hover,
+.youtube-admin-config-page .admin-config-location-row-v2.admin-video-thumb-row.active {
+  background: #eff6ff;
+  border: 1px solid rgba(37, 99, 235, 0.42);
+  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.10);
+}
+
+.youtube-admin-config-page .admin-thumb-frame-v2 {
+  width: 132px;
+  height: 74px;
+  border-radius: 14px;
+  background: #e2e8f0;
+}
+
+.youtube-admin-config-page .admin-thumb-copy-v2 strong {
+  color: #07152f;
+}
+
+.youtube-admin-config-page .admin-thumb-copy-v2 small {
+  color: #64748b;
+}
+
+.youtube-admin-config-page .admin-station-header-v3 {
+  padding: 0 2px;
+  align-items: flex-end;
+}
+
+.youtube-admin-config-page .admin-station-title-v3 span {
+  color: #64748b;
+}
+
+.youtube-admin-config-page .admin-station-title-v3 strong {
+  color: #07152f;
+  font-size: clamp(25px, 2.5vw, 40px);
+}
+
+.youtube-admin-config-page .admin-station-title-v3 p {
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.youtube-admin-config-page .admin-config-main-preview-v2 {
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow: 0 22px 56px rgba(15, 23, 42, 0.12);
+}
+
+.youtube-admin-config-page .admin-config-pannellum-wrap-v2,
+.youtube-admin-config-page .admin-config-pannellum-mount-v2 {
+  height: 100% !important;
+  min-height: 0 !important;
+  border-radius: 24px;
+  background: #000000;
+}
+
+.youtube-admin-config-page .admin-mode-switch-v3 {
+  display: none !important;
+}
+
+.youtube-admin-config-page .admin-config-pannellum-controls-v2 {
+  top: 18px;
+  right: 18px;
+}
+
+.youtube-admin-config-page .admin-config-pannellum-controls-v2 button {
+  background: #ffffff;
+  color: #0f1b35;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+}
+
+.youtube-admin-config-page .compact-admin-actions-v5 {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(104px, 1fr));
+  gap: 10px;
+  min-height: 72px;
+  overflow: visible;
+  padding: 0;
+}
+
+.youtube-admin-config-page .compact-admin-actions-v5 > button {
+  min-height: 70px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 18px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.94);
+  color: #07152f;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.youtube-admin-config-page .compact-admin-actions-v5 > button span {
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.youtube-admin-config-page .compact-admin-actions-v5 > button strong {
+  margin-top: 4px;
+  color: #07152f;
+  font-size: 17px;
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: -0.03em;
+}
+
+.youtube-admin-config-page .compact-admin-actions-v5 > button.active {
+  border-color: rgba(37, 99, 235, 0.48);
+  background: #eff6ff;
+}
+
+.youtube-admin-config-page .compact-admin-actions-v5 > button.safety.active {
+  border-color: rgba(249, 115, 22, 0.48);
+  background: #fff7ed;
+}
+
+.youtube-admin-config-page .compact-admin-actions-v5 > button.safety strong {
+  color: #c2410c;
+}
+
+.youtube-admin-config-page .compact-admin-actions-v5 > button.danger {
+  background: #fff1f2;
+  border-color: rgba(239, 68, 68, 0.22);
+}
+
+.youtube-admin-config-page .compact-admin-actions-v5 > button.danger strong {
+  color: #991b1b;
+}
+
+.youtube-admin-config-page .admin-config-modal-backdrop-v2 {
+  background: rgba(15, 23, 42, 0.42);
+}
+
+@media (max-width: 1280px) {
+  .youtube-admin-config-page .admin-config-workspace-v2 {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+
+  .youtube-admin-config-page .compact-admin-actions-v5 {
+    grid-template-columns: repeat(4, minmax(104px, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .youtube-admin-config-page .admin-config-workspace-v2 {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+
+  .youtube-admin-config-page .admin-config-image-rail-v2 {
+    height: 330px;
+  }
+}
+
+
+/* =========================================================
+   ADMIN CONFIG V5.1
+   Keep top Tutor/Safety switch, remove bottom Change Map card,
+   put Change Map inside the Map popup, and tighten action labels.
+   ========================================================= */
+.youtube-admin-config-page .admin-mode-switch-v3 {
+  display: inline-flex !important;
+  flex: 0 0 auto;
+  padding: 5px;
+  border-radius: 999px;
+  background: #eaf1fb;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.youtube-admin-config-page .admin-mode-switch-v3 button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 16px;
+  background: transparent;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.youtube-admin-config-page .admin-mode-switch-v3 button.active {
+  background: #ffffff;
+  color: #07152f;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.10);
+}
+
+.youtube-admin-config-page .admin-mode-switch-v3 button.active.safety {
+  background: #f97316;
+  color: #ffffff;
+}
+
+.youtube-admin-config-page .compact-admin-actions-v5 {
+  grid-template-columns: repeat(6, minmax(112px, 1fr));
+}
+
+.youtube-admin-config-page .compact-admin-actions-v5 > button strong {
+  font-size: 15px;
+  line-height: 1.1;
+}
+
+.youtube-admin-config-page .compact-admin-actions-v5 > button:first-child strong {
+  font-size: 14px;
+}
+
+.youtube-admin-config-page .admin-config-map-modal-v2 {
+  max-width: min(1180px, 94vw);
+}
+
+.youtube-admin-config-page .admin-config-map-toolbar-v2 {
+  gap: 12px;
+}
+
+.youtube-admin-config-page .admin-config-map-zoom-controls-v2 button {
+  white-space: nowrap;
+}

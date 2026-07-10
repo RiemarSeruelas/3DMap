@@ -9,6 +9,9 @@ import {
   updateAreaTour,
   uploadPanoramaAsset,
   uploadAssetFile,
+  uploadAdminImage,
+  getEffectiveFactoryMaps,
+  saveFactoryMaps,
   createUniqueId,
 } from "../utils/streetViewAdminStorage";
 import "../styles/admin.css";
@@ -784,6 +787,7 @@ function AdminAreaConfigPage() {
   const { siteId, areaId } = useParams();
   const [searchParams] = useSearchParams();
   const fileInputRef = useRef(null);
+  const siteMapInputRef = useRef(null);
 
   const [site, setSite] = useState(null);
   const [area, setArea] = useState(null);
@@ -818,6 +822,7 @@ function AdminAreaConfigPage() {
   const [isMarkingsMenuOpen, setIsMarkingsMenuOpen] = useState(false);
   const [isLocationManagerOpen, setIsLocationManagerOpen] = useState(false);
   const [mapModalMode, setMapModalMode] = useState("jump");
+  const [adminStationMode, setAdminStationMode] = useState("tutor");
 
   const mapViewportRef = useRef(null);
   const mapPanGestureRef = useRef({
@@ -882,6 +887,10 @@ function AdminAreaConfigPage() {
     return scenes.filter((scene) => scene.id !== selectedScene?.id);
   }, [scenes, selectedScene?.id]);
 
+  const adminStationModeCopy = adminStationMode === "safety"
+    ? "Safety mode is for hazard zones, restricted areas, and compliance callouts."
+    : "Tutor mode is for invisible click areas that explain machine name and purpose.";
+
   useEffect(() => {
     setVisibleCount(CARD_PAGE_SIZE);
   }, [searchText]);
@@ -907,6 +916,35 @@ function AdminAreaConfigPage() {
   function handleFileSelect(event) {
     const files = Array.from(event.target.files || []).filter((file) => file.type.startsWith("image/"));
     setNewLocationFiles(files);
+  }
+
+  async function handleSiteMapUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file || !site?.id) return;
+
+    try {
+      showSaved("Uploading map...");
+      const imagePath = await uploadAdminImage(file, "maps");
+      const currentMaps = getEffectiveFactoryMaps();
+      const currentSite = currentMaps?.[site.id] || site;
+
+      const nextMaps = {
+        ...currentMaps,
+        [site.id]: {
+          ...currentSite,
+          mapImage: imagePath,
+        },
+      };
+
+      const savedMaps = saveFactoryMaps(nextMaps);
+      setSite(savedMaps?.[site.id] || { ...site, mapImage: imagePath });
+      showSaved("Map image saved");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to upload map image.");
+    } finally {
+      event.target.value = "";
+    }
   }
 
   async function handleAddLocation(event) {
@@ -1466,7 +1504,8 @@ function AdminAreaConfigPage() {
   }
 
   return (
-    <div className="admin-config-page-v2">
+    <div className="admin-config-page-v2 youtube-admin-config-page">
+      <input ref={siteMapInputRef} type="file" accept="image/*" hidden onChange={handleSiteMapUpload} />
       <header className="admin-config-topbar-v2">
         <div className="admin-config-topbar-brand-v2">
           <div className="admin-config-logo-v2">360</div>
@@ -1502,14 +1541,29 @@ function AdminAreaConfigPage() {
               const isMapped = !!getSceneMapPoint(scene);
               const linkCount = getSceneLinkCount(scene);
               const machineCount = getSceneMachineAreaCount(scene);
+              const thumbnail = resolveAssetUrl(scene.thumbnail || scene.panorama || scene.image || scene.url || "");
               return (
-                <button key={scene.id} type="button" className={`admin-config-location-row-v2 ${isActive ? "active" : ""}`} onClick={() => { setSelectedSceneId(scene.id); setMode("preview"); setPendingTargetSceneId(null); setMachineAreaDraftPoints([]); }}>
-                  <span className="admin-config-location-index-v2">{String(index + 1).padStart(2, "0")}</span>
-                  <strong>{getSceneTitle(scene)}</strong>
-                  <span className="admin-config-location-badges-v2">
-                    {isMapped && <em>MAP</em>}
-                    {linkCount > 0 && <em>{linkCount} LINK{linkCount > 1 ? "S" : ""}</em>}
-                    {machineCount > 0 && <em>{machineCount} MACHINE{machineCount > 1 ? "S" : ""}</em>}
+                <button
+                  key={scene.id}
+                  type="button"
+                  className={`admin-config-location-row-v2 admin-video-thumb-row ${isActive ? "active" : ""}`}
+                  onClick={() => {
+                    setSelectedSceneId(scene.id);
+                    setMode("preview");
+                    setPendingTargetSceneId(null);
+                    setMachineAreaDraftPoints([]);
+                  }}
+                >
+                  <span className="admin-thumb-frame-v2">
+                    {thumbnail ? <img src={thumbnail} alt="" /> : <b>{String(index + 1).padStart(2, "0")}</b>}
+                  </span>
+                  <span className="admin-thumb-copy-v2">
+                    <strong>{getSceneTitle(scene)}</strong>
+                    <small>
+                      {isMapped ? "Mapped" : "No map mark"}
+                      {linkCount > 0 ? ` • ${linkCount} link${linkCount > 1 ? "s" : ""}` : ""}
+                      {machineCount > 0 ? ` • ${machineCount} safety` : ""}
+                    </small>
                   </span>
                 </button>
               );
@@ -1524,10 +1578,33 @@ function AdminAreaConfigPage() {
         </aside>
 
         <section className="admin-config-center-stage-v2">
-          <div className="admin-config-stage-header-v2">
-            <strong>{selectedScene ? getSceneTitle(selectedScene) : "No image selected"}</strong>
+          <div className="admin-config-stage-header-v2 admin-station-header-v3">
+            <div className="admin-station-title-v3">
+              <span>Selected panorama</span>
+              <strong>{selectedScene ? getSceneTitle(selectedScene) : "No image selected"}</strong>
+              <p>{adminStationModeCopy}</p>
+            </div>
+
             <div className="admin-config-stage-right-v2">
               {saveMessage && <span className="admin-config-save-flash-v2">{saveMessage}</span>}
+
+              <div className="admin-mode-switch-v3" role="group" aria-label="Admin station mode">
+                <button
+                  type="button"
+                  className={adminStationMode === "tutor" ? "active" : ""}
+                  onClick={() => setAdminStationMode("tutor")}
+                >
+                  Tutor Mode
+                </button>
+                <button
+                  type="button"
+                  className={adminStationMode === "safety" ? "active safety" : ""}
+                  onClick={() => setAdminStationMode("safety")}
+                >
+                  Safety Mode
+                </button>
+              </div>
+
               {mode === "mark-machine-area" && (
                 <div className="machine-area-draft-toolbar">
                   <button type="button" onClick={undoMachineAreaPoint} disabled={!machineAreaDraftPoints.length}>Undo</button>
@@ -1568,32 +1645,36 @@ function AdminAreaConfigPage() {
             />
           </div>
 
-          <div className="admin-config-preview-actions-bar-v2 compact-three-actions">
-            <div className="admin-action-menu-wrap">
-              <button
-                type="button"
-                onClick={() => setIsMarkingsMenuOpen((current) => !current)}
-                disabled={!selectedScene}
-                className={isMarkingsMenuOpen ? "active" : ""}
-              >
-                Markings
-              </button>
-              {isMarkingsMenuOpen && (
-                <div className="admin-action-menu">
-                  <button type="button" onClick={() => { setIsMarkingsMenuOpen(false); openMapModal("jump"); }} disabled={!selectedScene}>Map Area</button>
-                  <button type="button" onClick={() => { setIsMarkingsMenuOpen(false); setIsLocationManagerOpen(true); }} disabled={!selectedScene}>Mark Area</button>
-                </div>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={openMachineAreaPicker}
-              disabled={!selectedScene}
-              className={mode === "mark-machine-area" ? "active" : ""}
-            >
-              {mode === "mark-machine-area" ? "Cancel Safety" : "Safety"}
+          <div className="admin-station-details-v3 compact-admin-actions-v5">
+            <button type="button" onClick={openEditName} disabled={!selectedScene}>
+              <span>Details</span>
+              <strong>Change Name</strong>
             </button>
-            <button type="button" className="danger" onClick={deleteSelectedLocation} disabled={!selectedScene}>Delete</button>
+
+            <button type="button" onClick={() => openMapModal("jump")} disabled={!selectedScene}>
+              <span>Station</span>
+              <strong>Map</strong>
+            </button>
+
+            <button type="button" onClick={() => setIsLocationManagerOpen(true)} disabled={!selectedScene}>
+              <span>Map</span>
+              <strong>Locations</strong>
+            </button>
+
+            <button type="button" className={adminStationMode === "tutor" ? "active" : ""} onClick={() => { setAdminStationMode("tutor"); startNewMachineAreaForm(); }} disabled={!selectedScene}>
+              <span>Mode</span>
+              <strong>Tutor</strong>
+            </button>
+
+            <button type="button" className={`safety ${adminStationMode === "safety" ? "active" : ""}`} onClick={() => { setAdminStationMode("safety"); openMachineAreaPicker(); }} disabled={!selectedScene}>
+              <span>Mode</span>
+              <strong>{mode === "mark-machine-area" ? "Cancel" : "Safety"}</strong>
+            </button>
+
+            <button type="button" className="danger" onClick={deleteSelectedLocation} disabled={!selectedScene}>
+              <span>Remove</span>
+              <strong>Delete</strong>
+            </button>
           </div>
         </section>
       </main>
@@ -1634,7 +1715,7 @@ function AdminAreaConfigPage() {
         <div className="admin-config-modal-backdrop-v2" onMouseDown={() => !isSaving && cancelMachineAreaDraft()}>
           <form className="admin-config-add-modal-v2 machine-area-modal" onMouseDown={(event) => event.stopPropagation()} onSubmit={saveMachineArea}>
             <div className="admin-config-modal-header-v2">
-              <div><span>Safety Area</span><strong>{editingMachineAreaId ? "Edit information or area shape" : "Add information first, then mark the area"}</strong></div>
+              <div><span>{adminStationMode === "safety" ? "Safety Area" : "Tutor Area"}</span><strong>{editingMachineAreaId ? "Edit information or area shape" : "Add information first, then mark the area"}</strong></div>
               <button type="button" disabled={isSaving} onClick={cancelMachineAreaDraft}>×</button>
             </div>
 
@@ -1675,23 +1756,23 @@ function AdminAreaConfigPage() {
             )}
 
             <label className="admin-config-form-field-v2">
-              <span>Name</span>
-              <input value={machineForm.machineName} onChange={(event) => setMachineForm((current) => ({ ...current, machineName: event.target.value }))} placeholder="Example: Mespack Door / Guard Door / Conveyor Section" autoFocus />
+              <span>{adminStationMode === "safety" ? "Name" : "Machine / Area Name"}</span>
+              <input value={machineForm.machineName} onChange={(event) => setMachineForm((current) => ({ ...current, machineName: event.target.value }))} placeholder={adminStationMode === "safety" ? "Example: Mespack Door / Guard Door / Conveyor Section" : "Example: FD12A Filler / Conveyor Infeed / Guard Door"} autoFocus />
             </label>
 
             <label className="admin-config-form-field-v2">
-              <span>Category</span>
-              <input value={machineForm.machineType} onChange={(event) => setMachineForm((current) => ({ ...current, machineType: event.target.value }))} placeholder="Example: Cartoner / Conveyor / Filler" />
+              <span>{adminStationMode === "safety" ? "Category" : "Purpose / Function"}</span>
+              <input value={machineForm.machineType} onChange={(event) => setMachineForm((current) => ({ ...current, machineType: event.target.value }))} placeholder={adminStationMode === "safety" ? "Example: Cartoner / Conveyor / Filler" : "Example: Fills product into sachets / Transfers packs to the next conveyor"} />
             </label>
 
             <label className="admin-config-form-field-v2">
-              <span>Hazard</span>
-              <input value={machineForm.hazard} onChange={(event) => setMachineForm((current) => ({ ...current, hazard: event.target.value }))} placeholder="Example: Moving parts / pinch point" />
+              <span>{adminStationMode === "safety" ? "Hazard" : "Short popup title"}</span>
+              <input value={machineForm.hazard} onChange={(event) => setMachineForm((current) => ({ ...current, hazard: event.target.value }))} placeholder={adminStationMode === "safety" ? "Example: Moving parts / pinch point" : "Example: Product transfer point / Main filler head"} />
             </label>
 
             <label className="admin-config-form-field-v2">
-              <span>Safety</span>
-              <textarea value={machineForm.safetyNote} onChange={(event) => setMachineForm((current) => ({ ...current, safetyNote: event.target.value }))} placeholder="Example: Do not open door while machine is running." />
+              <span>{adminStationMode === "safety" ? "Safety" : "Tutor note"}</span>
+              <textarea value={machineForm.safetyNote} onChange={(event) => setMachineForm((current) => ({ ...current, safetyNote: event.target.value }))} placeholder={adminStationMode === "safety" ? "Example: Do not open door while machine is running." : "Example: This section shows the product flow before sealing."} />
             </label>
 
             <label className="admin-config-form-field-v2">
@@ -1760,7 +1841,7 @@ function AdminAreaConfigPage() {
         <div className="admin-config-modal-backdrop-v2" onMouseDown={() => setIsMapModalOpen(false)}>
           <section className="admin-config-map-modal-v2" onMouseDown={(event) => event.stopPropagation()}>
             <div className="admin-config-modal-header-v2">
-              <div><span>Map Area</span><strong>{mapModalMode === "place" ? `Place ${getSceneTitle(selectedScene)}` : "Click anywhere to jump to closest location"}</strong></div>
+              <div><span>Map</span><strong>{mapModalMode === "place" ? `Place ${getSceneTitle(selectedScene)}` : "View map, change map, or jump to closest location"}</strong></div>
               <button type="button" onClick={() => setIsMapModalOpen(false)}>×</button>
             </div>
 
@@ -1771,6 +1852,7 @@ function AdminAreaConfigPage() {
                 <span>{Math.round(mapZoom * 100)}%</span>
                 <button type="button" onClick={() => updateMapZoom(MAP_ZOOM_STEP)} disabled={mapZoom >= MAP_ZOOM_MAX}>+</button>
                 <button type="button" onClick={resetMapZoom}>Reset</button>
+                <button type="button" onClick={(event) => { event.stopPropagation(); siteMapInputRef.current?.click(); }}>Change Map</button>
                 <button type="button" className={mapModalMode === "place" ? "primary" : ""} onClick={(event) => { event.stopPropagation(); setMapModalMode("place"); }}>Add/Update Selected Mark</button>
                 {getSceneMapPoint(selectedScene) && (
                   <button type="button" className="danger" onClick={(event) => { event.stopPropagation(); removeMapPoint(); setMapModalMode("jump"); }}>Remove Selected Mark</button>
