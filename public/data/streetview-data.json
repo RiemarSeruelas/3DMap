@@ -856,13 +856,13 @@
                   {
                     "id": "machine-1",
                     "type": "machineArea",
-                    "machineName": "1",
-                    "machineType": "1",
-                    "hazard": "1",
-                    "safetyNote": "1",
-                    "description": "1",
+                    "machineName": "FD12A",
+                    "machineType": "Filler",
+                    "hazard": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "safetyNote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "description": "",
                     "image": "",
-                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-08-at-11.23.14-22am-20260709032931-28cff4a0.jpg",
+                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.18-pm-20260710002057-d1d18fb1.jpg",
                     "points": [
                       {
                         "pitch": 0.02,
@@ -887,6 +887,117 @@
                         "yaw": 131.72,
                         "x": 86.59,
                         "y": 63.65
+                      }
+                    ]
+                  },
+                  {
+                    "id": "machine-fd12a",
+                    "type": "machineArea",
+                    "machineName": "FD12A",
+                    "machineType": "Filler",
+                    "hazard": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "safetyNote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "description": "",
+                    "image": "",
+                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.18-pm-1-20260710002311-8b5d318a.jpg",
+                    "points": [
+                      {
+                        "pitch": -0.12,
+                        "yaw": 115.67,
+                        "x": 82.13,
+                        "y": 50.07
+                      },
+                      {
+                        "pitch": 0.02,
+                        "yaw": 129.28,
+                        "x": 85.91,
+                        "y": 49.99
+                      },
+                      {
+                        "pitch": -18.8,
+                        "yaw": 129.58,
+                        "x": 85.99,
+                        "y": 60.44
+                      },
+                      {
+                        "pitch": -13.28,
+                        "yaw": 115.81,
+                        "x": 82.17,
+                        "y": 57.38
+                      }
+                    ]
+                  },
+                  {
+                    "id": "machine-fd12a-2",
+                    "type": "machineArea",
+                    "machineName": "FD12A",
+                    "machineType": "Filler",
+                    "hazard": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "safetyNote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "description": "",
+                    "image": "",
+                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.19-pm-1-20260710002612-ba18e85a.jpg",
+                    "points": [
+                      {
+                        "pitch": 0.77,
+                        "yaw": 155.23,
+                        "x": 93.12,
+                        "y": 49.57
+                      },
+                      {
+                        "pitch": 1.23,
+                        "yaw": -146.25,
+                        "x": 9.38,
+                        "y": 49.32
+                      },
+                      {
+                        "pitch": -27.58,
+                        "yaw": -146.13,
+                        "x": 9.41,
+                        "y": 65.32
+                      },
+                      {
+                        "pitch": -30.17,
+                        "yaw": 155.51,
+                        "x": 93.2,
+                        "y": 66.76
+                      }
+                    ]
+                  },
+                  {
+                    "id": "machine-fd12a-3",
+                    "type": "machineArea",
+                    "machineName": "FD12A",
+                    "machineType": "Filler",
+                    "hazard": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "safetyNote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "description": "",
+                    "image": "",
+                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.19-pm-20260710002654-dcd659d7.jpg",
+                    "points": [
+                      {
+                        "pitch": -14.49,
+                        "yaw": -141.8,
+                        "x": 10.61,
+                        "y": 58.05
+                      },
+                      {
+                        "pitch": -13.38,
+                        "yaw": -133.66,
+                        "x": 12.87,
+                        "y": 57.43
+                      },
+                      {
+                        "pitch": -22.88,
+                        "yaw": -133.67,
+                        "x": 12.87,
+                        "y": 62.71
+                      },
+                      {
+                        "pitch": -26,
+                        "yaw": -141.38,
+                        "x": 10.73,
+                        "y": 64.44
                       }
                     ]
                   }
@@ -2463,7 +2574,57 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [
+                  {
+                    "id": "machine-fd12a",
+                    "type": "machineArea",
+                    "machineName": "FD12A",
+                    "machineType": "Filler",
+                    "hazard": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "safetyNote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "description": "",
+                    "image": "",
+                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.18-pm-2-20260710002805-f45a3ab1.jpg",
+                    "points": [
+                      {
+                        "pitch": -11.72,
+                        "yaw": -148.19,
+                        "x": 8.84,
+                        "y": 56.51
+                      },
+                      {
+                        "pitch": -15.45,
+                        "yaw": -133.62,
+                        "x": 12.88,
+                        "y": 58.58
+                      },
+                      {
+                        "pitch": -39.09,
+                        "yaw": -133.53,
+                        "x": 12.91,
+                        "y": 71.72
+                      },
+                      {
+                        "pitch": -30.99,
+                        "yaw": -149.89,
+                        "x": 8.36,
+                        "y": 67.22
+                      },
+                      {
+                        "pitch": -15.98,
+                        "yaw": -149.64,
+                        "x": 8.43,
+                        "y": 58.88
+                      },
+                      {
+                        "pitch": -16.56,
+                        "yaw": -148.27,
+                        "x": 8.81,
+                        "y": 59.2
+                      }
+                    ]
+                  }
+                ]
               },
               "savoury-next1": {
                 "id": "savoury-next1",
