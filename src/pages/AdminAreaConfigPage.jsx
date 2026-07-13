@@ -268,6 +268,108 @@ function hasPopupPoint(point) {
   );
 }
 
+function unwrapAdminYawAround(yaw, referenceYaw) {
+  let value = normalizeAdminYaw(yaw);
+  const reference = normalizeAdminYaw(referenceYaw);
+  while (value - reference > 180) value -= 360;
+  while (value - reference < -180) value += 360;
+  return value;
+}
+
+function isPointInsideMachineArea(point, machineArea) {
+  if (!hasPopupPoint(point)) return false;
+  const points = getMachineAreaPoints(machineArea);
+  if (points.length < 3) return false;
+
+  const pointYaw = normalizeAdminYaw(point.yaw);
+  const pointPitch = normalizeAdminNumber(point.pitch, 0);
+  const polygon = points.map((polygonPoint) => ({
+    x: unwrapAdminYawAround(polygonPoint.yaw, pointYaw),
+    y: normalizeAdminNumber(polygonPoint.pitch, 0),
+  }));
+
+  let inside = false;
+  for (
+    let currentIndex = 0, previousIndex = polygon.length - 1;
+    currentIndex < polygon.length;
+    previousIndex = currentIndex, currentIndex += 1
+  ) {
+    const current = polygon[currentIndex];
+    const previous = polygon[previousIndex];
+    const crosses =
+      current.y > pointPitch !== previous.y > pointPitch &&
+      pointYaw <
+        ((previous.x - current.x) * (pointPitch - current.y)) /
+          (previous.y - current.y || Number.EPSILON) +
+          current.x;
+    if (crosses) inside = !inside;
+  }
+
+  return inside;
+}
+
+function getPointDistanceToMachineArea(point, machineArea) {
+  if (!hasPopupPoint(point)) return Number.POSITIVE_INFINITY;
+  const pointYaw = normalizeAdminYaw(point.yaw);
+  const pointPitch = normalizeAdminNumber(point.pitch, 0);
+  const points = getMachineAreaPoints(machineArea);
+  if (!points.length) return Number.POSITIVE_INFINITY;
+
+  return Math.min(
+    ...points.map((areaPoint) => {
+      const yawDistance =
+        unwrapAdminYawAround(areaPoint.yaw, pointYaw) - pointYaw;
+      const pitchDistance =
+        normalizeAdminNumber(areaPoint.pitch, 0) - pointPitch;
+      return Math.hypot(yawDistance, pitchDistance);
+    }),
+  );
+}
+
+function getSafetyAreaIdForPoint(point, machineAreas = []) {
+  if (!hasPopupPoint(point)) return null;
+
+  const safetyAreas = machineAreas.filter(
+    (machineArea) => getMachineAreaMode(machineArea) === "safety",
+  );
+  const containingArea = safetyAreas.find((machineArea) =>
+    isPointInsideMachineArea(point, machineArea),
+  );
+
+  if (containingArea?.id) return containingArea.id;
+
+  const nearestArea = [...safetyAreas].sort(
+    (firstArea, secondArea) =>
+      getPointDistanceToMachineArea(point, firstArea) -
+      getPointDistanceToMachineArea(point, secondArea),
+  )[0];
+
+  return nearestArea?.id || null;
+}
+
+function ensureSafetyPopupParents(popups = [], machineAreas = []) {
+  const validAreaIds = new Set(
+    machineAreas
+      .filter((machineArea) => getMachineAreaMode(machineArea) === "safety")
+      .map((machineArea) => machineArea.id)
+      .filter(Boolean),
+  );
+
+  return popups.map((popup) => {
+    const existingParentId = popup.machineAreaId || popup.safetyAreaId || null;
+    if (existingParentId && validAreaIds.has(existingParentId)) {
+      return { ...popup, machineAreaId: existingParentId };
+    }
+
+    const targetPoint = hasPopupPoint(getPopupArrowPoint(popup))
+      ? getPopupArrowPoint(popup)
+      : getPopupAreaPoint(popup);
+    const parentId = getSafetyAreaIdForPoint(targetPoint, machineAreas);
+
+    return parentId ? { ...popup, machineAreaId: parentId } : popup;
+  });
+}
+
 function getSafetyPopups(area = {}) {
   return Array.isArray(area.safetyPopups) ? area.safetyPopups : [];
 }
@@ -287,75 +389,6 @@ function getSceneSafetyPopups(scene = {}) {
     seen.add(key);
     return true;
   });
-}
-
-function unwrapAdminYawAround(yaw, referenceYaw) {
-  let value = normalizeAdminYaw(yaw);
-  const reference = normalizeAdminYaw(referenceYaw);
-  while (value - reference > 180) value -= 360;
-  while (value - reference < -180) value += 360;
-  return value;
-}
-
-function isAdminPointInsideMachineArea(point, machineArea) {
-  if (!hasPopupPoint(point)) return false;
-  const points = getMachineAreaPoints(machineArea);
-  if (points.length < 3) return false;
-
-  const pointYaw = normalizeAdminYaw(point.yaw);
-  const pointPitch = normalizeAdminNumber(point.pitch, 0);
-  const polygon = points.map((polygonPoint) => ({
-    x: unwrapAdminYawAround(polygonPoint.yaw, pointYaw),
-    y: normalizeAdminNumber(polygonPoint.pitch, 0),
-  }));
-
-  let inside = false;
-  for (let currentIndex = 0, previousIndex = polygon.length - 1;
-    currentIndex < polygon.length;
-    previousIndex = currentIndex, currentIndex += 1) {
-    const current = polygon[currentIndex];
-    const previous = polygon[previousIndex];
-    const crosses =
-      current.y > pointPitch !== previous.y > pointPitch &&
-      pointYaw <
-        ((previous.x - current.x) * (pointPitch - current.y)) /
-          (previous.y - current.y || Number.EPSILON) +
-          current.x;
-    if (crosses) inside = !inside;
-  }
-
-  return inside;
-}
-
-function getAdminPointDistanceToMachineArea(point, machineArea) {
-  if (!hasPopupPoint(point)) return Number.POSITIVE_INFINITY;
-  const pointYaw = normalizeAdminYaw(point.yaw);
-  const pointPitch = normalizeAdminNumber(point.pitch, 0);
-  const points = getMachineAreaPoints(machineArea);
-  if (!points.length) return Number.POSITIVE_INFINITY;
-
-  return Math.min(
-    ...points.map((areaPoint) => {
-      const yawDistance =
-        unwrapAdminYawAround(areaPoint.yaw, pointYaw) - pointYaw;
-      const pitchDistance =
-        normalizeAdminNumber(areaPoint.pitch, 0) - pointPitch;
-      return Math.hypot(yawDistance, pitchDistance);
-    }),
-  );
-}
-
-function findMachineAreaForPopupPoint(point, machineAreas = []) {
-  const containingArea = machineAreas.find((machineArea) =>
-    isAdminPointInsideMachineArea(point, machineArea),
-  );
-  if (containingArea) return containingArea;
-
-  return [...machineAreas].sort(
-    (firstArea, secondArea) =>
-      getAdminPointDistanceToMachineArea(point, firstArea) -
-      getAdminPointDistanceToMachineArea(point, secondArea),
-  )[0] || null;
 }
 
 function projectPanoPointToScreen(point, viewer, element) {
@@ -1608,7 +1641,12 @@ function AdminAreaConfigPage() {
     setMachineForm(EMPTY_MACHINE_FORM);
     setMachineImageFile(null);
     setMachineHoverImageFile(null);
-    setSafetyPopups(getSceneSafetyPopups(selectedScene));
+    setSafetyPopups(
+      ensureSafetyPopupParents(
+        getSceneSafetyPopups(selectedScene),
+        selectedScene?.machineAreas || [],
+      ),
+    );
     setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
     setEditingSafetyPopupId(null);
     setEditingMachineAreaId(null);
@@ -1635,7 +1673,12 @@ function AdminAreaConfigPage() {
     });
     setMachineImageFile(null);
     setMachineHoverImageFile(null);
-    setSafetyPopups(getSceneSafetyPopups(selectedScene));
+    setSafetyPopups(
+      ensureSafetyPopupParents(
+        getSceneSafetyPopups(selectedScene),
+        selectedScene?.machineAreas || [],
+      ),
+    );
     setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
     setEditingSafetyPopupId(null);
     setMachineAreaDraftPoints(getMachineAreaPoints(machineArea));
@@ -1650,7 +1693,12 @@ function AdminAreaConfigPage() {
     setMachineForm(EMPTY_MACHINE_FORM);
     setMachineImageFile(null);
     setMachineHoverImageFile(null);
-    setSafetyPopups(getSceneSafetyPopups(selectedScene));
+    setSafetyPopups(
+      ensureSafetyPopupParents(
+        getSceneSafetyPopups(selectedScene),
+        selectedScene?.machineAreas || [],
+      ),
+    );
     setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
     setEditingSafetyPopupId(null);
     setMachineAreaDraftPoints([]);
@@ -1662,7 +1710,12 @@ function AdminAreaConfigPage() {
   function openSafetyPopupEditor(popup) {
     if (!popup?.id) return;
     setAdminStationMode("safety");
-    setSafetyPopups(getSceneSafetyPopups(selectedScene));
+    setSafetyPopups(
+      ensureSafetyPopupParents(
+        getSceneSafetyPopups(selectedScene),
+        selectedScene?.machineAreas || [],
+      ),
+    );
     setEditingSafetyPopupId(popup.id);
     setSafetyEditorTab("popup");
     setSafetyPopupForm({
@@ -1684,13 +1737,17 @@ function AdminAreaConfigPage() {
           return rest;
         })
       : [];
+    const normalizedPopups = ensureSafetyPopupParents(
+      nextPopups,
+      nextMachineAreas,
+    );
     const nextScene = {
       ...selectedScene,
       machineAreas: nextMachineAreas,
-      safetyPopups: nextPopups,
+      safetyPopups: normalizedPopups,
     };
 
-    setSafetyPopups(nextPopups);
+    setSafetyPopups(normalizedPopups);
     saveTour(
       { ...tour, scenes: { ...tour.scenes, [selectedScene.id]: nextScene } },
       message,
@@ -1755,8 +1812,18 @@ function AdminAreaConfigPage() {
       return false;
     }
 
+    const targetPoint = hasPopupPoint(getPopupArrowPoint(existingPopup))
+      ? getPopupArrowPoint(existingPopup)
+      : getPopupAreaPoint(existingPopup);
+    const parentAreaId =
+      existingPopup.machineAreaId ||
+      getSafetyAreaIdForPoint(
+        targetPoint,
+        selectedScene?.machineAreas || [],
+      );
     const nextPopup = {
       ...existingPopup,
+      machineAreaId: parentAreaId || null,
       title: safetyPopupForm.title.trim(),
       content: safetyPopupForm.content.trim(),
       hazard: safetyPopupForm.hazard.trim(),
@@ -1936,26 +2003,27 @@ function AdminAreaConfigPage() {
           mode === "mark-safety-popup-arrow"
             ? point
             : getPopupArrowPoint(existingPopup);
-        const mappedMachineArea = hasPopupPoint(arrowPoint)
-          ? findMachineAreaForPopupPoint(
-              arrowPoint,
-              selectedMachineAreas.filter(
-                (machineArea) => getMachineAreaMode(machineArea) === "safety",
-              ),
-            )
-          : null;
+        const parentTargetPoint =
+          mode === "mark-safety-popup-arrow"
+            ? point
+            : hasPopupPoint(arrowPoint)
+              ? arrowPoint
+              : popupArea;
+        const machineAreaId =
+          getSafetyAreaIdForPoint(
+            parentTargetPoint,
+            selectedScene?.machineAreas || [],
+          ) ||
+          existingPopup.machineAreaId ||
+          null;
         const nextPopup = {
           ...existingPopup,
           id: popupId,
+          machineAreaId,
           title: safetyPopupForm.title.trim(),
           content: safetyPopupForm.content.trim(),
           hazard: safetyPopupForm.hazard.trim(),
           safetyNote: safetyPopupForm.safetyNote.trim(),
-          machineAreaId:
-            mappedMachineArea?.id ||
-            existingPopup.machineAreaId ||
-            editingMachineAreaId ||
-            null,
           popupArea,
           arrowPoint: hasPopupPoint(arrowPoint) ? arrowPoint : null,
           pitch: popupArea.pitch,
@@ -2047,7 +2115,6 @@ function AdminAreaConfigPage() {
       }
     },
     [
-      editingMachineAreaId,
       editingSafetyPopupId,
       mode,
       pendingTargetSceneId,
@@ -2056,7 +2123,6 @@ function AdminAreaConfigPage() {
       safetyPopupForm.safetyNote,
       safetyPopupForm.title,
       safetyPopups,
-      selectedMachineAreas,
       selectedScene,
       tour,
     ],

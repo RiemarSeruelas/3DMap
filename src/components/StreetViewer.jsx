@@ -8,8 +8,7 @@ const MAP_WORLD_WIDTH = 520;
 const MAP_WORLD_HEIGHT = 292.5;
 const MAP_WINDOW_WIDTH = 310;
 const MAP_WINDOW_HEIGHT = 175;
-const POPUP_HOVER_RELEASE_DELAY = 900;
-const POPUP_INTERACTION_PADDING = 96;
+const SAFETY_EXIT_DELAY = 1400;
 
 function safeScenes(mapData) {
   return mapData?.scenes || {};
@@ -505,6 +504,137 @@ function getProjectedMachineAreas(machineAreas = [], viewer, element) {
     .filter(Boolean);
 }
 
+function rectanglesOverlap(first, second) {
+  return !(
+    first.right <= second.left ||
+    first.left >= second.right ||
+    first.bottom <= second.top ||
+    first.top >= second.bottom
+  );
+}
+
+function createCenteredRect(x, y, width, height) {
+  return {
+    left: x - width / 2,
+    right: x + width / 2,
+    top: y - height / 2,
+    bottom: y + height / 2,
+    width,
+    height,
+  };
+}
+
+function getPopupCollisionPosition({
+  anchor,
+  popupElement,
+  viewerElement,
+  shellElement,
+  occupiedRects,
+}) {
+  if (!anchor || !popupElement || !viewerElement) {
+    return { x: anchor?.x || 0, y: anchor?.y || 0, rect: null };
+  }
+
+  const popupWidth = Math.max(1, popupElement.offsetWidth || 1);
+  const popupHeight = Math.max(1, popupElement.offsetHeight || 1);
+  const viewerWidth = Math.max(1, viewerElement.clientWidth || 1);
+  const viewerHeight = Math.max(1, viewerElement.clientHeight || 1);
+  const margin = 14;
+  const gap = 12;
+  const halfWidth = popupWidth / 2;
+  const halfHeight = popupHeight / 2;
+
+  const clampPoint = (point) => ({
+    x: clamp(point.x, margin + halfWidth, viewerWidth - margin - halfWidth),
+    y: clamp(point.y, margin + halfHeight, viewerHeight - margin - halfHeight),
+  });
+
+  const viewerRect = viewerElement.getBoundingClientRect();
+  const blockedRects = shellElement
+    ? Array.from(
+        shellElement.querySelectorAll(
+          '.street-right-stack, .street-minimap-card, .street-viewer-controls-clean',
+        ),
+      ).map((node) => {
+        const rect = node.getBoundingClientRect();
+        return {
+          left: rect.left - viewerRect.left - gap,
+          right: rect.right - viewerRect.left + gap,
+          top: rect.top - viewerRect.top - gap,
+          bottom: rect.bottom - viewerRect.top + gap,
+        };
+      })
+    : [];
+
+  const collisionRects = [...blockedRects, ...occupiedRects];
+  const firstCandidate = clampPoint(anchor);
+  const candidates = [firstCandidate];
+
+  collisionRects.forEach((rect) => {
+    candidates.push(
+      clampPoint({ x: rect.left - halfWidth - gap, y: anchor.y }),
+      clampPoint({ x: rect.right + halfWidth + gap, y: anchor.y }),
+      clampPoint({ x: anchor.x, y: rect.top - halfHeight - gap }),
+      clampPoint({ x: anchor.x, y: rect.bottom + halfHeight + gap }),
+    );
+  });
+
+  candidates.push(
+    clampPoint({ x: anchor.x - popupWidth - gap, y: anchor.y }),
+    clampPoint({ x: anchor.x + popupWidth + gap, y: anchor.y }),
+    clampPoint({ x: anchor.x, y: anchor.y - popupHeight - gap }),
+    clampPoint({ x: anchor.x, y: anchor.y + popupHeight + gap }),
+  );
+
+  const uniqueCandidates = [];
+  const seen = new Set();
+  candidates.forEach((candidate) => {
+    const key = `${candidate.x.toFixed(1)}:${candidate.y.toFixed(1)}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    uniqueCandidates.push(candidate);
+  });
+
+  const rankedCandidates = uniqueCandidates
+    .map((candidate) => {
+      const rect = createCenteredRect(
+        candidate.x,
+        candidate.y,
+        popupWidth,
+        popupHeight,
+      );
+      const collisionCount = collisionRects.reduce(
+        (count, blockedRect) =>
+          count + (rectanglesOverlap(rect, blockedRect) ? 1 : 0),
+        0,
+      );
+      const distance = Math.hypot(
+        candidate.x - anchor.x,
+        candidate.y - anchor.y,
+      );
+      return { candidate, rect, collisionCount, distance };
+    })
+    .sort(
+      (first, second) =>
+        first.collisionCount - second.collisionCount ||
+        first.distance - second.distance,
+    );
+
+  const selected = rankedCandidates[0];
+  return {
+    x: selected?.candidate.x ?? firstCandidate.x,
+    y: selected?.candidate.y ?? firstCandidate.y,
+    rect:
+      selected?.rect ||
+      createCenteredRect(
+        firstCandidate.x,
+        firstCandidate.y,
+        popupWidth,
+        popupHeight,
+      ),
+  };
+}
+
 function StreetViewer({ mapData, site, area }) {
   const [searchParams] = useSearchParams();
   const shellRef = useRef(null);
@@ -517,13 +647,12 @@ function StreetViewer({ mapData, site, area }) {
   const popupBoxRefs = useRef(new Map());
   const popupLineRefs = useRef(new Map());
   const popupArrowRefs = useRef(new Map());
-  const projectedMachineBoundsRef = useRef(new Map());
-  const popupInteractionZonesRef = useRef(new Map());
-  const hoveredMachineAreaIdRef = useRef(null);
-  const hoveredPopupIdRef = useRef(null);
-  const hoverLeaveTimerRef = useRef(null);
-  const hoverReleaseClearPopupRef = useRef(false);
-  const lastPointerPositionRef = useRef({ x: null, y: null });
+  const activeSafetyAreaIdRef = useRef(null);
+  const expandedPopupIdRef = useRef(null);
+  const isPopupLockedRef = useRef(false);
+  const pointerSafetyAreaIdRef = useRef(null);
+  const pointerPopupIdRef = useRef(null);
+  const closeTimerRef = useRef(null);
   const popupDragRef = useRef({
     active: false,
     pointerId: null,
@@ -544,6 +673,7 @@ function StreetViewer({ mapData, site, area }) {
     startPitch: 0,
   });
   const suppressMachineAreaClickRef = useRef(false);
+  const suppressPopupClickRef = useRef(false);
 
   const requestedSceneId = searchParams.get("scene");
 
@@ -557,8 +687,9 @@ function StreetViewer({ mapData, site, area }) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [viewerMode, setViewerMode] = useState("tutor");
   const [selectedMachineArea, setSelectedMachineArea] = useState(null);
-  const [hoveredMachineAreaId, setHoveredMachineAreaId] = useState(null);
-  const [hoveredPopupId, setHoveredPopupId] = useState(null);
+  const [activeSafetyAreaId, setActiveSafetyAreaId] = useState(null);
+  const [expandedPopupId, setExpandedPopupId] = useState(null);
+  const [isPopupLocked, setIsPopupLocked] = useState(false);
 
   const currentScene = scenes[currentSceneId] || sceneList[0];
   const currentSceneIdResolved = currentScene?.id || currentSceneId;
@@ -577,6 +708,14 @@ function StreetViewer({ mapData, site, area }) {
     () => getSceneSafetyPopups(currentScene),
     [currentScene],
   );
+  const popupParentAreaIds = useMemo(() => {
+    const parents = new Map();
+    sceneSafetyPopups.forEach((popup) => {
+      const parentId = getPopupMachineAreaId(popup, machineAreas);
+      if (parentId) parents.set(popup.id, parentId);
+    });
+    return parents;
+  }, [machineAreas, sceneSafetyPopups]);
 
   const sceneConnections = useMemo(
     () => getSceneConnections(mapData, currentSceneIdResolved),
@@ -589,168 +728,147 @@ function StreetViewer({ mapData, site, area }) {
     );
   }
 
-  function clearHoverLeaveTimer() {
-    if (hoverLeaveTimerRef.current) {
-      window.clearTimeout(hoverLeaveTimerRef.current);
-      hoverLeaveTimerRef.current = null;
-    }
-    hoverReleaseClearPopupRef.current = false;
+  function clearSafetyCloseTimer() {
+    if (!closeTimerRef.current) return;
+    window.clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = null;
   }
 
-  function rememberPointerPosition(event) {
-    if (!event) return;
-    lastPointerPositionRef.current = {
-      x: Number.isFinite(Number(event.clientX)) ? Number(event.clientX) : null,
-      y: Number.isFinite(Number(event.clientY)) ? Number(event.clientY) : null,
-    };
+  function setPopupLocked(nextLocked) {
+    isPopupLockedRef.current = nextLocked;
+    setIsPopupLocked(nextLocked);
   }
 
-  function setHoveredMachineAreaSafe(machineAreaId, event) {
-    rememberPointerPosition(event);
-    clearHoverLeaveTimer();
-    setHoveredMachineAreaId(machineAreaId);
-  }
+  function setActiveSafetyArea(
+    machineAreaId,
+    { expandFirstPopup = false, lockPopup = false } = {},
+  ) {
+    if (!machineAreaId) return;
+    clearSafetyCloseTimer();
 
-  function getElementUnderLastPointer() {
-    const { x, y } = lastPointerPositionRef.current;
-    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
-    return document.elementFromPoint(x, y);
-  }
-
-  function isPointerInsideLinkedZone(activeAreaId) {
-    if (!activeAreaId) return false;
-
-    const shell = shellRef.current;
-    const { x: clientX, y: clientY } = lastPointerPositionRef.current;
-    if (!shell || !Number.isFinite(clientX) || !Number.isFinite(clientY)) {
-      return false;
+    const isNewArea = activeSafetyAreaIdRef.current !== machineAreaId;
+    if (isNewArea) {
+      activeSafetyAreaIdRef.current = machineAreaId;
+      setActiveSafetyAreaId(machineAreaId);
+      expandedPopupIdRef.current = null;
+      setExpandedPopupId(null);
     }
 
-    const rect = shell.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-
-    return sceneSafetyPopups.some((popup) => {
-      if (getPopupMachineAreaId(popup, machineAreas) !== activeAreaId) {
-        return false;
-      }
-
-      return isInsideInteractionZone(
-        x,
-        y,
-        popupInteractionZonesRef.current.get(popup.id),
+    if (expandFirstPopup) {
+      const firstPopup = sceneSafetyPopups.find(
+        (popup) => popupParentAreaIds.get(popup.id) === machineAreaId,
       );
-    });
+      const nextPopupId = firstPopup?.id || null;
+      expandedPopupIdRef.current = nextPopupId;
+      setExpandedPopupId(nextPopupId);
+    }
+
+    if (lockPopup) {
+      setPopupLocked(true);
+    }
   }
 
-  function scheduleHoverRelease({ clearPopup = false } = {}) {
-    hoverReleaseClearPopupRef.current =
-      hoverReleaseClearPopupRef.current || clearPopup;
-    if (hoverLeaveTimerRef.current) return;
+  function closeSafetyExperience() {
+    clearSafetyCloseTimer();
+    pointerSafetyAreaIdRef.current = null;
+    pointerPopupIdRef.current = null;
+    activeSafetyAreaIdRef.current = null;
+    expandedPopupIdRef.current = null;
+    setActiveSafetyAreaId(null);
+    setExpandedPopupId(null);
+    setPopupLocked(false);
+  }
 
-    hoverLeaveTimerRef.current = window.setTimeout(() => {
-      const activeAreaId = hoveredMachineAreaIdRef.current;
-      const target = getElementUnderLastPointer();
-      const popupTarget = target?.closest?.(".viewer-safety-popup-marker");
-      const machineTarget = target?.closest?.(".machine-area-screen-polygon");
-      const pointerStillLinked = isPointerInsideLinkedZone(activeAreaId);
+  function scheduleSafetyClose(delay = SAFETY_EXIT_DELAY) {
+    clearSafetyCloseTimer();
+    if (isPopupLockedRef.current) return;
+    const expectedAreaId = activeSafetyAreaIdRef.current;
+    if (!expectedAreaId) return;
 
-      if (popupTarget) {
-        const popupId = popupTarget.dataset.popupId;
-        if (popupId) setHoveredPopupId(popupId);
-        hoverReleaseClearPopupRef.current = false;
-        hoverLeaveTimerRef.current = null;
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = null;
+
+      if (popupDragRef.current.active || machineAreaDragRef.current.active) {
+        scheduleSafetyClose();
         return;
       }
 
-      if (machineTarget) {
-        const machineAreaId = machineTarget.dataset.machineAreaId;
-        if (machineAreaId) setHoveredMachineAreaId(machineAreaId);
-        hoverReleaseClearPopupRef.current = false;
-        hoverLeaveTimerRef.current = null;
-        return;
-      }
+      if (pointerSafetyAreaIdRef.current) return;
+      if (pointerPopupIdRef.current) return;
+      if (activeSafetyAreaIdRef.current !== expectedAreaId) return;
 
-      if (pointerStillLinked) {
-        hoverReleaseClearPopupRef.current = false;
-        hoverLeaveTimerRef.current = null;
-        return;
-      }
-
-      setHoveredMachineAreaId(null);
-      if (hoverReleaseClearPopupRef.current) setHoveredPopupId(null);
-      hoverReleaseClearPopupRef.current = false;
-      hoverLeaveTimerRef.current = null;
-    }, POPUP_HOVER_RELEASE_DELAY);
+      closeSafetyExperience();
+    }, delay);
   }
 
-  function releaseHoveredMachineArea(event) {
-    rememberPointerPosition(event);
-    if (machineAreaDragRef.current.active) return;
-    scheduleHoverRelease();
-  }
-
-  function enterSafetyPopup(popupId, event) {
-    rememberPointerPosition(event);
-    clearHoverLeaveTimer();
-    setHoveredPopupId(popupId);
-  }
-
-  function leaveSafetyPopup(event) {
-    rememberPointerPosition(event);
-    if (popupDragRef.current.active) return;
-    scheduleHoverRelease({ clearPopup: true });
-  }
-
-
-  function isInsideInteractionZone(x, y, zone) {
-    return (
-      zone &&
-      x >= zone.left &&
-      x <= zone.right &&
-      y >= zone.top &&
-      y <= zone.bottom
-    );
-  }
-
-  function handleViewerPointerMove(event) {
-    rememberPointerPosition(event);
-    if (viewerMode !== "safety") return;
-
-    const activeAreaId = hoveredMachineAreaIdRef.current;
-    if (!activeAreaId) return;
-
-    const shell = shellRef.current;
-    if (!shell) return;
-
-    const rect = shell.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    const insideLinkedZone = sceneSafetyPopups.some((popup) => {
-      if (getPopupMachineAreaId(popup, machineAreas) !== activeAreaId) {
-        return false;
-      }
-
-      return isInsideInteractionZone(
-        x,
-        y,
-        popupInteractionZonesRef.current.get(popup.id),
-      );
-    });
-
-    if (insideLinkedZone || hoveredPopupIdRef.current) {
-      clearHoverLeaveTimer();
+  function handleSafetyAreaEnter(machineAreaId) {
+    if (
+      isPopupLockedRef.current &&
+      activeSafetyAreaIdRef.current &&
+      activeSafetyAreaIdRef.current !== machineAreaId
+    ) {
       return;
     }
 
-    scheduleHoverRelease({ clearPopup: true });
+    pointerSafetyAreaIdRef.current = machineAreaId;
+    clearSafetyCloseTimer();
+
+    if (activeSafetyAreaIdRef.current !== machineAreaId) {
+      pointerPopupIdRef.current = null;
+      expandedPopupIdRef.current = null;
+      setExpandedPopupId(null);
+      setActiveSafetyArea(machineAreaId);
+    }
   }
 
-  function handleViewerPointerLeave(event) {
-    rememberPointerPosition(event);
-    if (viewerMode === "safety") {
-      scheduleHoverRelease({ clearPopup: true });
+  function handleSafetyAreaLeave(machineAreaId) {
+    if (pointerSafetyAreaIdRef.current === machineAreaId) {
+      pointerSafetyAreaIdRef.current = null;
     }
+    if (!isPopupLockedRef.current) scheduleSafetyClose();
+  }
+
+  function handleSafetyAreaClick(machineAreaId) {
+    pointerSafetyAreaIdRef.current = machineAreaId;
+    pointerPopupIdRef.current = null;
+    setActiveSafetyArea(machineAreaId, {
+      expandFirstPopup: true,
+      lockPopup: true,
+    });
+  }
+
+  function handleSafetyPopupEnter(popupId) {
+    const parentAreaId = popupParentAreaIds.get(popupId) || null;
+    if (!parentAreaId) return;
+    if (
+      isPopupLockedRef.current &&
+      activeSafetyAreaIdRef.current !== parentAreaId
+    ) {
+      return;
+    }
+
+    pointerPopupIdRef.current = popupId;
+    clearSafetyCloseTimer();
+    setActiveSafetyArea(parentAreaId);
+  }
+
+  function handleSafetyPopupLeave(popupId) {
+    if (pointerPopupIdRef.current === popupId) {
+      pointerPopupIdRef.current = null;
+    }
+    if (!isPopupLockedRef.current) scheduleSafetyClose();
+  }
+
+  function handleSafetyPopupClick(popupId) {
+    const parentAreaId = popupParentAreaIds.get(popupId) || null;
+    if (!parentAreaId) return;
+
+    clearSafetyCloseTimer();
+    setActiveSafetyArea(parentAreaId, { lockPopup: true });
+
+    const nextPopupId = expandedPopupIdRef.current === popupId ? null : popupId;
+    expandedPopupIdRef.current = nextPopupId;
+    setExpandedPopupId(nextPopupId);
   }
 
   function handlePopupWheel(event) {
@@ -759,7 +877,7 @@ function StreetViewer({ mapData, site, area }) {
 
     event.preventDefault();
     event.stopPropagation();
-    clearHoverLeaveTimer();
+    clearSafetyCloseTimer();
 
     const wheelEvent = event.nativeEvent || event;
     const multiplier =
@@ -863,8 +981,7 @@ function StreetViewer({ mapData, site, area }) {
   }
 
   function handleMachineAreaPointerDown(event, machineAreaId) {
-    clearHoverLeaveTimer();
-    setHoveredMachineAreaId(machineAreaId);
+    handleSafetyAreaEnter(machineAreaId);
     beginViewerDrag(event, machineAreaDragRef, event.currentTarget);
   }
 
@@ -873,14 +990,8 @@ function StreetViewer({ mapData, site, area }) {
   }
 
   function finishMachineAreaPointerDrag(event) {
-    const dragNode = machineAreaDragRef.current.node;
     const result = endViewerDrag(event, machineAreaDragRef);
     if (!result) return;
-
-    const pointerTarget = document.elementFromPoint(event.clientX, event.clientY);
-    const remainsInsideArea = Boolean(
-      dragNode && pointerTarget && dragNode.contains(pointerTarget),
-    );
 
     if (result.moved) {
       suppressMachineAreaClickRef.current = true;
@@ -889,14 +1000,12 @@ function StreetViewer({ mapData, site, area }) {
       }, 0);
     }
 
-    if (!remainsInsideArea) {
-      scheduleHoverRelease();
-    }
   }
 
   function handlePopupPointerDown(event, popupId) {
-    clearHoverLeaveTimer();
-    enterSafetyPopup(popupId);
+    const parentAreaId = popupParentAreaIds.get(popupId) || null;
+    if (!parentAreaId) return;
+    handleSafetyPopupEnter(popupId);
     beginViewerDrag(event, popupDragRef, event.currentTarget);
   }
 
@@ -905,18 +1014,14 @@ function StreetViewer({ mapData, site, area }) {
   }
 
   function finishPopupPointerDrag(event) {
-    const dragNode = popupDragRef.current.node;
     const result = endViewerDrag(event, popupDragRef);
     if (!result) return;
 
-    const pointerTarget = document.elementFromPoint(event.clientX, event.clientY);
-    const remainsInsidePopup = Boolean(
-      dragNode && pointerTarget && dragNode.contains(pointerTarget),
-    );
-
-    if (!remainsInsidePopup) {
-      setHoveredPopupId(null);
-      scheduleHoverRelease({ clearPopup: true });
+    if (result.moved) {
+      suppressPopupClickRef.current = true;
+      window.setTimeout(() => {
+        suppressPopupClickRef.current = false;
+      }, 0);
     }
   }
 
@@ -945,9 +1050,11 @@ function StreetViewer({ mapData, site, area }) {
     if (!scenes[nextSceneId] || nextSceneId === currentSceneIdResolved) return;
 
     rememberCurrentView();
-    clearHoverLeaveTimer();
+    clearSafetyCloseTimer();
+    pointerSafetyAreaIdRef.current = null;
+    pointerPopupIdRef.current = null;
     setSelectedMachineArea(null);
-    setHoveredPopupId(null);
+    closeSafetyExperience();
     setIsTransitioning(true);
     await preloadImage(scenes[nextSceneId]?.panorama);
 
@@ -978,27 +1085,42 @@ function StreetViewer({ mapData, site, area }) {
   }, [sceneConnections, scenes]);
 
   useEffect(() => {
-    clearHoverLeaveTimer();
+    clearSafetyCloseTimer();
     setSelectedMachineArea(null);
-    setHoveredMachineAreaId(null);
-    setHoveredPopupId(null);
-    hoveredMachineAreaIdRef.current = null;
-    hoveredPopupIdRef.current = null;
+    setActiveSafetyAreaId(null);
+    setExpandedPopupId(null);
+    activeSafetyAreaIdRef.current = null;
+    expandedPopupIdRef.current = null;
+    pointerSafetyAreaIdRef.current = null;
+    pointerPopupIdRef.current = null;
+    isPopupLockedRef.current = false;
+    setIsPopupLocked(false);
   }, [viewerMode, currentSceneIdResolved]);
 
   useEffect(() => {
-    hoveredMachineAreaIdRef.current = hoveredMachineAreaId;
-  }, [hoveredMachineAreaId]);
+    activeSafetyAreaIdRef.current = activeSafetyAreaId;
+  }, [activeSafetyAreaId]);
 
   useEffect(() => {
-    hoveredPopupIdRef.current = hoveredPopupId;
-  }, [hoveredPopupId]);
+    expandedPopupIdRef.current = expandedPopupId;
+  }, [expandedPopupId]);
 
   useEffect(() => {
-    setSelectedMachineArea(null);
-    setHoveredMachineAreaId(null);
-    setHoveredPopupId(null);
+    isPopupLockedRef.current = isPopupLocked;
+  }, [isPopupLocked]);
 
+  useEffect(() => {
+    function handleEscape(event) {
+      if (event.key === "Escape" && activeSafetyAreaIdRef.current) {
+        closeSafetyExperience();
+      }
+    }
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, []);
+
+  useEffect(() => {
     let animationFrame = 0;
 
     function updateOverlayPositions() {
@@ -1018,14 +1140,12 @@ function StreetViewer({ mapData, site, area }) {
           const imageElement = machineImageRefs.current.get(id);
 
           if (!projected) {
-            projectedMachineBoundsRef.current.delete(id);
             polygon?.setAttribute("visibility", "hidden");
             clip?.setAttribute("visibility", "hidden");
             imageElement?.setAttribute("visibility", "hidden");
             return;
           }
 
-          projectedMachineBoundsRef.current.set(id, projected.bounds);
           polygon?.setAttribute("visibility", "visible");
           polygon?.setAttribute("points", projected.pointsAttr);
           clip?.setAttribute("visibility", "visible");
@@ -1041,70 +1161,22 @@ function StreetViewer({ mapData, site, area }) {
         });
 
         if (viewerMode === "safety") {
-          const hoveredAreaId = hoveredMachineAreaIdRef.current;
+          const activeAreaId = activeSafetyAreaIdRef.current;
+          const occupiedPopupRects = [];
 
           sceneSafetyPopups.forEach((popup) => {
             const projected = getProjectedSafetyPopup(popup, viewer, element);
             const box = popupBoxRefs.current.get(popup.id);
             const line = popupLineRefs.current.get(popup.id);
             const arrow = popupArrowRefs.current.get(popup.id);
-            const popupAreaId = getPopupMachineAreaId(popup, machineAreas);
-            const isPopupHovered = hoveredPopupIdRef.current === popup.id;
-            const isAreaHovered = hoveredAreaId && popupAreaId === hoveredAreaId;
+            const parentAreaId = popupParentAreaIds.get(popup.id) || null;
+
+            const isPopupExpanded =
+              expandedPopupIdRef.current === popup.id &&
+              parentAreaId === activeAreaId;
             const shouldShow = Boolean(
-              projected && (isAreaHovered || isPopupHovered),
+              projected && activeAreaId && parentAreaId === activeAreaId,
             );
-
-            if (projected) {
-              const areaBounds = popupAreaId
-                ? projectedMachineBoundsRef.current.get(popupAreaId)
-                : null;
-              const halfWidth = Math.max(box?.offsetWidth || 150, 150) / 2;
-              const halfHeight = Math.max(box?.offsetHeight || 46, 46) / 2;
-              const zones = [
-                {
-                  left: projected.boxPosition.x - halfWidth,
-                  right: projected.boxPosition.x + halfWidth,
-                  top: projected.boxPosition.y - halfHeight,
-                  bottom: projected.boxPosition.y + halfHeight,
-                },
-              ];
-
-              if (areaBounds) {
-                zones.push({
-                  left: areaBounds.x,
-                  right: areaBounds.x + areaBounds.width,
-                  top: areaBounds.y,
-                  bottom: areaBounds.y + areaBounds.height,
-                });
-              }
-
-              if (projected.arrowPosition) {
-                zones.push({
-                  left: projected.arrowPosition.x,
-                  right: projected.arrowPosition.x,
-                  top: projected.arrowPosition.y,
-                  bottom: projected.arrowPosition.y,
-                });
-              }
-
-              popupInteractionZonesRef.current.set(popup.id, {
-                left:
-                  Math.min(...zones.map((zone) => zone.left)) -
-                  POPUP_INTERACTION_PADDING,
-                right:
-                  Math.max(...zones.map((zone) => zone.right)) +
-                  POPUP_INTERACTION_PADDING,
-                top:
-                  Math.min(...zones.map((zone) => zone.top)) -
-                  POPUP_INTERACTION_PADDING,
-                bottom:
-                  Math.max(...zones.map((zone) => zone.bottom)) +
-                  POPUP_INTERACTION_PADDING,
-              });
-            } else {
-              popupInteractionZonesRef.current.delete(popup.id);
-            }
 
             if (!shouldShow) {
               if (box) {
@@ -1116,17 +1188,33 @@ function StreetViewer({ mapData, site, area }) {
               return;
             }
 
+            let popupPosition = projected.boxPosition;
+
             if (box) {
               box.style.visibility = "visible";
-              box.style.transform = `translate3d(${projected.boxPosition.x}px, ${projected.boxPosition.y}px, 0)`;
               box.classList.add("is-visible");
-              box.classList.toggle("is-expanded", isPopupHovered);
+              box.classList.toggle("is-expanded", isPopupExpanded);
+
+              const collisionPosition = getPopupCollisionPosition({
+                anchor: projected.boxPosition,
+                popupElement: box,
+                viewerElement: element,
+                shellElement: shellRef.current,
+                occupiedRects: occupiedPopupRects,
+              });
+
+              popupPosition = collisionPosition;
+              if (collisionPosition.rect) {
+                occupiedPopupRects.push(collisionPosition.rect);
+              }
+
+              box.style.transform = `translate3d(${popupPosition.x}px, ${popupPosition.y}px, 0)`;
             }
 
             if (line && projected.arrowPosition) {
               line.setAttribute("visibility", "visible");
-              line.setAttribute("x1", String(projected.boxPosition.x));
-              line.setAttribute("y1", String(projected.boxPosition.y));
+              line.setAttribute("x1", String(popupPosition.x));
+              line.setAttribute("y1", String(popupPosition.y));
               line.setAttribute("x2", String(projected.arrowPosition.x));
               line.setAttribute("y2", String(projected.arrowPosition.y));
             } else {
@@ -1142,6 +1230,7 @@ function StreetViewer({ mapData, site, area }) {
             }
           });
         }
+
       }
 
       animationFrame = window.requestAnimationFrame(updateOverlayPositions);
@@ -1150,11 +1239,15 @@ function StreetViewer({ mapData, site, area }) {
     updateOverlayPositions();
     return () => {
       window.cancelAnimationFrame(animationFrame);
-      projectedMachineBoundsRef.current.clear();
-      popupInteractionZonesRef.current.clear();
-      clearHoverLeaveTimer();
+      clearSafetyCloseTimer();
     };
-  }, [machineAreas, sceneSafetyPopups, viewerMode, currentSceneIdResolved]);
+  }, [
+    currentSceneIdResolved,
+    machineAreas,
+    popupParentAreaIds,
+    sceneSafetyPopups,
+    viewerMode,
+  ]);
 
   useEffect(() => {
     if (!viewerRef.current || !currentPanorama) return;
@@ -1348,9 +1441,14 @@ function StreetViewer({ mapData, site, area }) {
   return (
     <div
       ref={shellRef}
-      className={`street-viewer-shell ${isTransitioning ? "is-speed-transitioning" : ""}`}
-      onPointerMoveCapture={handleViewerPointerMove}
-      onPointerLeave={handleViewerPointerLeave}
+      className={`street-viewer-shell ${isTransitioning ? "is-speed-transitioning" : ""} ${isPopupLocked ? "is-safety-popup-locked" : ""}`}
+      onPointerDownCapture={(event) => {
+        if (viewerMode !== "safety" || !activeSafetyAreaIdRef.current) return;
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        if (target.closest("[data-machine-area-id], [data-popup-id], .street-right-stack, .street-minimap-card, .street-viewer-controls-clean")) return;
+        closeSafetyExperience();
+      }}
     >
       <div ref={viewerRef} className="street-pannellum-stage" />
 
@@ -1437,9 +1535,16 @@ function StreetViewer({ mapData, site, area }) {
                   else popupBoxRefs.current.delete(popup.id);
                 }}
                 data-popup-id={popup.id}
-                className={`viewer-safety-popup-marker ${hoveredPopupId === popup.id ? "is-expanded" : ""}`}
-                onMouseEnter={(event) => enterSafetyPopup(popup.id, event)}
-                onMouseLeave={leaveSafetyPopup}
+                role="button"
+                tabIndex={0}
+                aria-expanded={expandedPopupId === popup.id}
+                aria-label={`${popup.title || "Safety information"}. ${expandedPopupId === popup.id ? "Click to collapse details" : "Click to open full details"}`}
+                title={expandedPopupId === popup.id ? "Click to collapse details" : "Click to open full details"}
+                className={`viewer-safety-popup-marker ${expandedPopupId === popup.id ? "is-expanded" : ""}`}
+                onPointerEnter={() => handleSafetyPopupEnter(popup.id)}
+                onPointerLeave={() => handleSafetyPopupLeave(popup.id)}
+                onFocus={() => handleSafetyPopupEnter(popup.id)}
+                onBlur={() => handleSafetyPopupLeave(popup.id)}
                 onWheelCapture={handlePopupWheel}
                 onPointerDown={(event) =>
                   handlePopupPointerDown(event, popup.id)
@@ -1447,7 +1552,37 @@ function StreetViewer({ mapData, site, area }) {
                 onPointerMove={handlePopupPointerMove}
                 onPointerUp={finishPopupPointerDrag}
                 onPointerCancel={finishPopupPointerDrag}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  if (suppressPopupClickRef.current) return;
+                  handleSafetyPopupClick(popup.id);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter" && event.key !== " ") return;
+                  event.preventDefault();
+                  handleSafetyPopupClick(popup.id);
+                }}
               >
+                {expandedPopupId === popup.id && (
+                  <button
+                    type="button"
+                    className="viewer-safety-popup-close"
+                    aria-label="Close safety popup"
+                    title="Close"
+                    onPointerDown={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                    }}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      closeSafetyExperience();
+                    }}
+                  >
+                    ×
+                  </button>
+                )}
                 <strong>{popup.title || "Safety information"}</strong>
                 {popup.content && <p>{popup.content}</p>}
                 {(popup.hazard || popup.safetyNote) && (
@@ -1505,7 +1640,7 @@ function StreetViewer({ mapData, site, area }) {
                     if (node) machineImageRefs.current.set(id, node);
                     else machineImageRefs.current.delete(id);
                   }}
-                  className={`machine-area-hover-image ${hoveredMachineAreaId === machineArea.id ? "is-visible" : ""}`}
+                  className={`machine-area-hover-image ${activeSafetyAreaId === id ? "is-visible" : ""}`}
                   href={hoverImage}
                   preserveAspectRatio="xMidYMid slice"
                   clipPath={`url(#viewer-machine-clip-${id})`}
@@ -1516,7 +1651,7 @@ function StreetViewer({ mapData, site, area }) {
           {machineAreas.map((machineArea) => {
             const id = machineArea.id || getMachineAreaTitle(machineArea);
             const isSelected = selectedMachineArea?.id === machineArea.id;
-            const isHovered = hoveredMachineAreaId === machineArea.id;
+            const isHovered = activeSafetyAreaId === id;
             return (
               <polygon
                 key={id}
@@ -1524,15 +1659,19 @@ function StreetViewer({ mapData, site, area }) {
                   if (node) machinePolygonRefs.current.set(id, node);
                   else machinePolygonRefs.current.delete(id);
                 }}
-                data-machine-area-id={machineArea.id}
+                data-machine-area-id={id}
+                role="button"
+                tabIndex={0}
+                aria-label={`Open safety information for ${getMachineAreaTitle(machineArea)}`}
+                title="Click or tap to open full safety details"
                 className={`machine-area-screen-polygon ${isSelected || isHovered ? "is-active" : ""}`}
-                onMouseEnter={(event) =>
-                  setHoveredMachineAreaSafe(machineArea.id, event)
-                }
-                onMouseLeave={releaseHoveredMachineArea}
+                onPointerEnter={() => handleSafetyAreaEnter(id)}
+                onPointerLeave={() => handleSafetyAreaLeave(id)}
+                onFocus={() => handleSafetyAreaEnter(id)}
+                onBlur={() => handleSafetyAreaLeave(id)}
                 onWheelCapture={handlePopupWheel}
                 onPointerDown={(event) =>
-                  handleMachineAreaPointerDown(event, machineArea.id)
+                  handleMachineAreaPointerDown(event, id)
                 }
                 onPointerMove={handleMachineAreaPointerMove}
                 onPointerUp={finishMachineAreaPointerDrag}
@@ -1541,6 +1680,19 @@ function StreetViewer({ mapData, site, area }) {
                   event.preventDefault();
                   event.stopPropagation();
                   if (suppressMachineAreaClickRef.current) return;
+                  if (viewerMode === "safety") {
+                    handleSafetyAreaClick(id);
+                    return;
+                  }
+                  showMachineArea(machineArea);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter" && event.key !== " ") return;
+                  event.preventDefault();
+                  if (viewerMode === "safety") {
+                    handleSafetyAreaClick(id);
+                    return;
+                  }
                   showMachineArea(machineArea);
                 }}
               />

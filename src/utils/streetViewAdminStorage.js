@@ -87,6 +87,7 @@ function normalizeSafetyPopup(popup = {}) {
     content: popup.content || popup.paragraph || popup.description || "",
     hazard: popup.hazard || "",
     safetyNote: popup.safetyNote || popup.safety || "",
+    machineAreaId: popup.machineAreaId || popup.safetyAreaId || null,
     popupArea,
     arrowPoint,
     pitch: popupArea.pitch,
