@@ -17,12 +17,10 @@ function ProtectedRoute({ children, role }) {
     return <Navigate to="/login" replace />;
   }
 
-  // Admin can access both admin and viewer pages.
   if (userRole === "admin") {
     return children;
   }
 
-  // Viewer/user cannot access admin pages.
   if (role && userRole !== role) {
     return <Navigate to="/" replace />;
   }
@@ -38,7 +36,6 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-
       <Route
         path="/"
         element={
@@ -47,7 +44,6 @@ function App() {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/map/:siteId"
         element={
@@ -56,7 +52,6 @@ function App() {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/viewer/:siteId/:areaId"
         element={
@@ -65,7 +60,6 @@ function App() {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/admin"
         element={
@@ -74,7 +68,6 @@ function App() {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/admin/config/:siteId/:areaId"
         element={
@@ -83,7 +76,6 @@ function App() {
           </ProtectedRoute>
         }
       />
-
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

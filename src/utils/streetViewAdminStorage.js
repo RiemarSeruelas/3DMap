@@ -29,8 +29,6 @@ function getSaveApiBase() {
     return override.trim().replace(/\/$/, "");
   }
 
-  // Same-origin mode: browser calls /api/admin/... on port 5055.
-  // Vite proxies those requests to the internal save server on 3010.
   return "";
 }
 
@@ -42,15 +40,24 @@ function normalizeNumber(value, fallback = 0) {
 function normalizeSceneView(scene = {}) {
   const view = scene.view || {};
   return {
-    initialYaw: normalizeNumber(view.initialYaw, normalizeNumber(scene.initialYaw, 0)),
-    initialPitch: normalizeNumber(view.initialPitch, normalizeNumber(scene.initialPitch, 0)),
-    initialHfov: normalizeNumber(view.initialHfov, normalizeNumber(scene.initialHfov, 110)),
+    initialYaw: normalizeNumber(
+      view.initialYaw,
+      normalizeNumber(scene.initialYaw, 0),
+    ),
+    initialPitch: normalizeNumber(
+      view.initialPitch,
+      normalizeNumber(scene.initialPitch, 0),
+    ),
+    initialHfov: normalizeNumber(
+      view.initialHfov,
+      normalizeNumber(scene.initialHfov, 110),
+    ),
     northOffset: normalizeNumber(
       view.northOffset ??
         view.yawOffset ??
         scene.northOffset ??
         scene.yawOffset,
-      0
+      0,
     ),
   };
 }
@@ -69,6 +76,7 @@ function normalizeMachineArea(area = {}) {
     ...area,
     id: area.id || createId(area.machineName || area.name || "machine-area"),
     type: "machineArea",
+    mode: area.mode === "tutor" ? "tutor" : "safety",
     machineName: area.machineName || area.name || "Machine",
     machineType: area.machineType || "",
     hazard: area.hazard || "",
@@ -76,7 +84,7 @@ function normalizeMachineArea(area = {}) {
     description: area.description || "",
     image: area.image || area.machineImage || "",
     hoverImage: area.hoverImage || area.openImage || area.overlayImage || "",
-    points: Array.isArray(area.points) ? area.points.map(normalizePoint).slice(0, 8) : [],
+    points: Array.isArray(area.points) ? area.points.map(normalizePoint) : [],
   };
 }
 
@@ -84,8 +92,12 @@ function normalizeScene(scene = {}) {
   return {
     ...scene,
     hotspots: Array.isArray(scene.hotspots) ? scene.hotspots : [],
-    machineMarkers: Array.isArray(scene.machineMarkers) ? scene.machineMarkers : [],
-    machineAreas: Array.isArray(scene.machineAreas) ? scene.machineAreas.map(normalizeMachineArea) : [],
+    machineMarkers: Array.isArray(scene.machineMarkers)
+      ? scene.machineMarkers
+      : [],
+    machineAreas: Array.isArray(scene.machineAreas)
+      ? scene.machineAreas.map(normalizeMachineArea)
+      : [],
     mapPoint: scene.mapPoint || scene.minimap || null,
     minimap: scene.minimap || scene.mapPoint || null,
     view: normalizeSceneView(scene),
@@ -97,7 +109,7 @@ function normalizeScenes(scenes = {}) {
     Object.entries(scenes || {}).map(([sceneId, scene]) => [
       sceneId,
       normalizeScene({ id: scene?.id || sceneId, ...scene }),
-    ])
+    ]),
   );
 }
 
@@ -109,7 +121,9 @@ export async function hydrateFactoryMapsFromPublicJson({ force = false } = {}) {
   if (publicJsonHydrated && !force) return getEffectiveFactoryMaps();
 
   try {
-    const response = await fetch(`/data/streetview-data.json?_=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`/data/streetview-data.json?_=${Date.now()}`, {
+      cache: "no-store",
+    });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const payload = await response.json();
@@ -119,13 +133,10 @@ export async function hydrateFactoryMapsFromPublicJson({ force = false } = {}) {
       memoryFactoryMaps = normalizeMaps(maps);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryFactoryMaps));
-      } catch {
-        // Saved JSON is still the source of truth if localStorage is unavailable.
-      }
+      } catch {}
       window.dispatchEvent(new Event("streetview-admin-storage-updated"));
     }
   } catch {
-    // It is okay if the JSON file is empty or missing; app will use mapData.js.
   } finally {
     publicJsonHydrated = true;
   }
@@ -138,11 +149,15 @@ function dataUrlToFile(dataUrl, filename) {
   const mime = header.match(/data:(.*?);base64/)?.[1] || "image/jpeg";
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
-  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  for (let index = 0; index < binary.length; index += 1)
+    bytes[index] = binary.charCodeAt(index);
   return new File([bytes], filename, { type: mime });
 }
 
-export function createImageThumbnail(file, { maxWidth = 420, quality = 0.78 } = {}) {
+export function createImageThumbnail(
+  file,
+  { maxWidth = 420, quality = 0.78 } = {},
+) {
   return new Promise((resolve) => {
     const image = new Image();
     const objectUrl = URL.createObjectURL(file);
@@ -150,8 +165,14 @@ export function createImageThumbnail(file, { maxWidth = 420, quality = 0.78 } = 
     image.onload = () => {
       try {
         const ratio = image.width ? maxWidth / image.width : 1;
-        const width = Math.max(1, Math.round(Math.min(maxWidth, image.width || maxWidth)));
-        const height = Math.max(1, Math.round((image.height || maxWidth / 2) * Math.min(1, ratio)));
+        const width = Math.max(
+          1,
+          Math.round(Math.min(maxWidth, image.width || maxWidth)),
+        );
+        const height = Math.max(
+          1,
+          Math.round((image.height || maxWidth / 2) * Math.min(1, ratio)),
+        );
 
         const canvas = document.createElement("canvas");
         canvas.width = width;
@@ -199,14 +220,21 @@ export async function uploadAdminImage(file, kind = "panos") {
     const payload = await response.json();
     return payload.publicPath || payload.path || payload.url || "";
   } catch (error) {
-    console.warn("[streetview-admin] Image upload server unavailable. Falling back to temporary browser URL.", error);
+    console.warn(
+      "[streetview-admin] Image upload server unavailable. Falling back to temporary browser URL.",
+      error,
+    );
     return URL.createObjectURL(file);
   }
 }
 
 export async function uploadAssetFile(file, folder = "panos") {
   const publicPath = await uploadAdminImage(file, folder);
-  return { url: publicPath, publicPath, fallback: publicPath?.startsWith("blob:") || false };
+  return {
+    url: publicPath,
+    publicPath,
+    fallback: publicPath?.startsWith("blob:") || false,
+  };
 }
 
 export async function uploadPanoramaAsset(file) {
@@ -222,7 +250,8 @@ export async function uploadPanoramaAsset(file) {
 
   return {
     panorama: full.publicPath || full.url,
-    thumbnail: thumbnail?.publicPath || thumbnail?.url || full.publicPath || full.url,
+    thumbnail:
+      thumbnail?.publicPath || thumbnail?.url || full.publicPath || full.url,
   };
 }
 
@@ -245,13 +274,24 @@ async function syncMapsToDataFile(nextMaps) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryFactoryMaps));
       } catch (error) {
-        console.error("[streetview-admin] Failed to save maps to localStorage.", error);
+        console.error(
+          "[streetview-admin] Failed to save maps to localStorage.",
+          error,
+        );
       }
     }
 
-    window.dispatchEvent(new CustomEvent("streetview-admin-js-save-status", { detail: { ok: true, savedTo: payload.savedTo } }));
+    window.dispatchEvent(
+      new CustomEvent("streetview-admin-js-save-status", {
+        detail: { ok: true, savedTo: payload.savedTo },
+      }),
+    );
   } catch (error) {
-    window.dispatchEvent(new CustomEvent("streetview-admin-js-save-status", { detail: { ok: false, error: error.message } }));
+    window.dispatchEvent(
+      new CustomEvent("streetview-admin-js-save-status", {
+        detail: { ok: false, error: error.message },
+      }),
+    );
   }
 }
 
@@ -284,7 +324,10 @@ export function ensureTour(tour, area = {}) {
       version: tour.version || 1,
       mapImage: tour.mapImage || undefined,
       settings: {
-        firstScene: tour.settings.firstScene || Object.keys(normalizedScenes || {})[0] || null,
+        firstScene:
+          tour.settings.firstScene ||
+          Object.keys(normalizedScenes || {})[0] ||
+          null,
         defaultHfov: tour.settings.defaultHfov || 110,
         mobileHfov: tour.settings.mobileHfov || 90,
         ...tour.settings,
@@ -317,7 +360,10 @@ export function saveFactoryMaps(nextMaps) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
   } catch (error) {
-    console.warn("[streetview-admin] localStorage save failed. The JSON save server is required for persistence.", error);
+    console.warn(
+      "[streetview-admin] localStorage save failed. The JSON save server is required for persistence.",
+      error,
+    );
   }
   window.dispatchEvent(new Event("streetview-admin-storage-updated"));
   return normalized;
@@ -373,7 +419,9 @@ export function saveArea(siteId, area) {
   };
 
   const exists = site.areas.some((item) => item.id === cleanArea.id);
-  site.areas = exists ? site.areas.map((item) => (item.id === cleanArea.id ? cleanArea : item)) : [...site.areas, cleanArea];
+  site.areas = exists
+    ? site.areas.map((item) => (item.id === cleanArea.id ? cleanArea : item))
+    : [...site.areas, cleanArea];
   return saveFactoryMaps(maps);
 }
 
@@ -391,7 +439,7 @@ export function updateAreaTour(siteId, areaId, nextTour) {
   if (!site) return maps;
 
   site.areas = site.areas.map((area) =>
-    area.id === areaId ? { ...area, tour: ensureTour(nextTour, area) } : area
+    area.id === areaId ? { ...area, tour: ensureTour(nextTour, area) } : area,
   );
 
   return saveFactoryMaps(maps);
@@ -438,5 +486,8 @@ export function getPercentPoint(event, element) {
   const rect = element.getBoundingClientRect();
   const x = ((event.clientX - rect.left) / rect.width) * 100;
   const y = ((event.clientY - rect.top) / rect.height) * 100;
-  return { x: Number(Math.max(0, Math.min(100, x)).toFixed(2)), y: Number(Math.max(0, Math.min(100, y)).toFixed(2)) };
+  return {
+    x: Number(Math.max(0, Math.min(100, x)).toFixed(2)),
+    y: Number(Math.max(0, Math.min(100, y)).toFixed(2)),
+  };
 }

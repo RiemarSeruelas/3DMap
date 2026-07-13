@@ -24,13 +24,18 @@ function getAlphabeticalSceneList(mapData) {
       labelForScene(a, a.id).localeCompare(labelForScene(b, b.id), undefined, {
         numeric: true,
         sensitivity: "base",
-      })
+      }),
     );
 }
 
 function getFirstSceneId(mapData) {
   const alphabeticalScenes = getAlphabeticalSceneList(mapData);
-  return alphabeticalScenes[0]?.id || mapData?.settings?.firstScene || mapData?.firstScene || null;
+  return (
+    alphabeticalScenes[0]?.id ||
+    mapData?.settings?.firstScene ||
+    mapData?.firstScene ||
+    null
+  );
 }
 
 function normalizeNumber(value, fallback = 0) {
@@ -64,7 +69,9 @@ function bindLiveArrowRotation(button, hotspotYaw, getViewer) {
     const viewer = getViewer?.();
     if (viewer?.getYaw) {
       const currentYaw = normalizeNumber(viewer.getYaw(), 0);
-      const relativeYaw = normalizeYaw(normalizeNumber(hotspotYaw, 0) - currentYaw);
+      const relativeYaw = normalizeYaw(
+        normalizeNumber(hotspotYaw, 0) - currentYaw,
+      );
       button.style.setProperty("--floor-arrow-rotation", `${relativeYaw}deg`);
     }
 
@@ -79,7 +86,6 @@ function bindLiveArrowRotation(button, hotspotYaw, getViewer) {
   };
 }
 
-
 function getSaveAssetBase() {
   if (typeof window === "undefined") return "";
 
@@ -88,7 +94,6 @@ function getSaveAssetBase() {
     return override.trim().replace(/\/$/, "");
   }
 
-  // Same-origin mode: /uploads and /data are served through Vite on port 5055.
   return "";
 }
 
@@ -108,7 +113,11 @@ function resolveAssetUrl(value) {
     return cleanValue;
   }
 
-  if (cleanValue.startsWith("/uploads/") || cleanValue.startsWith("/data/") || cleanValue === "/streetview-data.json") {
+  if (
+    cleanValue.startsWith("/uploads/") ||
+    cleanValue.startsWith("/data/") ||
+    cleanValue === "/streetview-data.json"
+  ) {
     return `${getSaveAssetBase()}${cleanValue}`;
   }
 
@@ -121,23 +130,28 @@ function getSceneNorthOffset(scene) {
       scene?.view?.yawOffset ??
       scene?.northOffset ??
       scene?.yawOffset ??
-      0
+      0,
   );
 }
 
 function toWorldYaw(sceneYaw, scene) {
-  return normalizeYaw(normalizeNumber(sceneYaw, 0) + getSceneNorthOffset(scene));
+  return normalizeYaw(
+    normalizeNumber(sceneYaw, 0) + getSceneNorthOffset(scene),
+  );
 }
 
 function toSceneYaw(worldYaw, scene) {
-  return normalizeYaw(normalizeNumber(worldYaw, 0) - getSceneNorthOffset(scene));
+  return normalizeYaw(
+    normalizeNumber(worldYaw, 0) - getSceneNorthOffset(scene),
+  );
 }
 
-
-
 function xyToYawPitch(hotspot = {}) {
-  const hasYawPitch = Number.isFinite(Number(hotspot.yaw)) && Number.isFinite(Number(hotspot.pitch));
-  const hasXY = Number.isFinite(Number(hotspot.x)) && Number.isFinite(Number(hotspot.y));
+  const hasYawPitch =
+    Number.isFinite(Number(hotspot.yaw)) &&
+    Number.isFinite(Number(hotspot.pitch));
+  const hasXY =
+    Number.isFinite(Number(hotspot.x)) && Number.isFinite(Number(hotspot.y));
 
   if (hasYawPitch) {
     return {
@@ -173,7 +187,9 @@ function getSceneConnections(mapData, sceneId) {
       source: "sceneHotspot",
     }));
 
-  const hotspotTargets = new Set(sceneHotspotConnections.map((connection) => connection.to));
+  const hotspotTargets = new Set(
+    sceneHotspotConnections.map((connection) => connection.to),
+  );
 
   const legacyConnections = (mapData?.connections || [])
     .filter((connection) => connection?.from === sceneId && connection?.to)
@@ -194,9 +210,15 @@ function getSceneMapPoint(scene) {
   return scene?.mapPoint || scene?.minimap || null;
 }
 
-
 function getMapImage(mapData, site, area) {
-  return resolveAssetUrl(site?.mapImage || area?.mapImage || mapData?.mapImage || mapData?.siteMapImage || mapData?.areaMapImage || null);
+  return resolveAssetUrl(
+    site?.mapImage ||
+      area?.mapImage ||
+      mapData?.mapImage ||
+      mapData?.siteMapImage ||
+      mapData?.areaMapImage ||
+      null,
+  );
 }
 
 function getMiniMapTransform(activePoint) {
@@ -219,31 +241,17 @@ function preloadImage(src) {
 }
 
 function getMachineAreaPoints(area = {}) {
-  return Array.isArray(area.points) ? area.points.filter((point) => Number.isFinite(Number(point.pitch)) && Number.isFinite(Number(point.yaw))) : [];
+  return Array.isArray(area.points)
+    ? area.points.filter(
+        (point) =>
+          Number.isFinite(Number(point.pitch)) &&
+          Number.isFinite(Number(point.yaw)),
+      )
+    : [];
 }
 
-function getMachineAreaCenter(area = {}) {
-  const points = getMachineAreaPoints(area);
-  if (!points.length) return { pitch: -8, yaw: 0 };
-  return {
-    pitch: points.reduce((sum, point) => sum + normalizeNumber(point.pitch, 0), 0) / points.length,
-    yaw: points.reduce((sum, point) => sum + normalizeNumber(point.yaw, 0), 0) / points.length,
-  };
-}
-
-function getMachineAreaSize(area = {}) {
-  const points = getMachineAreaPoints(area);
-  if (points.length < 2) return { width: 170, height: 120 };
-
-  const yaws = points.map((point) => normalizeNumber(point.yaw, 0));
-  const pitches = points.map((point) => normalizeNumber(point.pitch, 0));
-  const yawSpan = Math.max(...yaws) - Math.min(...yaws);
-  const pitchSpan = Math.max(...pitches) - Math.min(...pitches);
-
-  return {
-    width: Math.round(clamp(Math.abs(yawSpan) * 14, 120, 460)),
-    height: Math.round(clamp(Math.abs(pitchSpan) * 18, 80, 360)),
-  };
+function getMachineAreaMode(area = {}) {
+  return area.mode === "tutor" ? "tutor" : "safety";
 }
 
 function getMachineAreaTitle(area = {}) {
@@ -259,15 +267,20 @@ function getMachineAreaHoverImage(area = {}) {
 }
 
 function getMachineAreaPatternId(prefix, value) {
-  const safeId = String(value || "machine-area").replace(/[^a-zA-Z0-9_-]/g, "-");
+  const safeId = String(value || "machine-area").replace(
+    /[^a-zA-Z0-9_-]/g,
+    "-",
+  );
   return `${prefix}-${safeId}`;
 }
 
 function projectPanoPointToScreen(point, viewer, element) {
   if (!point || !viewer || !element) return null;
 
-  const width = element.clientWidth || element.getBoundingClientRect().width || 1;
-  const height = element.clientHeight || element.getBoundingClientRect().height || 1;
+  const width =
+    element.clientWidth || element.getBoundingClientRect().width || 1;
+  const height =
+    element.clientHeight || element.getBoundingClientRect().height || 1;
   const yaw = normalizeYaw(point.yaw);
   const pitch = clamp(normalizeNumber(point.pitch, 0), -89, 89);
   const viewYaw = normalizeYaw(viewer.getYaw?.() || 0);
@@ -292,8 +305,10 @@ function projectPanoPointToScreen(point, viewer, element) {
 
   if (relZ <= 0.02) return null;
 
-  const screenX = width / 2 + (width / 2) * (relX / relZ) / Math.tan(hFovRad / 2);
-  const screenY = height / 2 - (height / 2) * (relY / relZ) / Math.tan(vFovRad / 2);
+  const screenX =
+    width / 2 + ((width / 2) * (relX / relZ)) / Math.tan(hFovRad / 2);
+  const screenY =
+    height / 2 - ((height / 2) * (relY / relZ)) / Math.tan(vFovRad / 2);
 
   return { x: Number(screenX.toFixed(1)), y: Number(screenY.toFixed(1)) };
 }
@@ -313,15 +328,21 @@ function getProjectedMachineAreas(machineAreas = [], viewer, element) {
       if (screenPoints.length < 3) return null;
 
       const center = {
-        x: screenPoints.reduce((sum, point) => sum + point.x, 0) / screenPoints.length,
-        y: screenPoints.reduce((sum, point) => sum + point.y, 0) / screenPoints.length,
+        x:
+          screenPoints.reduce((sum, point) => sum + point.x, 0) /
+          screenPoints.length,
+        y:
+          screenPoints.reduce((sum, point) => sum + point.y, 0) /
+          screenPoints.length,
       };
 
       return {
         area: machineArea,
         id: machineArea.id || getMachineAreaTitle(machineArea),
         points: screenPoints,
-        pointsAttr: screenPoints.map((point) => `${point.x},${point.y}`).join(' '),
+        pointsAttr: screenPoints
+          .map((point) => `${point.x},${point.y}`)
+          .join(" "),
         center,
       };
     })
@@ -341,7 +362,9 @@ function StreetViewer({ mapData, site, area }) {
   const sceneList = useMemo(() => getAlphabeticalSceneList(mapData), [mapData]);
   const requestedSceneExists = requestedSceneId && scenes[requestedSceneId];
 
-  const [currentSceneId, setCurrentSceneId] = useState(() => requestedSceneId || getFirstSceneId(mapData));
+  const [currentSceneId, setCurrentSceneId] = useState(
+    () => requestedSceneId || getFirstSceneId(mapData),
+  );
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isSafetyModeOn, setIsSafetyModeOn] = useState(false);
   const [hoveredMachineArea, setHoveredMachineArea] = useState(null);
@@ -352,11 +375,19 @@ function StreetViewer({ mapData, site, area }) {
   const currentSceneIdResolved = currentScene?.id || currentSceneId;
   const currentPanorama = resolveAssetUrl(currentScene?.panorama);
   const mapImage = getMapImage(mapData, site, area);
-  const machineAreas = useMemo(() => (Array.isArray(currentScene?.machineAreas) ? currentScene.machineAreas : []), [currentScene]);
+  const machineAreas = useMemo(
+    () =>
+      Array.isArray(currentScene?.machineAreas)
+        ? currentScene.machineAreas.filter(
+            (area) => getMachineAreaMode(area) === "safety",
+          )
+        : [],
+    [currentScene],
+  );
 
   const sceneConnections = useMemo(
     () => getSceneConnections(mapData, currentSceneIdResolved),
-    [mapData, currentSceneIdResolved]
+    [mapData, currentSceneIdResolved],
   );
 
   function cancelMachineAreaClose() {
@@ -376,14 +407,16 @@ function StreetViewer({ mapData, site, area }) {
     }, 140);
   }
 
-
   function rememberCurrentView() {
     const viewer = pannellumInstanceRef.current;
     if (!viewer || !currentScene) return;
 
     const rawYaw = normalizeNumber(viewer.getYaw?.(), 0);
     const rawPitch = normalizeNumber(viewer.getPitch?.(), 0);
-    const rawHfov = normalizeNumber(viewer.getHfov?.(), normalizeNumber(mapData?.settings?.defaultHfov, 110));
+    const rawHfov = normalizeNumber(
+      viewer.getHfov?.(),
+      normalizeNumber(mapData?.settings?.defaultHfov, 110),
+    );
 
     viewMemoryRef.current = {
       worldYaw: toWorldYaw(rawYaw, currentScene),
@@ -456,21 +489,30 @@ function StreetViewer({ mapData, site, area }) {
           lastSignature = "__empty__";
           setProjectedMachineAreas([]);
         }
-        animationFrame = window.requestAnimationFrame(updateProjectedMachineAreas);
+        animationFrame = window.requestAnimationFrame(
+          updateProjectedMachineAreas,
+        );
         return;
       }
 
-      const nextProjected = getProjectedMachineAreas(machineAreas, viewer, element);
-      const nextSignature = nextProjected
-        .map((item) => `${item.id}:${item.pointsAttr}`)
-        .join('|') || "__empty__";
+      const nextProjected = getProjectedMachineAreas(
+        machineAreas,
+        viewer,
+        element,
+      );
+      const nextSignature =
+        nextProjected
+          .map((item) => `${item.id}:${item.pointsAttr}`)
+          .join("|") || "__empty__";
 
       if (nextSignature !== lastSignature) {
         lastSignature = nextSignature;
         setProjectedMachineAreas(nextProjected);
       }
 
-      animationFrame = window.requestAnimationFrame(updateProjectedMachineAreas);
+      animationFrame = window.requestAnimationFrame(
+        updateProjectedMachineAreas,
+      );
     }
 
     updateProjectedMachineAreas();
@@ -500,25 +542,28 @@ function StreetViewer({ mapData, site, area }) {
     const targetYaw = normalizeYaw(
       remembered
         ? toSceneYaw(remembered.worldYaw, currentScene)
-        : normalizeNumber(currentScene?.view?.initialYaw, 0)
+        : normalizeNumber(currentScene?.view?.initialYaw, 0),
     );
 
     const targetPitch = clamp(
       normalizeNumber(
         remembered?.pitch,
-        normalizeNumber(currentScene?.view?.initialPitch, 0)
+        normalizeNumber(currentScene?.view?.initialPitch, 0),
       ),
       -85,
-      85
+      85,
     );
 
     const targetHfov = clamp(
       normalizeNumber(
         remembered?.hfov,
-        normalizeNumber(currentScene?.view?.initialHfov, normalizeNumber(mapData?.settings?.defaultHfov, 110))
+        normalizeNumber(
+          currentScene?.view?.initialHfov,
+          normalizeNumber(mapData?.settings?.defaultHfov, 110),
+        ),
       ),
       35,
-      120
+      120,
     );
 
     function applyRememberedView(viewer) {
@@ -565,12 +610,18 @@ function StreetViewer({ mapData, site, area }) {
             button.className = "street-arrow-only-button";
             button.title = args.title;
             button.setAttribute("aria-label", args.title);
-            button.innerHTML = '<span class="street-floor-arrow-core" aria-hidden="true"></span>';
-            bindLiveArrowRotation(button, args.hotspotYaw, () => pannellumInstanceRef.current);
+            button.innerHTML =
+              '<span class="street-floor-arrow-core" aria-hidden="true"></span>';
+            bindLiveArrowRotation(
+              button,
+              args.hotspotYaw,
+              () => pannellumInstanceRef.current,
+            );
             hotSpotDiv.appendChild(button);
           },
           createTooltipArgs: {
-            title: connection.label || labelForScene(targetScene, connection.to),
+            title:
+              connection.label || labelForScene(targetScene, connection.to),
             hotspotYaw: point.yaw,
           },
           clickHandlerFunc: () => switchScene(connection.to),
@@ -608,7 +659,14 @@ function StreetViewer({ mapData, site, area }) {
         pannellumInstanceRef.current = null;
       }
     };
-  }, [currentSceneIdResolved, currentPanorama, mapData, sceneConnections, scenes, machineAreas]);
+  }, [
+    currentSceneIdResolved,
+    currentPanorama,
+    mapData,
+    sceneConnections,
+    scenes,
+    machineAreas,
+  ]);
 
   function zoomBy(delta) {
     const viewer = pannellumInstanceRef.current;
@@ -656,7 +714,10 @@ function StreetViewer({ mapData, site, area }) {
   }
 
   return (
-    <div ref={shellRef} className={`street-viewer-shell ${isTransitioning ? "is-speed-transitioning" : ""}`}>
+    <div
+      ref={shellRef}
+      className={`street-viewer-shell ${isTransitioning ? "is-speed-transitioning" : ""}`}
+    >
       <div ref={viewerRef} className="street-pannellum-stage" />
 
       <div className="street-location-pill">
@@ -679,7 +740,10 @@ function StreetViewer({ mapData, site, area }) {
             {projectedMachineAreas.map((item) => {
               const previewImage = getMachineAreaHoverImage(item.area);
               if (!previewImage) return null;
-              const patternId = getMachineAreaPatternId("viewer-machine-area-fill", item.id);
+              const patternId = getMachineAreaPatternId(
+                "viewer-machine-area-fill",
+                item.id,
+              );
               return (
                 <pattern
                   key={patternId}
@@ -689,7 +753,14 @@ function StreetViewer({ mapData, site, area }) {
                   width="1"
                   height="1"
                 >
-                  <image href={previewImage} x="0" y="0" width="1" height="1" preserveAspectRatio="xMidYMid slice" />
+                  <image
+                    href={previewImage}
+                    x="0"
+                    y="0"
+                    width="1"
+                    height="1"
+                    preserveAspectRatio="xMidYMid slice"
+                  />
                 </pattern>
               );
             })}
@@ -697,15 +768,22 @@ function StreetViewer({ mapData, site, area }) {
 
           {projectedMachineAreas.map((item) => {
             const isActive = hoveredMachineArea?.id === item.area.id;
-            const previewImage = isActive ? getMachineAreaHoverImage(item.area) : "";
-            const patternId = getMachineAreaPatternId("viewer-machine-area-fill", item.id);
+            const previewImage = isActive
+              ? getMachineAreaHoverImage(item.area)
+              : "";
+            const patternId = getMachineAreaPatternId(
+              "viewer-machine-area-fill",
+              item.id,
+            );
 
             return (
               <polygon
                 key={item.id}
                 className={`machine-area-screen-polygon ${isActive ? "is-active" : ""} ${previewImage ? "has-preview-fill" : ""}`}
                 points={item.pointsAttr}
-                style={previewImage ? { fill: `url(#${patternId})` } : undefined}
+                style={
+                  previewImage ? { fill: `url(#${patternId})` } : undefined
+                }
                 onMouseEnter={() => showMachineArea(item.area)}
                 onMouseLeave={scheduleMachineAreaClose}
                 onClick={(event) => {
@@ -719,34 +797,73 @@ function StreetViewer({ mapData, site, area }) {
         </svg>
       )}
 
-      <div className="street-viewer-controls-clean street-viewer-controls-by-map" onClick={(event) => event.stopPropagation()}>
-        <button type="button" onClick={() => zoomBy(-10)} title="Zoom in">+</button>
-        <button type="button" onClick={() => zoomBy(10)} title="Zoom out">−</button>
-        <button type="button" onClick={toggleFullscreen} title="Fullscreen">⛶</button>
+      <div
+        className="street-viewer-controls-clean street-viewer-controls-by-map"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button type="button" onClick={() => zoomBy(-10)} title="Zoom in">
+          +
+        </button>
+        <button type="button" onClick={() => zoomBy(10)} title="Zoom out">
+          −
+        </button>
+        <button type="button" onClick={toggleFullscreen} title="Fullscreen">
+          ⛶
+        </button>
       </div>
 
       {isSafetyModeOn && hoveredMachineArea && (
-        <aside className="machine-area-info-card" onMouseEnter={cancelMachineAreaClose} onMouseLeave={scheduleMachineAreaClose}>
+        <aside
+          className="machine-area-info-card"
+          onMouseEnter={cancelMachineAreaClose}
+          onMouseLeave={scheduleMachineAreaClose}
+        >
           <div className="machine-area-info-header">
             <span>Safety Area</span>
-            <button type="button" onClick={() => setHoveredMachineArea(null)}>×</button>
+            <button type="button" onClick={() => setHoveredMachineArea(null)}>
+              ×
+            </button>
           </div>
           <strong>{getMachineAreaTitle(hoveredMachineArea)}</strong>
-          {hoveredMachineArea.machineType && <em>{hoveredMachineArea.machineType}</em>}
-          {getMachineAreaPopupImage(hoveredMachineArea) && (
-            <img src={getMachineAreaPopupImage(hoveredMachineArea)} alt={getMachineAreaTitle(hoveredMachineArea)} />
+          {hoveredMachineArea.machineType && (
+            <em>{hoveredMachineArea.machineType}</em>
           )}
-          {hoveredMachineArea.hazard && <p><b>Hazard:</b> {hoveredMachineArea.hazard}</p>}
-          {hoveredMachineArea.safetyNote && <p><b>Safety:</b> {hoveredMachineArea.safetyNote}</p>}
-          {hoveredMachineArea.description && <p>{hoveredMachineArea.description}</p>}
+          {getMachineAreaPopupImage(hoveredMachineArea) && (
+            <img
+              src={getMachineAreaPopupImage(hoveredMachineArea)}
+              alt={getMachineAreaTitle(hoveredMachineArea)}
+            />
+          )}
+          {hoveredMachineArea.hazard && (
+            <p>
+              <b>Hazard:</b> {hoveredMachineArea.hazard}
+            </p>
+          )}
+          {hoveredMachineArea.safetyNote && (
+            <p>
+              <b>Safety:</b> {hoveredMachineArea.safetyNote}
+            </p>
+          )}
+          {hoveredMachineArea.description && (
+            <p>{hoveredMachineArea.description}</p>
+          )}
         </aside>
       )}
 
       <div className="street-minimap-card raw-only">
         <div className="street-minimap-window">
           {mapImage ? (
-            <div className="street-minimap-world" style={{ transform: getMiniMapTransform(activeMapPoint) }} onClick={handleMiniMapTeleport} title="Click the map to jump to the closest location">
-              <img src={mapImage} alt="Site map" className="street-minimap-image" />
+            <div
+              className="street-minimap-world"
+              style={{ transform: getMiniMapTransform(activeMapPoint) }}
+              onClick={handleMiniMapTeleport}
+              title="Click the map to jump to the closest location"
+            >
+              <img
+                src={mapImage}
+                alt="Site map"
+                className="street-minimap-image"
+              />
 
               {sceneList.map((scene) => {
                 const point = getSceneMapPoint(scene);
