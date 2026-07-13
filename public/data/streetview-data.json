@@ -3,7 +3,7 @@
     "savoury": {
       "id": "savoury",
       "name": "Savoury Block",
-      "mapImage": "/uploads/maps/chatgpt-image-jun-2-2026-10-37-40-am-20260602024432-0293c30e.png",
+      "mapImage": "/uploads/maps/chatgpt-image-jun-2-2026-10-37-40-am-20260602024432-0293c30e-20260713052133-30134ae7.png",
       "areas": [
         {
           "id": "savoury",
@@ -54,7 +54,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right2-1": {
                 "id": "savoury-right2-1",
@@ -102,7 +103,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left3-4": {
                 "id": "savoury-left3-4",
@@ -139,7 +141,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left6-1": {
                 "id": "savoury-left6-1",
@@ -198,7 +201,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left6-2": {
                 "id": "savoury-left6-2",
@@ -235,7 +239,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left7-1": {
                 "id": "savoury-left7-1",
@@ -294,7 +299,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right1-1": {
                 "id": "savoury-right1-1",
@@ -331,7 +337,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right1-2": {
                 "id": "savoury-right1-2",
@@ -368,7 +375,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left2-6": {
                 "id": "savoury-left2-6",
@@ -416,7 +424,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left3-3": {
                 "id": "savoury-left3-3",
@@ -464,7 +473,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left5-3": {
                 "id": "savoury-left5-3",
@@ -501,7 +511,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left6-3": {
                 "id": "savoury-left6-3",
@@ -538,7 +549,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left7-2": {
                 "id": "savoury-left7-2",
@@ -586,7 +598,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right4-1": {
                 "id": "savoury-right4-1",
@@ -634,7 +647,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left4-2": {
                 "id": "savoury-left4-2",
@@ -671,7 +685,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left5-2": {
                 "id": "savoury-left5-2",
@@ -719,7 +734,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left7-4": {
                 "id": "savoury-left7-4",
@@ -756,7 +772,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right7-1": {
                 "id": "savoury-right7-1",
@@ -804,7 +821,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left2-1": {
                 "id": "savoury-left2-1",
@@ -856,13 +874,9 @@
                   {
                     "id": "machine-1",
                     "type": "machineArea",
+                    "mode": "safety",
                     "machineName": "FD12A",
-                    "machineType": "Filler",
-                    "hazard": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                    "safetyNote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                    "description": "",
-                    "image": "",
-                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.18-pm-20260710002057-d1d18fb1.jpg",
+                    "purpose": "Filler",
                     "points": [
                       {
                         "pitch": 0.02,
@@ -888,18 +902,21 @@
                         "x": 86.59,
                         "y": 63.65
                       }
-                    ]
+                    ],
+                    "tutorPurpose": "",
+                    "safetyPurpose": "Filler",
+                    "hazard": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "safetyNote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "image": "",
+                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.18-pm-2-20260713023447-40159c14.jpeg",
+                    "safetyPopups": []
                   },
                   {
                     "id": "machine-fd12a",
                     "type": "machineArea",
+                    "mode": "safety",
                     "machineName": "FD12A",
-                    "machineType": "Filler",
-                    "hazard": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                    "safetyNote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                    "description": "",
-                    "image": "",
-                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.18-pm-1-20260710002311-8b5d318a.jpg",
+                    "purpose": "Filler",
                     "points": [
                       {
                         "pitch": -0.12,
@@ -925,18 +942,21 @@
                         "x": 82.17,
                         "y": 57.38
                       }
-                    ]
+                    ],
+                    "tutorPurpose": "",
+                    "safetyPurpose": "Filler",
+                    "hazard": "",
+                    "safetyNote": "",
+                    "image": "",
+                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.18-pm-20260713023506-ee76308a.jpeg",
+                    "safetyPopups": []
                   },
                   {
                     "id": "machine-fd12a-2",
                     "type": "machineArea",
+                    "mode": "safety",
                     "machineName": "FD12A",
-                    "machineType": "Filler",
-                    "hazard": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                    "safetyNote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                    "description": "",
-                    "image": "",
-                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.19-pm-1-20260710002612-ba18e85a.jpg",
+                    "purpose": "Filler",
                     "points": [
                       {
                         "pitch": 0.77,
@@ -962,18 +982,21 @@
                         "x": 93.2,
                         "y": 66.76
                       }
-                    ]
+                    ],
+                    "tutorPurpose": "",
+                    "safetyPurpose": "Filler",
+                    "hazard": "",
+                    "safetyNote": "",
+                    "image": "",
+                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.19-pm-1-20260713023536-87be7dd8.jpeg",
+                    "safetyPopups": []
                   },
                   {
                     "id": "machine-fd12a-3",
                     "type": "machineArea",
+                    "mode": "safety",
                     "machineName": "FD12A",
-                    "machineType": "Filler",
-                    "hazard": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                    "safetyNote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                    "description": "",
-                    "image": "",
-                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.19-pm-20260710002654-dcd659d7.jpg",
+                    "purpose": "Filler",
                     "points": [
                       {
                         "pitch": -14.49,
@@ -999,7 +1022,112 @@
                         "x": 10.73,
                         "y": 64.44
                       }
-                    ]
+                    ],
+                    "tutorPurpose": "",
+                    "safetyPurpose": "Filler",
+                    "hazard": "",
+                    "safetyNote": "",
+                    "image": "",
+                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.19-pm-20260713023559-e1555852.jpeg",
+                    "safetyPopups": []
+                  }
+                ],
+                "safetyPopups": [
+                  {
+                    "id": "safety-popup-trial-2",
+                    "title": "Trial 2",
+                    "content": "",
+                    "hazard": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
+                    "safetyNote": "",
+                    "machineAreaId": "machine-fd12a-2",
+                    "popupArea": {
+                      "pitch": -5.93,
+                      "yaw": -137.93,
+                      "x": 11.69,
+                      "y": 53.29
+                    },
+                    "arrowPoint": {
+                      "pitch": -11.09,
+                      "yaw": -160.11,
+                      "x": 5.52,
+                      "y": 56.16
+                    },
+                    "pitch": -5.93,
+                    "yaw": -137.93,
+                    "x": 11.69,
+                    "y": 53.29
+                  },
+                  {
+                    "id": "safety-popup-trial",
+                    "title": "Trial",
+                    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
+                    "hazard": "",
+                    "safetyNote": "",
+                    "machineAreaId": "machine-fd12a-2",
+                    "popupArea": {
+                      "pitch": -13.11,
+                      "yaw": 164.7,
+                      "x": 95.75,
+                      "y": 57.28
+                    },
+                    "arrowPoint": {
+                      "pitch": -25.18,
+                      "yaw": 176.86,
+                      "x": 99.13,
+                      "y": 63.99
+                    },
+                    "pitch": -13.11,
+                    "yaw": 164.7,
+                    "x": 95.75,
+                    "y": 57.28
+                  },
+                  {
+                    "id": "safety-popup-keep-hands-clear",
+                    "title": "Keep Hands Clear",
+                    "content": "DO NOT TOUCH",
+                    "hazard": "",
+                    "safetyNote": "",
+                    "machineAreaId": "machine-1",
+                    "popupArea": {
+                      "pitch": -26.53,
+                      "yaw": 116.01,
+                      "x": 82.22,
+                      "y": 64.74
+                    },
+                    "arrowPoint": {
+                      "pitch": -16.13,
+                      "yaw": 137.24,
+                      "x": 88.12,
+                      "y": 58.96
+                    },
+                    "pitch": -26.53,
+                    "yaw": 116.01,
+                    "x": 82.22,
+                    "y": 64.74
+                  },
+                  {
+                    "id": "safety-popup-pls-dont-touch",
+                    "title": "Pls Dont touch",
+                    "content": "Clean ur hands cuh",
+                    "hazard": "",
+                    "safetyNote": "",
+                    "machineAreaId": "machine-1",
+                    "popupArea": {
+                      "pitch": -3.35,
+                      "yaw": 163.56,
+                      "x": 95.43,
+                      "y": 51.86
+                    },
+                    "arrowPoint": {
+                      "pitch": -8.19,
+                      "yaw": 143.93,
+                      "x": 89.98,
+                      "y": 54.55
+                    },
+                    "pitch": -3.35,
+                    "yaw": 163.56,
+                    "x": 95.43,
+                    "y": 51.86
                   }
                 ]
               },
@@ -1049,7 +1177,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left4-1": {
                 "id": "savoury-left4-1",
@@ -1097,7 +1226,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left5-1": {
                 "id": "savoury-left5-1",
@@ -1145,7 +1275,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right4-2": {
                 "id": "savoury-right4-2",
@@ -1182,7 +1313,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right6-1": {
                 "id": "savoury-right6-1",
@@ -1230,7 +1362,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left1-2": {
                 "id": "savoury-left1-2",
@@ -1282,13 +1415,9 @@
                   {
                     "id": "machine-guard",
                     "type": "machineArea",
+                    "mode": "safety",
                     "machineName": "Guard",
-                    "machineType": "Guard",
-                    "hazard": "Gengkiskan",
-                    "safetyNote": "Genggeng",
-                    "description": "geng",
-                    "image": "/uploads/machines/chatgpt-image-jul-2-2026-10_38_16-am-20260707081419-6b44a624.jpg",
-                    "hoverImage": "",
+                    "purpose": "Guard",
                     "points": [
                       {
                         "pitch": -3.92,
@@ -1314,9 +1443,17 @@
                         "x": 46.35,
                         "y": 79.16
                       }
-                    ]
+                    ],
+                    "tutorPurpose": "",
+                    "safetyPurpose": "Guard",
+                    "hazard": "",
+                    "safetyNote": "",
+                    "image": "",
+                    "hoverImage": "",
+                    "safetyPopups": []
                   }
-                ]
+                ],
+                "safetyPopups": []
               },
               "savoury-left1-4": {
                 "id": "savoury-left1-4",
@@ -1353,7 +1490,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left3-2": {
                 "id": "savoury-left3-2",
@@ -1401,7 +1539,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-next1-1": {
                 "id": "savoury-next1-1",
@@ -1449,7 +1588,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-next1-3": {
                 "id": "savoury-next1-3",
@@ -1497,7 +1637,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right5-1": {
                 "id": "savoury-right5-1",
@@ -1534,7 +1675,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left2-2": {
                 "id": "savoury-left2-2",
@@ -1582,7 +1724,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left2-3": {
                 "id": "savoury-left2-3",
@@ -1630,7 +1773,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left3-1": {
                 "id": "savoury-left3-1",
@@ -1667,7 +1811,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-opening3": {
                 "id": "savoury-opening3",
@@ -1715,7 +1860,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-opening7": {
                 "id": "savoury-opening7",
@@ -1785,7 +1931,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right2-2": {
                 "id": "savoury-right2-2",
@@ -1822,7 +1969,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right3-2": {
                 "id": "savoury-right3-2",
@@ -1870,7 +2018,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left1-3": {
                 "id": "savoury-left1-3",
@@ -1918,7 +2067,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right3-1": {
                 "id": "savoury-right3-1",
@@ -1966,7 +2116,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right3-3": {
                 "id": "savoury-right3-3",
@@ -2003,7 +2154,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right6-2": {
                 "id": "savoury-right6-2",
@@ -2040,7 +2192,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-left1-1": {
                 "id": "savoury-left1-1",
@@ -2108,13 +2261,9 @@
                   {
                     "id": "machine-mespack",
                     "type": "machineArea",
+                    "mode": "safety",
                     "machineName": "Mespack",
-                    "machineType": "Filler bro",
-                    "hazard": "Moving Parts bro",
-                    "safetyNote": "Do not open bro",
-                    "description": "bro...",
-                    "image": "",
-                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-06-at-9.09.52-am-20260707062814-2b511be6.jpg",
+                    "purpose": "Filler bro",
                     "points": [
                       {
                         "pitch": 3.36,
@@ -2140,18 +2289,21 @@
                         "x": 39.28,
                         "y": 71.38
                       }
-                    ]
+                    ],
+                    "tutorPurpose": "",
+                    "safetyPurpose": "Filler bro",
+                    "hazard": "",
+                    "safetyNote": "",
+                    "image": "",
+                    "hoverImage": "",
+                    "safetyPopups": []
                   },
                   {
                     "id": "machine-mespack-2",
                     "type": "machineArea",
+                    "mode": "safety",
                     "machineName": "Mespack 2",
-                    "machineType": "Mespack 2 bro",
-                    "hazard": "Moving Parts 2 bro",
-                    "safetyNote": "Bro",
-                    "description": "bro...",
-                    "image": "",
-                    "hoverImage": "/uploads/machines/chatgpt-image-jul-2-2026-10_38_36-am-20260707063016-f1430162.jpg",
+                    "purpose": "Mespack 2 bro",
                     "points": [
                       {
                         "pitch": 5.45,
@@ -2189,9 +2341,17 @@
                         "x": 53.56,
                         "y": 74.37
                       }
-                    ]
+                    ],
+                    "tutorPurpose": "",
+                    "safetyPurpose": "Mespack 2 bro",
+                    "hazard": "",
+                    "safetyNote": "",
+                    "image": "",
+                    "hoverImage": "",
+                    "safetyPopups": []
                   }
-                ]
+                ],
+                "safetyPopups": []
               },
               "savoury-left2-4": {
                 "id": "savoury-left2-4",
@@ -2239,7 +2399,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-next1-5": {
                 "id": "savoury-next1-5",
@@ -2276,7 +2437,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-opening6": {
                 "id": "savoury-opening6",
@@ -2346,7 +2508,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-opening9": {
                 "id": "savoury-opening9",
@@ -2405,7 +2568,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-right7-2": {
                 "id": "savoury-right7-2",
@@ -2442,7 +2606,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "jessicasavoury-opening1-1": {
                 "id": "jessicasavoury-opening1-1",
@@ -2504,7 +2669,85 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [
+                  {
+                    "id": "machine-fd12a",
+                    "type": "machineArea",
+                    "mode": "tutor",
+                    "machineName": "FD12A",
+                    "purpose": "Fills product",
+                    "points": [
+                      {
+                        "pitch": 2.84,
+                        "yaw": -82.44,
+                        "x": 27.1,
+                        "y": 48.42
+                      },
+                      {
+                        "pitch": -16.12,
+                        "yaw": -86.06,
+                        "x": 26.09,
+                        "y": 58.96
+                      },
+                      {
+                        "pitch": -36.81,
+                        "yaw": -65.92,
+                        "x": 31.69,
+                        "y": 70.45
+                      },
+                      {
+                        "pitch": -33.97,
+                        "yaw": -57.52,
+                        "x": 34.02,
+                        "y": 68.87
+                      },
+                      {
+                        "pitch": -37.31,
+                        "yaw": -48.42,
+                        "x": 36.55,
+                        "y": 70.73
+                      },
+                      {
+                        "pitch": -28.56,
+                        "yaw": -35.59,
+                        "x": 40.11,
+                        "y": 65.87
+                      },
+                      {
+                        "pitch": -10.04,
+                        "yaw": -36.42,
+                        "x": 39.88,
+                        "y": 55.58
+                      },
+                      {
+                        "pitch": -7.91,
+                        "yaw": -44.13,
+                        "x": 37.74,
+                        "y": 54.39
+                      },
+                      {
+                        "pitch": 2.69,
+                        "yaw": -43.29,
+                        "x": 37.98,
+                        "y": 48.51
+                      },
+                      {
+                        "pitch": 4.72,
+                        "yaw": -66.47,
+                        "x": 31.54,
+                        "y": 47.38
+                      }
+                    ],
+                    "tutorPurpose": "Fills product",
+                    "safetyPurpose": "",
+                    "hazard": "",
+                    "safetyNote": "",
+                    "image": "",
+                    "hoverImage": "",
+                    "safetyPopups": []
+                  }
+                ],
+                "safetyPopups": []
               },
               "jessicasavoury-opening1-2": {
                 "id": "jessicasavoury-opening1-2",
@@ -2578,13 +2821,9 @@
                   {
                     "id": "machine-fd12a",
                     "type": "machineArea",
+                    "mode": "safety",
                     "machineName": "FD12A",
-                    "machineType": "Filler",
-                    "hazard": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                    "safetyNote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                    "description": "",
-                    "image": "",
-                    "hoverImage": "/uploads/machines/whatsapp-image-2026-07-09-at-6.39.18-pm-2-20260710002805-f45a3ab1.jpg",
+                    "purpose": "Filler",
                     "points": [
                       {
                         "pitch": -11.72,
@@ -2622,9 +2861,81 @@
                         "x": 8.81,
                         "y": 59.2
                       }
-                    ]
+                    ],
+                    "tutorPurpose": "",
+                    "safetyPurpose": "Filler",
+                    "hazard": "",
+                    "safetyNote": "",
+                    "image": "",
+                    "hoverImage": "",
+                    "safetyPopups": []
+                  },
+                  {
+                    "id": "machine-fd12a-2",
+                    "type": "machineArea",
+                    "mode": "tutor",
+                    "machineName": "FD12A",
+                    "purpose": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "points": [
+                      {
+                        "pitch": 1.85,
+                        "yaw": -139.94,
+                        "x": 11.13,
+                        "y": 48.97
+                      },
+                      {
+                        "pitch": -9.34,
+                        "yaw": -139.96,
+                        "x": 11.12,
+                        "y": 55.19
+                      },
+                      {
+                        "pitch": -11.77,
+                        "yaw": -148.13,
+                        "x": 8.85,
+                        "y": 56.54
+                      },
+                      {
+                        "pitch": -30.82,
+                        "yaw": -149.86,
+                        "x": 8.37,
+                        "y": 67.12
+                      },
+                      {
+                        "pitch": -38.95,
+                        "yaw": -133.82,
+                        "x": 12.83,
+                        "y": 71.64
+                      },
+                      {
+                        "pitch": -12.94,
+                        "yaw": -105.6,
+                        "x": 20.67,
+                        "y": 57.19
+                      },
+                      {
+                        "pitch": 1.17,
+                        "yaw": -106.4,
+                        "x": 20.44,
+                        "y": 49.35
+                      },
+                      {
+                        "pitch": 2.58,
+                        "yaw": -126.08,
+                        "x": 14.98,
+                        "y": 48.57
+                      }
+                    ],
+                    "tutorPurpose": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "safetyPurpose": "",
+                    "hazard": "",
+                    "safetyNote": "",
+                    "image": "",
+                    "hoverImage": "",
+                    "safetyPopups": []
                   }
-                ]
+                ],
+                "safetyPopups": []
               },
               "savoury-next1": {
                 "id": "savoury-next1",
@@ -2672,7 +2983,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-next1-4": {
                 "id": "savoury-next1-4",
@@ -2720,7 +3032,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-opening4": {
                 "id": "savoury-opening4",
@@ -2779,7 +3092,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-opening5": {
                 "id": "savoury-opening5",
@@ -2849,7 +3163,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "savoury-opening8": {
                 "id": "savoury-opening8",
@@ -2919,7 +3234,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               }
             },
             "connections": []
@@ -3032,7 +3348,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145246-743": {
                 "id": "20260601-145246-743",
@@ -3080,7 +3397,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145235-167": {
                 "id": "20260601-145235-167",
@@ -3128,7 +3446,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145137-368": {
                 "id": "20260601-145137-368",
@@ -3187,7 +3506,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145016-832": {
                 "id": "20260601-145016-832",
@@ -3246,7 +3566,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145034-782": {
                 "id": "20260601-145034-782",
@@ -3305,7 +3626,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145010-964": {
                 "id": "20260601-145010-964",
@@ -3342,7 +3664,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145024-325": {
                 "id": "20260601-145024-325",
@@ -3390,7 +3713,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145043-312": {
                 "id": "20260601-145043-312",
@@ -3427,7 +3751,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145200-118": {
                 "id": "20260601-145200-118",
@@ -3486,7 +3811,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145240-894": {
                 "id": "20260601-145240-894",
@@ -3534,7 +3860,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145328-254": {
                 "id": "20260601-145328-254",
@@ -3571,7 +3898,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145217-386": {
                 "id": "20260601-145217-386",
@@ -3630,7 +3958,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145252-719": {
                 "id": "20260601-145252-719",
@@ -3667,7 +3996,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145334-075": {
                 "id": "20260601-145334-075",
@@ -3715,7 +4045,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145340-278": {
                 "id": "20260601-145340-278",
@@ -3752,7 +4083,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145050-083": {
                 "id": "20260601-145050-083",
@@ -3800,7 +4132,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145056-169": {
                 "id": "20260601-145056-169",
@@ -3881,7 +4214,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145101-880": {
                 "id": "20260601-145101-880",
@@ -3962,7 +4296,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145154-347": {
                 "id": "20260601-145154-347",
@@ -3999,7 +4334,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145211-362": {
                 "id": "20260601-145211-362",
@@ -4047,7 +4383,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145113-656": {
                 "id": "20260601-145113-656",
@@ -4106,7 +4443,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145131-369": {
                 "id": "20260601-145131-369",
@@ -4154,7 +4492,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145148-805": {
                 "id": "20260601-145148-805",
@@ -4213,7 +4552,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145223-334": {
                 "id": "20260601-145223-334",
@@ -4250,7 +4590,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145322-120": {
                 "id": "20260601-145322-120",
@@ -4298,7 +4639,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145107-773": {
                 "id": "20260601-145107-773",
@@ -4357,7 +4699,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145143-091": {
                 "id": "20260601-145143-091",
@@ -4394,7 +4737,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145205-573": {
                 "id": "20260601-145205-573",
@@ -4442,7 +4786,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145258-221": {
                 "id": "20260601-145258-221",
@@ -4490,7 +4835,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145304-125": {
                 "id": "20260601-145304-125",
@@ -4527,7 +4873,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145351-983": {
                 "id": "20260601-145351-983",
@@ -4564,7 +4911,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145119-711": {
                 "id": "20260601-145119-711",
@@ -4634,7 +4982,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145125-744": {
                 "id": "20260601-145125-744",
@@ -4693,7 +5042,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145229-267": {
                 "id": "20260601-145229-267",
@@ -4741,7 +5091,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145316-177": {
                 "id": "20260601-145316-177",
@@ -4789,7 +5140,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               },
               "20260601-145346-044": {
                 "id": "20260601-145346-044",
@@ -4837,7 +5189,8 @@
                   "northOffset": 0
                 },
                 "machineMarkers": [],
-                "machineAreas": []
+                "machineAreas": [],
+                "safetyPopups": []
               }
             },
             "connections": []

@@ -8,6 +8,8 @@ const MAP_WORLD_WIDTH = 520;
 const MAP_WORLD_HEIGHT = 292.5;
 const MAP_WINDOW_WIDTH = 310;
 const MAP_WINDOW_HEIGHT = 175;
+const POPUP_HOVER_RELEASE_DELAY = 900;
+const POPUP_INTERACTION_PADDING = 96;
 
 function safeScenes(mapData) {
   return mapData?.scenes || {};
@@ -254,24 +256,148 @@ function getMachineAreaMode(area = {}) {
   return area.mode === "tutor" ? "tutor" : "safety";
 }
 
+function getPopupAreaPoint(popup = {}) {
+  return popup.popupArea || popup.areaPoint || popup.position || popup;
+}
+
+function getPopupArrowPoint(popup = {}) {
+  return popup.arrowPoint || popup.pointerPoint || popup.targetPoint || null;
+}
+
+function hasPopupPoint(point) {
+  return (
+    Number.isFinite(Number(point?.pitch)) &&
+    Number.isFinite(Number(point?.yaw))
+  );
+}
+
+function getSafetyPopups(area = {}) {
+  return Array.isArray(area.safetyPopups)
+    ? area.safetyPopups.filter((popup) =>
+        hasPopupPoint(getPopupAreaPoint(popup)),
+      )
+    : [];
+}
+
+function getSceneSafetyPopups(scene = {}) {
+  const directPopups = getSafetyPopups(scene);
+  const legacyPopups = Array.isArray(scene.machineAreas)
+    ? scene.machineAreas.flatMap((machineArea) => getSafetyPopups(machineArea))
+    : [];
+  const seen = new Set();
+
+  return [...directPopups, ...legacyPopups].filter((popup) => {
+    const key = popup?.id || `${popup?.title || "popup"}-${popup?.yaw}-${popup?.pitch}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function unwrapYawAround(yaw, referenceYaw) {
+  let value = normalizeYaw(yaw);
+  const reference = normalizeYaw(referenceYaw);
+  while (value - reference > 180) value -= 360;
+  while (value - reference < -180) value += 360;
+  return value;
+}
+
+function isPointInsideMachineArea(point, machineArea) {
+  if (!hasPopupPoint(point)) return false;
+  const points = getMachineAreaPoints(machineArea);
+  if (points.length < 3) return false;
+
+  const pointYaw = normalizeYaw(point.yaw);
+  const pointPitch = normalizeNumber(point.pitch, 0);
+  const polygon = points.map((polygonPoint) => ({
+    x: unwrapYawAround(polygonPoint.yaw, pointYaw),
+    y: normalizeNumber(polygonPoint.pitch, 0),
+  }));
+
+  let inside = false;
+  for (let currentIndex = 0, previousIndex = polygon.length - 1;
+    currentIndex < polygon.length;
+    previousIndex = currentIndex, currentIndex += 1) {
+    const current = polygon[currentIndex];
+    const previous = polygon[previousIndex];
+    const crosses =
+      current.y > pointPitch !== previous.y > pointPitch &&
+      pointYaw <
+        ((previous.x - current.x) * (pointPitch - current.y)) /
+          (previous.y - current.y || Number.EPSILON) +
+          current.x;
+    if (crosses) inside = !inside;
+  }
+
+  return inside;
+}
+
+function getPointDistanceToMachineArea(point, machineArea) {
+  if (!hasPopupPoint(point)) return Number.POSITIVE_INFINITY;
+  const pointYaw = normalizeYaw(point.yaw);
+  const pointPitch = normalizeNumber(point.pitch, 0);
+  const points = getMachineAreaPoints(machineArea);
+  if (!points.length) return Number.POSITIVE_INFINITY;
+
+  return Math.min(
+    ...points.map((areaPoint) => {
+      const yawDistance = unwrapYawAround(areaPoint.yaw, pointYaw) - pointYaw;
+      const pitchDistance = normalizeNumber(areaPoint.pitch, 0) - pointPitch;
+      return Math.hypot(yawDistance, pitchDistance);
+    }),
+  );
+}
+
+function getPopupMachineAreaId(popup, machineAreas = []) {
+  const explicitId = popup?.machineAreaId || popup?.safetyAreaId || null;
+  if (explicitId && machineAreas.some((machineArea) => machineArea.id === explicitId)) {
+    return explicitId;
+  }
+
+  const popupPoint = getPopupAreaPoint(popup);
+  const popupArea = machineAreas.find((machineArea) =>
+    isPointInsideMachineArea(popupPoint, machineArea),
+  );
+
+  if (popupArea?.id) return popupArea.id;
+
+  const arrowPoint = getPopupArrowPoint(popup);
+  const targetPoint = hasPopupPoint(arrowPoint) ? arrowPoint : popupPoint;
+  const matchedArea = machineAreas.find((machineArea) =>
+    isPointInsideMachineArea(targetPoint, machineArea),
+  );
+
+  if (matchedArea?.id) return matchedArea.id;
+
+  const nearestArea = [...machineAreas].sort(
+    (firstArea, secondArea) =>
+      getPointDistanceToMachineArea(targetPoint, firstArea) -
+      getPointDistanceToMachineArea(targetPoint, secondArea),
+  )[0];
+
+  return nearestArea?.id || null;
+}
+
 function getMachineAreaTitle(area = {}) {
   return area.machineName || area.name || "Machine Area";
 }
 
-function getMachineAreaPopupImage(area = {}) {
-  return resolveAssetUrl(area?.image || "");
-}
+function getMachineAreaPurpose(area = {}, mode = getMachineAreaMode(area)) {
+  if (mode === "safety") {
+    return (
+      area.safetyPurpose ||
+      (area.mode === "safety" ? area.purpose : "") ||
+      ""
+    );
+  }
 
-function getMachineAreaHoverImage(area = {}) {
-  return resolveAssetUrl(area?.hoverImage || "");
-}
-
-function getMachineAreaPatternId(prefix, value) {
-  const safeId = String(value || "machine-area").replace(
-    /[^a-zA-Z0-9_-]/g,
-    "-",
+  return (
+    area.tutorPurpose ||
+    (area.mode === "tutor" ? area.purpose : "") ||
+    area.description ||
+    area.machineType ||
+    ""
   );
-  return `${prefix}-${safeId}`;
 }
 
 function projectPanoPointToScreen(point, viewer, element) {
@@ -313,6 +439,23 @@ function projectPanoPointToScreen(point, viewer, element) {
   return { x: Number(screenX.toFixed(1)), y: Number(screenY.toFixed(1)) };
 }
 
+function getProjectedSafetyPopup(popup, viewer, element) {
+  if (!viewer || !element) return null;
+  const boxPosition = projectPanoPointToScreen(
+    getPopupAreaPoint(popup),
+    viewer,
+    element,
+  );
+  if (!boxPosition) return null;
+
+  const arrowPoint = getPopupArrowPoint(popup);
+  const arrowPosition = hasPopupPoint(arrowPoint)
+    ? projectPanoPointToScreen(arrowPoint, viewer, element)
+    : null;
+
+  return { boxPosition, arrowPosition };
+}
+
 function getProjectedMachineAreas(machineAreas = [], viewer, element) {
   if (!viewer || !element) return [];
 
@@ -336,6 +479,13 @@ function getProjectedMachineAreas(machineAreas = [], viewer, element) {
           screenPoints.length,
       };
 
+      const xValues = screenPoints.map((point) => point.x);
+      const yValues = screenPoints.map((point) => point.y);
+      const minX = Math.min(...xValues);
+      const maxX = Math.max(...xValues);
+      const minY = Math.min(...yValues);
+      const maxY = Math.max(...yValues);
+
       return {
         area: machineArea,
         id: machineArea.id || getMachineAreaTitle(machineArea),
@@ -344,6 +494,12 @@ function getProjectedMachineAreas(machineAreas = [], viewer, element) {
           .map((point) => `${point.x},${point.y}`)
           .join(" "),
         center,
+        bounds: {
+          x: minX,
+          y: minY,
+          width: Math.max(1, maxX - minX),
+          height: Math.max(1, maxY - minY),
+        },
       };
     })
     .filter(Boolean);
@@ -355,6 +511,39 @@ function StreetViewer({ mapData, site, area }) {
   const viewerRef = useRef(null);
   const pannellumInstanceRef = useRef(null);
   const viewMemoryRef = useRef(null);
+  const machinePolygonRefs = useRef(new Map());
+  const machineClipRefs = useRef(new Map());
+  const machineImageRefs = useRef(new Map());
+  const popupBoxRefs = useRef(new Map());
+  const popupLineRefs = useRef(new Map());
+  const popupArrowRefs = useRef(new Map());
+  const projectedMachineBoundsRef = useRef(new Map());
+  const popupInteractionZonesRef = useRef(new Map());
+  const hoveredMachineAreaIdRef = useRef(null);
+  const hoveredPopupIdRef = useRef(null);
+  const hoverLeaveTimerRef = useRef(null);
+  const hoverReleaseClearPopupRef = useRef(false);
+  const lastPointerPositionRef = useRef({ x: null, y: null });
+  const popupDragRef = useRef({
+    active: false,
+    pointerId: null,
+    node: null,
+    startX: 0,
+    startY: 0,
+    startYaw: 0,
+    startPitch: 0,
+  });
+  const machineAreaDragRef = useRef({
+    active: false,
+    moved: false,
+    pointerId: null,
+    node: null,
+    startX: 0,
+    startY: 0,
+    startYaw: 0,
+    startPitch: 0,
+  });
+  const suppressMachineAreaClickRef = useRef(false);
 
   const requestedSceneId = searchParams.get("scene");
 
@@ -366,10 +555,10 @@ function StreetViewer({ mapData, site, area }) {
     () => requestedSceneId || getFirstSceneId(mapData),
   );
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isSafetyModeOn, setIsSafetyModeOn] = useState(false);
-  const [hoveredMachineArea, setHoveredMachineArea] = useState(null);
-  const [projectedMachineAreas, setProjectedMachineAreas] = useState([]);
-  const machineHoverCloseTimerRef = useRef(null);
+  const [viewerMode, setViewerMode] = useState("tutor");
+  const [selectedMachineArea, setSelectedMachineArea] = useState(null);
+  const [hoveredMachineAreaId, setHoveredMachineAreaId] = useState(null);
+  const [hoveredPopupId, setHoveredPopupId] = useState(null);
 
   const currentScene = scenes[currentSceneId] || sceneList[0];
   const currentSceneIdResolved = currentScene?.id || currentSceneId;
@@ -379,9 +568,13 @@ function StreetViewer({ mapData, site, area }) {
     () =>
       Array.isArray(currentScene?.machineAreas)
         ? currentScene.machineAreas.filter(
-            (area) => getMachineAreaMode(area) === "safety",
+            (machineArea) => getMachineAreaMode(machineArea) === viewerMode,
           )
         : [],
+    [currentScene, viewerMode],
+  );
+  const sceneSafetyPopups = useMemo(
+    () => getSceneSafetyPopups(currentScene),
     [currentScene],
   );
 
@@ -390,21 +583,341 @@ function StreetViewer({ mapData, site, area }) {
     [mapData, currentSceneIdResolved],
   );
 
-  function cancelMachineAreaClose() {
-    window.clearTimeout(machineHoverCloseTimerRef.current);
-    machineHoverCloseTimerRef.current = null;
-  }
-
   function showMachineArea(machineArea) {
-    cancelMachineAreaClose();
-    setHoveredMachineArea(machineArea);
+    setSelectedMachineArea((current) =>
+      current?.id === machineArea?.id ? null : machineArea,
+    );
   }
 
-  function scheduleMachineAreaClose() {
-    cancelMachineAreaClose();
-    machineHoverCloseTimerRef.current = window.setTimeout(() => {
-      setHoveredMachineArea(null);
-    }, 140);
+  function clearHoverLeaveTimer() {
+    if (hoverLeaveTimerRef.current) {
+      window.clearTimeout(hoverLeaveTimerRef.current);
+      hoverLeaveTimerRef.current = null;
+    }
+    hoverReleaseClearPopupRef.current = false;
+  }
+
+  function rememberPointerPosition(event) {
+    if (!event) return;
+    lastPointerPositionRef.current = {
+      x: Number.isFinite(Number(event.clientX)) ? Number(event.clientX) : null,
+      y: Number.isFinite(Number(event.clientY)) ? Number(event.clientY) : null,
+    };
+  }
+
+  function setHoveredMachineAreaSafe(machineAreaId, event) {
+    rememberPointerPosition(event);
+    clearHoverLeaveTimer();
+    setHoveredMachineAreaId(machineAreaId);
+  }
+
+  function getElementUnderLastPointer() {
+    const { x, y } = lastPointerPositionRef.current;
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    return document.elementFromPoint(x, y);
+  }
+
+  function isPointerInsideLinkedZone(activeAreaId) {
+    if (!activeAreaId) return false;
+
+    const shell = shellRef.current;
+    const { x: clientX, y: clientY } = lastPointerPositionRef.current;
+    if (!shell || !Number.isFinite(clientX) || !Number.isFinite(clientY)) {
+      return false;
+    }
+
+    const rect = shell.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    return sceneSafetyPopups.some((popup) => {
+      if (getPopupMachineAreaId(popup, machineAreas) !== activeAreaId) {
+        return false;
+      }
+
+      return isInsideInteractionZone(
+        x,
+        y,
+        popupInteractionZonesRef.current.get(popup.id),
+      );
+    });
+  }
+
+  function scheduleHoverRelease({ clearPopup = false } = {}) {
+    hoverReleaseClearPopupRef.current =
+      hoverReleaseClearPopupRef.current || clearPopup;
+    if (hoverLeaveTimerRef.current) return;
+
+    hoverLeaveTimerRef.current = window.setTimeout(() => {
+      const activeAreaId = hoveredMachineAreaIdRef.current;
+      const target = getElementUnderLastPointer();
+      const popupTarget = target?.closest?.(".viewer-safety-popup-marker");
+      const machineTarget = target?.closest?.(".machine-area-screen-polygon");
+      const pointerStillLinked = isPointerInsideLinkedZone(activeAreaId);
+
+      if (popupTarget) {
+        const popupId = popupTarget.dataset.popupId;
+        if (popupId) setHoveredPopupId(popupId);
+        hoverReleaseClearPopupRef.current = false;
+        hoverLeaveTimerRef.current = null;
+        return;
+      }
+
+      if (machineTarget) {
+        const machineAreaId = machineTarget.dataset.machineAreaId;
+        if (machineAreaId) setHoveredMachineAreaId(machineAreaId);
+        hoverReleaseClearPopupRef.current = false;
+        hoverLeaveTimerRef.current = null;
+        return;
+      }
+
+      if (pointerStillLinked) {
+        hoverReleaseClearPopupRef.current = false;
+        hoverLeaveTimerRef.current = null;
+        return;
+      }
+
+      setHoveredMachineAreaId(null);
+      if (hoverReleaseClearPopupRef.current) setHoveredPopupId(null);
+      hoverReleaseClearPopupRef.current = false;
+      hoverLeaveTimerRef.current = null;
+    }, POPUP_HOVER_RELEASE_DELAY);
+  }
+
+  function releaseHoveredMachineArea(event) {
+    rememberPointerPosition(event);
+    if (machineAreaDragRef.current.active) return;
+    scheduleHoverRelease();
+  }
+
+  function enterSafetyPopup(popupId, event) {
+    rememberPointerPosition(event);
+    clearHoverLeaveTimer();
+    setHoveredPopupId(popupId);
+  }
+
+  function leaveSafetyPopup(event) {
+    rememberPointerPosition(event);
+    if (popupDragRef.current.active) return;
+    scheduleHoverRelease({ clearPopup: true });
+  }
+
+
+  function isInsideInteractionZone(x, y, zone) {
+    return (
+      zone &&
+      x >= zone.left &&
+      x <= zone.right &&
+      y >= zone.top &&
+      y <= zone.bottom
+    );
+  }
+
+  function handleViewerPointerMove(event) {
+    rememberPointerPosition(event);
+    if (viewerMode !== "safety") return;
+
+    const activeAreaId = hoveredMachineAreaIdRef.current;
+    if (!activeAreaId) return;
+
+    const shell = shellRef.current;
+    if (!shell) return;
+
+    const rect = shell.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const insideLinkedZone = sceneSafetyPopups.some((popup) => {
+      if (getPopupMachineAreaId(popup, machineAreas) !== activeAreaId) {
+        return false;
+      }
+
+      return isInsideInteractionZone(
+        x,
+        y,
+        popupInteractionZonesRef.current.get(popup.id),
+      );
+    });
+
+    if (insideLinkedZone || hoveredPopupIdRef.current) {
+      clearHoverLeaveTimer();
+      return;
+    }
+
+    scheduleHoverRelease({ clearPopup: true });
+  }
+
+  function handleViewerPointerLeave(event) {
+    rememberPointerPosition(event);
+    if (viewerMode === "safety") {
+      scheduleHoverRelease({ clearPopup: true });
+    }
+  }
+
+  function handlePopupWheel(event) {
+    const viewer = pannellumInstanceRef.current;
+    if (!viewer?.getHfov || !viewer?.setHfov) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    clearHoverLeaveTimer();
+
+    const wheelEvent = event.nativeEvent || event;
+    const multiplier =
+      wheelEvent.deltaMode === 1
+        ? 16
+        : wheelEvent.deltaMode === 2
+          ? window.innerHeight
+          : 1;
+    const delta = normalizeNumber(wheelEvent.deltaY, 0) * multiplier;
+    if (!delta) return;
+
+    const currentHfov = normalizeNumber(viewer.getHfov(), 100);
+    const zoomStep = clamp(Math.abs(delta) * 0.045, 1.5, 10);
+    const nextHfov =
+      delta > 0 ? currentHfov + zoomStep : currentHfov - zoomStep;
+
+    viewer.setHfov(clamp(nextHfov, 35, 120), false);
+  }
+
+  function beginViewerDrag(event, dragRef, node) {
+    if (event.button !== 0) return false;
+
+    const viewer = pannellumInstanceRef.current;
+    if (!viewer?.getYaw || !viewer?.getPitch) return false;
+
+    dragRef.current = {
+      active: true,
+      moved: false,
+      pointerId: event.pointerId,
+      node,
+      startX: event.clientX,
+      startY: event.clientY,
+      startYaw: normalizeNumber(viewer.getYaw(), 0),
+      startPitch: normalizeNumber(viewer.getPitch(), 0),
+    };
+
+    node?.setPointerCapture?.(event.pointerId);
+    node?.classList.add("is-dragging");
+    event.preventDefault();
+    event.stopPropagation();
+    return true;
+  }
+
+  function moveViewerDrag(event, dragRef) {
+    const drag = dragRef.current;
+    if (!drag.active || drag.pointerId !== event.pointerId) return false;
+
+    const viewer = pannellumInstanceRef.current;
+    const element = viewerRef.current;
+    if (!viewer || !element) return false;
+
+    const width = Math.max(1, element.clientWidth);
+    const height = Math.max(1, element.clientHeight);
+    const hfov = clamp(normalizeNumber(viewer.getHfov?.(), 100), 35, 120);
+    const horizontalRadians = (hfov * Math.PI) / 180;
+    const verticalRadians =
+      2 * Math.atan(Math.tan(horizontalRadians / 2) / (width / height));
+    const verticalFov = (verticalRadians * 180) / Math.PI;
+    const yawPerPixel = hfov / width;
+    const pitchPerPixel = verticalFov / height;
+    const deltaX = event.clientX - drag.startX;
+    const deltaY = event.clientY - drag.startY;
+
+    if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+      drag.moved = true;
+    }
+
+    viewer.setYaw?.(normalizeYaw(drag.startYaw - deltaX * yawPerPixel), false);
+    viewer.setPitch?.(
+      clamp(drag.startPitch + deltaY * pitchPerPixel, -85, 85),
+      false,
+    );
+
+    event.preventDefault();
+    event.stopPropagation();
+    return true;
+  }
+
+  function endViewerDrag(event, dragRef) {
+    const drag = dragRef.current;
+    if (!drag.active || drag.pointerId !== event.pointerId) return null;
+
+    drag.node?.releasePointerCapture?.(event.pointerId);
+    drag.node?.classList.remove("is-dragging");
+
+    const result = { moved: drag.moved, node: drag.node };
+    dragRef.current = {
+      active: false,
+      moved: false,
+      pointerId: null,
+      node: null,
+      startX: 0,
+      startY: 0,
+      startYaw: 0,
+      startPitch: 0,
+    };
+
+    event.preventDefault();
+    event.stopPropagation();
+    return result;
+  }
+
+  function handleMachineAreaPointerDown(event, machineAreaId) {
+    clearHoverLeaveTimer();
+    setHoveredMachineAreaId(machineAreaId);
+    beginViewerDrag(event, machineAreaDragRef, event.currentTarget);
+  }
+
+  function handleMachineAreaPointerMove(event) {
+    moveViewerDrag(event, machineAreaDragRef);
+  }
+
+  function finishMachineAreaPointerDrag(event) {
+    const dragNode = machineAreaDragRef.current.node;
+    const result = endViewerDrag(event, machineAreaDragRef);
+    if (!result) return;
+
+    const pointerTarget = document.elementFromPoint(event.clientX, event.clientY);
+    const remainsInsideArea = Boolean(
+      dragNode && pointerTarget && dragNode.contains(pointerTarget),
+    );
+
+    if (result.moved) {
+      suppressMachineAreaClickRef.current = true;
+      window.setTimeout(() => {
+        suppressMachineAreaClickRef.current = false;
+      }, 0);
+    }
+
+    if (!remainsInsideArea) {
+      scheduleHoverRelease();
+    }
+  }
+
+  function handlePopupPointerDown(event, popupId) {
+    clearHoverLeaveTimer();
+    enterSafetyPopup(popupId);
+    beginViewerDrag(event, popupDragRef, event.currentTarget);
+  }
+
+  function handlePopupPointerMove(event) {
+    moveViewerDrag(event, popupDragRef);
+  }
+
+  function finishPopupPointerDrag(event) {
+    const dragNode = popupDragRef.current.node;
+    const result = endViewerDrag(event, popupDragRef);
+    if (!result) return;
+
+    const pointerTarget = document.elementFromPoint(event.clientX, event.clientY);
+    const remainsInsidePopup = Boolean(
+      dragNode && pointerTarget && dragNode.contains(pointerTarget),
+    );
+
+    if (!remainsInsidePopup) {
+      setHoveredPopupId(null);
+      scheduleHoverRelease({ clearPopup: true });
+    }
   }
 
   function rememberCurrentView() {
@@ -432,7 +945,9 @@ function StreetViewer({ mapData, site, area }) {
     if (!scenes[nextSceneId] || nextSceneId === currentSceneIdResolved) return;
 
     rememberCurrentView();
-    setHoveredMachineArea(null);
+    clearHoverLeaveTimer();
+    setSelectedMachineArea(null);
+    setHoveredPopupId(null);
     setIsTransitioning(true);
     await preloadImage(scenes[nextSceneId]?.panorama);
 
@@ -463,65 +978,183 @@ function StreetViewer({ mapData, site, area }) {
   }, [sceneConnections, scenes]);
 
   useEffect(() => {
-    return () => cancelMachineAreaClose();
-  }, []);
+    clearHoverLeaveTimer();
+    setSelectedMachineArea(null);
+    setHoveredMachineAreaId(null);
+    setHoveredPopupId(null);
+    hoveredMachineAreaIdRef.current = null;
+    hoveredPopupIdRef.current = null;
+  }, [viewerMode, currentSceneIdResolved]);
 
   useEffect(() => {
-    if (!isSafetyModeOn) {
-      cancelMachineAreaClose();
-      setHoveredMachineArea(null);
-    }
-  }, [isSafetyModeOn]);
+    hoveredMachineAreaIdRef.current = hoveredMachineAreaId;
+  }, [hoveredMachineAreaId]);
 
   useEffect(() => {
-    setProjectedMachineAreas([]);
-    setHoveredMachineArea(null);
+    hoveredPopupIdRef.current = hoveredPopupId;
+  }, [hoveredPopupId]);
+
+  useEffect(() => {
+    setSelectedMachineArea(null);
+    setHoveredMachineAreaId(null);
+    setHoveredPopupId(null);
 
     let animationFrame = 0;
-    let lastSignature = "__init__";
 
-    function updateProjectedMachineAreas() {
+    function updateOverlayPositions() {
       const viewer = pannellumInstanceRef.current;
       const element = viewerRef.current;
 
-      if (!viewer || !element || !machineAreas.length) {
-        if (lastSignature !== "__empty__") {
-          lastSignature = "__empty__";
-          setProjectedMachineAreas([]);
+      if (viewer && element) {
+        machineAreas.forEach((machineArea) => {
+          const id = machineArea.id || getMachineAreaTitle(machineArea);
+          const projected = getProjectedMachineAreas(
+            [machineArea],
+            viewer,
+            element,
+          )[0];
+          const polygon = machinePolygonRefs.current.get(id);
+          const clip = machineClipRefs.current.get(id);
+          const imageElement = machineImageRefs.current.get(id);
+
+          if (!projected) {
+            projectedMachineBoundsRef.current.delete(id);
+            polygon?.setAttribute("visibility", "hidden");
+            clip?.setAttribute("visibility", "hidden");
+            imageElement?.setAttribute("visibility", "hidden");
+            return;
+          }
+
+          projectedMachineBoundsRef.current.set(id, projected.bounds);
+          polygon?.setAttribute("visibility", "visible");
+          polygon?.setAttribute("points", projected.pointsAttr);
+          clip?.setAttribute("visibility", "visible");
+          clip?.setAttribute("points", projected.pointsAttr);
+
+          if (imageElement) {
+            imageElement.setAttribute("visibility", "visible");
+            imageElement.setAttribute("x", String(projected.bounds.x));
+            imageElement.setAttribute("y", String(projected.bounds.y));
+            imageElement.setAttribute("width", String(projected.bounds.width));
+            imageElement.setAttribute("height", String(projected.bounds.height));
+          }
+        });
+
+        if (viewerMode === "safety") {
+          const hoveredAreaId = hoveredMachineAreaIdRef.current;
+
+          sceneSafetyPopups.forEach((popup) => {
+            const projected = getProjectedSafetyPopup(popup, viewer, element);
+            const box = popupBoxRefs.current.get(popup.id);
+            const line = popupLineRefs.current.get(popup.id);
+            const arrow = popupArrowRefs.current.get(popup.id);
+            const popupAreaId = getPopupMachineAreaId(popup, machineAreas);
+            const isPopupHovered = hoveredPopupIdRef.current === popup.id;
+            const isAreaHovered = hoveredAreaId && popupAreaId === hoveredAreaId;
+            const shouldShow = Boolean(
+              projected && (isAreaHovered || isPopupHovered),
+            );
+
+            if (projected) {
+              const areaBounds = popupAreaId
+                ? projectedMachineBoundsRef.current.get(popupAreaId)
+                : null;
+              const halfWidth = Math.max(box?.offsetWidth || 150, 150) / 2;
+              const halfHeight = Math.max(box?.offsetHeight || 46, 46) / 2;
+              const zones = [
+                {
+                  left: projected.boxPosition.x - halfWidth,
+                  right: projected.boxPosition.x + halfWidth,
+                  top: projected.boxPosition.y - halfHeight,
+                  bottom: projected.boxPosition.y + halfHeight,
+                },
+              ];
+
+              if (areaBounds) {
+                zones.push({
+                  left: areaBounds.x,
+                  right: areaBounds.x + areaBounds.width,
+                  top: areaBounds.y,
+                  bottom: areaBounds.y + areaBounds.height,
+                });
+              }
+
+              if (projected.arrowPosition) {
+                zones.push({
+                  left: projected.arrowPosition.x,
+                  right: projected.arrowPosition.x,
+                  top: projected.arrowPosition.y,
+                  bottom: projected.arrowPosition.y,
+                });
+              }
+
+              popupInteractionZonesRef.current.set(popup.id, {
+                left:
+                  Math.min(...zones.map((zone) => zone.left)) -
+                  POPUP_INTERACTION_PADDING,
+                right:
+                  Math.max(...zones.map((zone) => zone.right)) +
+                  POPUP_INTERACTION_PADDING,
+                top:
+                  Math.min(...zones.map((zone) => zone.top)) -
+                  POPUP_INTERACTION_PADDING,
+                bottom:
+                  Math.max(...zones.map((zone) => zone.bottom)) +
+                  POPUP_INTERACTION_PADDING,
+              });
+            } else {
+              popupInteractionZonesRef.current.delete(popup.id);
+            }
+
+            if (!shouldShow) {
+              if (box) {
+                box.style.visibility = "hidden";
+                box.classList.remove("is-visible", "is-expanded");
+              }
+              line?.setAttribute("visibility", "hidden");
+              arrow?.setAttribute("visibility", "hidden");
+              return;
+            }
+
+            if (box) {
+              box.style.visibility = "visible";
+              box.style.transform = `translate3d(${projected.boxPosition.x}px, ${projected.boxPosition.y}px, 0)`;
+              box.classList.add("is-visible");
+              box.classList.toggle("is-expanded", isPopupHovered);
+            }
+
+            if (line && projected.arrowPosition) {
+              line.setAttribute("visibility", "visible");
+              line.setAttribute("x1", String(projected.boxPosition.x));
+              line.setAttribute("y1", String(projected.boxPosition.y));
+              line.setAttribute("x2", String(projected.arrowPosition.x));
+              line.setAttribute("y2", String(projected.arrowPosition.y));
+            } else {
+              line?.setAttribute("visibility", "hidden");
+            }
+
+            if (arrow && projected.arrowPosition) {
+              arrow.setAttribute("visibility", "visible");
+              arrow.setAttribute("cx", String(projected.arrowPosition.x));
+              arrow.setAttribute("cy", String(projected.arrowPosition.y));
+            } else {
+              arrow?.setAttribute("visibility", "hidden");
+            }
+          });
         }
-        animationFrame = window.requestAnimationFrame(
-          updateProjectedMachineAreas,
-        );
-        return;
       }
 
-      const nextProjected = getProjectedMachineAreas(
-        machineAreas,
-        viewer,
-        element,
-      );
-      const nextSignature =
-        nextProjected
-          .map((item) => `${item.id}:${item.pointsAttr}`)
-          .join("|") || "__empty__";
-
-      if (nextSignature !== lastSignature) {
-        lastSignature = nextSignature;
-        setProjectedMachineAreas(nextProjected);
-      }
-
-      animationFrame = window.requestAnimationFrame(
-        updateProjectedMachineAreas,
-      );
+      animationFrame = window.requestAnimationFrame(updateOverlayPositions);
     }
 
-    updateProjectedMachineAreas();
-
+    updateOverlayPositions();
     return () => {
-      setProjectedMachineAreas([]);
       window.cancelAnimationFrame(animationFrame);
+      projectedMachineBoundsRef.current.clear();
+      popupInteractionZonesRef.current.clear();
+      clearHoverLeaveTimer();
     };
-  }, [machineAreas, currentSceneIdResolved]);
+  }, [machineAreas, sceneSafetyPopups, viewerMode, currentSceneIdResolved]);
 
   useEffect(() => {
     if (!viewerRef.current || !currentPanorama) return;
@@ -535,7 +1168,7 @@ function StreetViewer({ mapData, site, area }) {
       pannellumInstanceRef.current = null;
     }
 
-    setHoveredMachineArea(null);
+    setSelectedMachineArea(null);
 
     const remembered = viewMemoryRef.current;
 
@@ -665,7 +1298,6 @@ function StreetViewer({ mapData, site, area }) {
     mapData,
     sceneConnections,
     scenes,
-    machineAreas,
   ]);
 
   function zoomBy(delta) {
@@ -717,79 +1349,199 @@ function StreetViewer({ mapData, site, area }) {
     <div
       ref={shellRef}
       className={`street-viewer-shell ${isTransitioning ? "is-speed-transitioning" : ""}`}
+      onPointerMoveCapture={handleViewerPointerMove}
+      onPointerLeave={handleViewerPointerLeave}
     >
       <div ref={viewerRef} className="street-pannellum-stage" />
 
-      <div className="street-location-pill">
-        <span>{site?.name || mapData?.name || "Street View"}</span>
-        <strong>{labelForScene(currentScene, currentSceneIdResolved)}</strong>
+      <div className="street-right-stack">
+        <div className="street-location-pill">
+          <span>{site?.name || mapData?.name || "Street View"}</span>
+          <strong>{labelForScene(currentScene, currentSceneIdResolved)}</strong>
+        </div>
+
+        <div
+          className={`street-mode-switch is-${viewerMode}`}
+          role="group"
+          aria-label="Viewer mode"
+        >
+          <button
+            type="button"
+            className={viewerMode === "tutor" ? "active" : ""}
+            onClick={() => setViewerMode("tutor")}
+          >
+            Tour
+          </button>
+          <button
+            type="button"
+            className={viewerMode === "safety" ? "active safety" : ""}
+            onClick={() => setViewerMode("safety")}
+          >
+            Safety
+          </button>
+        </div>
+
+        {selectedMachineArea && viewerMode === "tutor" && (
+          <aside className="machine-area-info-card is-tutor">
+            <strong>{getMachineAreaTitle(selectedMachineArea)}</strong>
+            <p>
+              {getMachineAreaPurpose(selectedMachineArea, viewerMode) ||
+                "No purpose added."}
+            </p>
+          </aside>
+        )}
+
       </div>
 
-      <button
-        type="button"
-        className={`street-safety-toggle ${isSafetyModeOn ? "is-on" : ""}`}
-        onClick={() => setIsSafetyModeOn((current) => !current)}
-        title={isSafetyModeOn ? "Hide safety markings" : "Show safety markings"}
-      >
-        {isSafetyModeOn ? "Safety Off" : "Safety On"}
-      </button>
+      {viewerMode === "safety" && sceneSafetyPopups.length > 0 && (
+        <>
+          <svg className="viewer-safety-popup-links" aria-hidden="true">
+            <defs>
+              <marker
+                id="viewer-safety-popup-arrowhead"
+                viewBox="0 0 10 10"
+                refX="8"
+                refY="5"
+                markerWidth="5"
+                markerHeight="5"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" />
+              </marker>
+            </defs>
+            {sceneSafetyPopups.map((popup) => (
+              <g key={`popup-link-${popup.id}`}>
+                <line
+                  ref={(node) => {
+                    if (node) popupLineRefs.current.set(popup.id, node);
+                    else popupLineRefs.current.delete(popup.id);
+                  }}
+                  markerEnd="url(#viewer-safety-popup-arrowhead)"
+                />
+                <circle
+                  ref={(node) => {
+                    if (node) popupArrowRefs.current.set(popup.id, node);
+                    else popupArrowRefs.current.delete(popup.id);
+                  }}
+                  r="4"
+                />
+              </g>
+            ))}
+          </svg>
+          <div className="viewer-safety-popup-markers" aria-live="polite">
+            {sceneSafetyPopups.map((popup) => (
+              <article
+                key={popup.id}
+                ref={(node) => {
+                  if (node) popupBoxRefs.current.set(popup.id, node);
+                  else popupBoxRefs.current.delete(popup.id);
+                }}
+                data-popup-id={popup.id}
+                className={`viewer-safety-popup-marker ${hoveredPopupId === popup.id ? "is-expanded" : ""}`}
+                onMouseEnter={(event) => enterSafetyPopup(popup.id, event)}
+                onMouseLeave={leaveSafetyPopup}
+                onWheelCapture={handlePopupWheel}
+                onPointerDown={(event) =>
+                  handlePopupPointerDown(event, popup.id)
+                }
+                onPointerMove={handlePopupPointerMove}
+                onPointerUp={finishPopupPointerDrag}
+                onPointerCancel={finishPopupPointerDrag}
+              >
+                <strong>{popup.title || "Safety information"}</strong>
+                {popup.content && <p>{popup.content}</p>}
+                {(popup.hazard || popup.safetyNote) && (
+                  <dl>
+                    {popup.hazard && (
+                      <div>
+                        <dt>Hazard</dt>
+                        <dd>{popup.hazard}</dd>
+                      </div>
+                    )}
+                    {popup.safetyNote && (
+                      <div>
+                        <dt>Safety</dt>
+                        <dd>{popup.safetyNote}</dd>
+                      </div>
+                    )}
+                  </dl>
+                )}
+              </article>
+            ))}
+          </div>
+        </>
+      )}
 
-      {isSafetyModeOn && projectedMachineAreas.length > 0 && (
-        <svg className="machine-area-screen-overlay" aria-hidden="true">
+      {machineAreas.length > 0 && (
+        <svg
+          className={`machine-area-screen-overlay viewer-machine-area-screen-overlay is-${viewerMode}`}
+        >
           <defs>
-            {projectedMachineAreas.map((item) => {
-              const previewImage = getMachineAreaHoverImage(item.area);
-              if (!previewImage) return null;
-              const patternId = getMachineAreaPatternId(
-                "viewer-machine-area-fill",
-                item.id,
-              );
+            {machineAreas.map((machineArea) => {
+              const id = machineArea.id || getMachineAreaTitle(machineArea);
               return (
-                <pattern
-                  key={patternId}
-                  id={patternId}
-                  patternUnits="objectBoundingBox"
-                  patternContentUnits="objectBoundingBox"
-                  width="1"
-                  height="1"
-                >
-                  <image
-                    href={previewImage}
-                    x="0"
-                    y="0"
-                    width="1"
-                    height="1"
-                    preserveAspectRatio="xMidYMid slice"
+                <clipPath key={`clip-${id}`} id={`viewer-machine-clip-${id}`}>
+                  <polygon
+                    ref={(node) => {
+                      if (node) machineClipRefs.current.set(id, node);
+                      else machineClipRefs.current.delete(id);
+                    }}
                   />
-                </pattern>
+                </clipPath>
               );
             })}
           </defs>
 
-          {projectedMachineAreas.map((item) => {
-            const isActive = hoveredMachineArea?.id === item.area.id;
-            const previewImage = isActive
-              ? getMachineAreaHoverImage(item.area)
-              : "";
-            const patternId = getMachineAreaPatternId(
-              "viewer-machine-area-fill",
-              item.id,
-            );
+          {viewerMode === "safety" &&
+            machineAreas.map((machineArea) => {
+              const id = machineArea.id || getMachineAreaTitle(machineArea);
+              const hoverImage = resolveAssetUrl(machineArea.hoverImage);
+              if (!hoverImage) return null;
 
+              return (
+                <image
+                  key={`hover-${id}`}
+                  ref={(node) => {
+                    if (node) machineImageRefs.current.set(id, node);
+                    else machineImageRefs.current.delete(id);
+                  }}
+                  className={`machine-area-hover-image ${hoveredMachineAreaId === machineArea.id ? "is-visible" : ""}`}
+                  href={hoverImage}
+                  preserveAspectRatio="xMidYMid slice"
+                  clipPath={`url(#viewer-machine-clip-${id})`}
+                />
+              );
+            })}
+
+          {machineAreas.map((machineArea) => {
+            const id = machineArea.id || getMachineAreaTitle(machineArea);
+            const isSelected = selectedMachineArea?.id === machineArea.id;
+            const isHovered = hoveredMachineAreaId === machineArea.id;
             return (
               <polygon
-                key={item.id}
-                className={`machine-area-screen-polygon ${isActive ? "is-active" : ""} ${previewImage ? "has-preview-fill" : ""}`}
-                points={item.pointsAttr}
-                style={
-                  previewImage ? { fill: `url(#${patternId})` } : undefined
+                key={id}
+                ref={(node) => {
+                  if (node) machinePolygonRefs.current.set(id, node);
+                  else machinePolygonRefs.current.delete(id);
+                }}
+                data-machine-area-id={machineArea.id}
+                className={`machine-area-screen-polygon ${isSelected || isHovered ? "is-active" : ""}`}
+                onMouseEnter={(event) =>
+                  setHoveredMachineAreaSafe(machineArea.id, event)
                 }
-                onMouseEnter={() => showMachineArea(item.area)}
-                onMouseLeave={scheduleMachineAreaClose}
+                onMouseLeave={releaseHoveredMachineArea}
+                onWheelCapture={handlePopupWheel}
+                onPointerDown={(event) =>
+                  handleMachineAreaPointerDown(event, machineArea.id)
+                }
+                onPointerMove={handleMachineAreaPointerMove}
+                onPointerUp={finishMachineAreaPointerDrag}
+                onPointerCancel={finishMachineAreaPointerDrag}
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
-                  showMachineArea(item.area);
+                  if (suppressMachineAreaClickRef.current) return;
+                  showMachineArea(machineArea);
                 }}
               />
             );
@@ -811,44 +1563,6 @@ function StreetViewer({ mapData, site, area }) {
           ⛶
         </button>
       </div>
-
-      {isSafetyModeOn && hoveredMachineArea && (
-        <aside
-          className="machine-area-info-card"
-          onMouseEnter={cancelMachineAreaClose}
-          onMouseLeave={scheduleMachineAreaClose}
-        >
-          <div className="machine-area-info-header">
-            <span>Safety Area</span>
-            <button type="button" onClick={() => setHoveredMachineArea(null)}>
-              ×
-            </button>
-          </div>
-          <strong>{getMachineAreaTitle(hoveredMachineArea)}</strong>
-          {hoveredMachineArea.machineType && (
-            <em>{hoveredMachineArea.machineType}</em>
-          )}
-          {getMachineAreaPopupImage(hoveredMachineArea) && (
-            <img
-              src={getMachineAreaPopupImage(hoveredMachineArea)}
-              alt={getMachineAreaTitle(hoveredMachineArea)}
-            />
-          )}
-          {hoveredMachineArea.hazard && (
-            <p>
-              <b>Hazard:</b> {hoveredMachineArea.hazard}
-            </p>
-          )}
-          {hoveredMachineArea.safetyNote && (
-            <p>
-              <b>Safety:</b> {hoveredMachineArea.safetyNote}
-            </p>
-          )}
-          {hoveredMachineArea.description && (
-            <p>{hoveredMachineArea.description}</p>
-          )}
-        </aside>
-      )}
 
       <div className="street-minimap-card raw-only">
         <div className="street-minimap-window">

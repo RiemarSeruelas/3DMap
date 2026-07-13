@@ -71,19 +71,61 @@ function normalizePoint(point = {}) {
   };
 }
 
+function normalizeSafetyPopup(popup = {}) {
+  const legacyPoint = normalizePoint(popup);
+  const popupArea = normalizePoint(
+    popup.popupArea || popup.areaPoint || popup.position || legacyPoint,
+  );
+  const arrowSource =
+    popup.arrowPoint || popup.pointerPoint || popup.targetPoint || null;
+  const arrowPoint = arrowSource ? normalizePoint(arrowSource) : null;
+
+  return {
+    ...popup,
+    id: popup.id || createId(popup.title || "safety-popup"),
+    title: popup.title || popup.name || "Popup",
+    content: popup.content || popup.paragraph || popup.description || "",
+    hazard: popup.hazard || "",
+    safetyNote: popup.safetyNote || popup.safety || "",
+    popupArea,
+    arrowPoint,
+    pitch: popupArea.pitch,
+    yaw: popupArea.yaw,
+    x: popupArea.x,
+    y: popupArea.y,
+  };
+}
+
 function normalizeMachineArea(area = {}) {
+  const mode = area.mode === "tutor" ? "tutor" : "safety";
+  const tutorPurpose =
+    area.tutorPurpose ||
+    (mode === "tutor" ? area.purpose : "") ||
+    area.description ||
+    area.machineType ||
+    "";
+  const safetyPurpose =
+    area.safetyPurpose ||
+    (mode === "safety" ? area.purpose : "") ||
+    "";
+
   return {
     ...area,
     id: area.id || createId(area.machineName || area.name || "machine-area"),
     type: "machineArea",
-    mode: area.mode === "tutor" ? "tutor" : "safety",
+    mode,
     machineName: area.machineName || area.name || "Machine",
-    machineType: area.machineType || "",
+    purpose: mode === "safety" ? safetyPurpose : tutorPurpose,
+    tutorPurpose,
+    safetyPurpose,
     hazard: area.hazard || "",
-    safetyNote: area.safetyNote || "",
-    description: area.description || "",
-    image: area.image || area.machineImage || "",
-    hoverImage: area.hoverImage || area.openImage || area.overlayImage || "",
+    safetyNote: area.safetyNote || area.safety || "",
+    image: area.image || area.machineImage || area.popupImage || "",
+    hoverImage:
+      area.hoverImage || area.openImage || area.overlayImage || "",
+    safetyPopups: Array.isArray(area.safetyPopups)
+      ? area.safetyPopups.map(normalizeSafetyPopup)
+      : [],
     points: Array.isArray(area.points) ? area.points.map(normalizePoint) : [],
   };
 }
@@ -97,6 +139,9 @@ function normalizeScene(scene = {}) {
       : [],
     machineAreas: Array.isArray(scene.machineAreas)
       ? scene.machineAreas.map(normalizeMachineArea)
+      : [],
+    safetyPopups: Array.isArray(scene.safetyPopups)
+      ? scene.safetyPopups.map(normalizeSafetyPopup)
       : [],
     mapPoint: scene.mapPoint || scene.minimap || null,
     minimap: scene.minimap || scene.mapPoint || null,

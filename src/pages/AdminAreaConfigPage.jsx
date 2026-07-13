@@ -8,7 +8,6 @@ import {
   ensureTour,
   updateAreaTour,
   uploadPanoramaAsset,
-  uploadAssetFile,
   uploadAdminImage,
   getEffectiveFactoryMaps,
   saveFactoryMaps,
@@ -25,12 +24,18 @@ const DIRECTION_ORBIT_YAW_RANGE = 68;
 const DIRECTION_ARROW_MAX_ROTATION = 48;
 const EMPTY_MACHINE_FORM = {
   machineName: "",
-  machineType: "",
+  purpose: "",
   hazard: "",
   safetyNote: "",
-  description: "",
   image: "",
   hoverImage: "",
+};
+
+const EMPTY_SAFETY_POPUP_FORM = {
+  title: "",
+  content: "",
+  hazard: "",
+  safetyNote: "",
 };
 
 function getSaveAssetBase() {
@@ -216,20 +221,22 @@ function getMachineAreaTitle(area = {}) {
   return area.machineName || area.name || "Machine Area";
 }
 
-function getMachineAreaPopupImage(area = {}) {
-  return resolveAssetUrl(area?.image || "");
-}
+function getMachineAreaPurpose(area = {}, mode = getMachineAreaMode(area)) {
+  if (mode === "safety") {
+    return (
+      area.safetyPurpose ||
+      (area.mode === "safety" ? area.purpose : "") ||
+      ""
+    );
+  }
 
-function getMachineAreaHoverImage(area = {}) {
-  return resolveAssetUrl(area?.hoverImage || "");
-}
-
-function getMachineAreaPatternId(prefix, value) {
-  const safeId = String(value || "machine-area").replace(
-    /[^a-zA-Z0-9_-]/g,
-    "-",
+  return (
+    area.tutorPurpose ||
+    (area.mode === "tutor" ? area.purpose : "") ||
+    area.description ||
+    area.machineType ||
+    ""
   );
-  return `${prefix}-${safeId}`;
 }
 
 function getMachineAreaPoints(area = {}) {
@@ -244,6 +251,111 @@ function getMachineAreaPoints(area = {}) {
 
 function getMachineAreaMode(area = {}) {
   return area.mode === "tutor" ? "tutor" : "safety";
+}
+
+function getPopupAreaPoint(popup = {}) {
+  return popup.popupArea || popup.areaPoint || popup.position || popup;
+}
+
+function getPopupArrowPoint(popup = {}) {
+  return popup.arrowPoint || popup.pointerPoint || popup.targetPoint || null;
+}
+
+function hasPopupPoint(point) {
+  return (
+    Number.isFinite(Number(point?.pitch)) &&
+    Number.isFinite(Number(point?.yaw))
+  );
+}
+
+function getSafetyPopups(area = {}) {
+  return Array.isArray(area.safetyPopups) ? area.safetyPopups : [];
+}
+
+function getSceneSafetyPopups(scene = {}) {
+  const directPopups = Array.isArray(scene.safetyPopups)
+    ? scene.safetyPopups
+    : [];
+  const legacyPopups = Array.isArray(scene.machineAreas)
+    ? scene.machineAreas.flatMap((machineArea) => getSafetyPopups(machineArea))
+    : [];
+  const seen = new Set();
+
+  return [...directPopups, ...legacyPopups].filter((popup) => {
+    const key = popup?.id || `${popup?.title || "popup"}-${popup?.yaw}-${popup?.pitch}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function unwrapAdminYawAround(yaw, referenceYaw) {
+  let value = normalizeAdminYaw(yaw);
+  const reference = normalizeAdminYaw(referenceYaw);
+  while (value - reference > 180) value -= 360;
+  while (value - reference < -180) value += 360;
+  return value;
+}
+
+function isAdminPointInsideMachineArea(point, machineArea) {
+  if (!hasPopupPoint(point)) return false;
+  const points = getMachineAreaPoints(machineArea);
+  if (points.length < 3) return false;
+
+  const pointYaw = normalizeAdminYaw(point.yaw);
+  const pointPitch = normalizeAdminNumber(point.pitch, 0);
+  const polygon = points.map((polygonPoint) => ({
+    x: unwrapAdminYawAround(polygonPoint.yaw, pointYaw),
+    y: normalizeAdminNumber(polygonPoint.pitch, 0),
+  }));
+
+  let inside = false;
+  for (let currentIndex = 0, previousIndex = polygon.length - 1;
+    currentIndex < polygon.length;
+    previousIndex = currentIndex, currentIndex += 1) {
+    const current = polygon[currentIndex];
+    const previous = polygon[previousIndex];
+    const crosses =
+      current.y > pointPitch !== previous.y > pointPitch &&
+      pointYaw <
+        ((previous.x - current.x) * (pointPitch - current.y)) /
+          (previous.y - current.y || Number.EPSILON) +
+          current.x;
+    if (crosses) inside = !inside;
+  }
+
+  return inside;
+}
+
+function getAdminPointDistanceToMachineArea(point, machineArea) {
+  if (!hasPopupPoint(point)) return Number.POSITIVE_INFINITY;
+  const pointYaw = normalizeAdminYaw(point.yaw);
+  const pointPitch = normalizeAdminNumber(point.pitch, 0);
+  const points = getMachineAreaPoints(machineArea);
+  if (!points.length) return Number.POSITIVE_INFINITY;
+
+  return Math.min(
+    ...points.map((areaPoint) => {
+      const yawDistance =
+        unwrapAdminYawAround(areaPoint.yaw, pointYaw) - pointYaw;
+      const pitchDistance =
+        normalizeAdminNumber(areaPoint.pitch, 0) - pointPitch;
+      return Math.hypot(yawDistance, pitchDistance);
+    }),
+  );
+}
+
+function findMachineAreaForPopupPoint(point, machineAreas = []) {
+  const containingArea = machineAreas.find((machineArea) =>
+    isAdminPointInsideMachineArea(point, machineArea),
+  );
+  if (containingArea) return containingArea;
+
+  return [...machineAreas].sort(
+    (firstArea, secondArea) =>
+      getAdminPointDistanceToMachineArea(point, firstArea) -
+      getAdminPointDistanceToMachineArea(point, secondArea),
+  )[0] || null;
 }
 
 function projectPanoPointToScreen(point, viewer, element) {
@@ -316,6 +428,13 @@ function getProjectedMachineAreas(machineAreas = [], viewer, element) {
           screenPoints.length,
       };
 
+      const xValues = screenPoints.map((point) => point.x);
+      const yValues = screenPoints.map((point) => point.y);
+      const minX = Math.min(...xValues);
+      const maxX = Math.max(...xValues);
+      const minY = Math.min(...yValues);
+      const maxY = Math.max(...yValues);
+
       return {
         area: machineArea,
         id: machineArea.id || getMachineAreaTitle(machineArea),
@@ -324,6 +443,12 @@ function getProjectedMachineAreas(machineAreas = [], viewer, element) {
           .map((point) => `${point.x},${point.y}`)
           .join(" "),
         center,
+        bounds: {
+          x: minX,
+          y: minY,
+          width: Math.max(1, maxX - minX),
+          height: Math.max(1, maxY - minY),
+        },
       };
     })
     .filter(Boolean);
@@ -341,8 +466,10 @@ function PannellumStage({
   onGoToScene,
   machineDraftPoints = [],
   machineAreas = [],
+  safetyPopups = [],
   onEditMachineArea,
   onRemoveMachineArea,
+  onEditSafetyPopup,
   isDirectionPicking = false,
   directionTargetTitle = "",
 }) {
@@ -351,9 +478,14 @@ function PannellumStage({
   const viewMemoryRef = useRef(null);
   const onGoToSceneRef = useRef(onGoToScene);
   const onPickPointRef = useRef(onPickPoint);
+  const machinePolygonRefs = useRef(new Map());
+  const machineClipRefs = useRef(new Map());
+  const machineImageRefs = useRef(new Map());
+  const popupBoxRefs = useRef(new Map());
+  const popupLineRefs = useRef(new Map());
+  const popupArrowRefs = useRef(new Map());
   const [hoveredMachineArea, setHoveredMachineArea] = useState(null);
-  const [projectedMachineAreas, setProjectedMachineAreas] = useState([]);
-  const machineHoverCloseTimerRef = useRef(null);
+  const [hoveredMachineAreaId, setHoveredMachineAreaId] = useState(null);
   const selectedSceneId = scene?.id || "";
 
   const hotspotSignature = useMemo(() => {
@@ -365,21 +497,12 @@ function PannellumStage({
       )
       .join("|");
 
-    const machineSignature = (machineAreas || [])
-      .map(
-        (area) =>
-          `${area.id}:${getMachineAreaPoints(area)
-            .map((point) => `${point.pitch},${point.yaw}`)
-            .join(";")}`,
-      )
-      .join("|");
-
     const draftSignature = (machineDraftPoints || [])
       .map((point) => `${point.pitch},${point.yaw}`)
       .join("|");
 
-    return `${linkSignature}::${machineSignature}::${draftSignature}`;
-  }, [scene?.hotspots, machineAreas, machineDraftPoints]);
+    return `${linkSignature}::${draftSignature}`;
+  }, [scene?.hotspots, machineDraftPoints]);
 
   useEffect(() => {
     onGoToSceneRef.current = onGoToScene;
@@ -389,33 +512,14 @@ function PannellumStage({
     onPickPointRef.current = onPickPoint;
   }, [onPickPoint]);
 
-  function cancelMachineAreaClose() {
-    window.clearTimeout(machineHoverCloseTimerRef.current);
-    machineHoverCloseTimerRef.current = null;
-  }
-
   function showMachineArea(machineArea) {
-    cancelMachineAreaClose();
     setHoveredMachineArea(machineArea);
   }
 
-  function scheduleMachineAreaClose() {
-    cancelMachineAreaClose();
-    machineHoverCloseTimerRef.current = window.setTimeout(() => {
-      setHoveredMachineArea(null);
-    }, 140);
-  }
-
   useEffect(() => {
-    return () => cancelMachineAreaClose();
-  }, []);
-
-  useEffect(() => {
-    if (!showAreaLayer) {
-      cancelMachineAreaClose();
-      setHoveredMachineArea(null);
-    }
-  }, [showAreaLayer]);
+    setHoveredMachineArea(null);
+    setHoveredMachineAreaId(null);
+  }, [showAreaLayer, areaMode, selectedSceneId]);
 
   function rememberCurrentAdminView() {
     const viewer = viewerRef.current;
@@ -575,6 +679,7 @@ function PannellumStage({
     } catch {}
 
     return () => {
+      rememberCurrentAdminView();
       try {
         viewerRef.current?.destroy?.();
       } catch {}
@@ -583,53 +688,98 @@ function PannellumStage({
   }, [image, selectedSceneId, hotspotSignature, scenesById]);
 
   useEffect(() => {
-    setProjectedMachineAreas([]);
     setHoveredMachineArea(null);
 
     let animationFrame = 0;
-    let lastSignature = "__init__";
 
-    function updateProjectedMachineAreas() {
+    function updateOverlayPositions() {
       const viewer = viewerRef.current;
       const element = mountRef.current;
 
-      if (!viewer || !element || !machineAreas.length) {
-        if (lastSignature !== "__empty__") {
-          lastSignature = "__empty__";
-          setProjectedMachineAreas([]);
-        }
-        animationFrame = window.requestAnimationFrame(
-          updateProjectedMachineAreas,
-        );
-        return;
+      if (viewer && element) {
+        machineAreas.forEach((machineArea) => {
+          const id = machineArea.id || getMachineAreaTitle(machineArea);
+          const projected = getProjectedMachineAreas(
+            [machineArea],
+            viewer,
+            element,
+          )[0];
+          const polygon = machinePolygonRefs.current.get(id);
+          const clip = machineClipRefs.current.get(id);
+          const imageElement = machineImageRefs.current.get(id);
+
+          if (!projected) {
+            polygon?.setAttribute("visibility", "hidden");
+            clip?.setAttribute("visibility", "hidden");
+            imageElement?.setAttribute("visibility", "hidden");
+            return;
+          }
+
+          polygon?.setAttribute("visibility", "visible");
+          polygon?.setAttribute("points", projected.pointsAttr);
+          clip?.setAttribute("visibility", "visible");
+          clip?.setAttribute("points", projected.pointsAttr);
+
+          if (imageElement) {
+            imageElement.setAttribute("visibility", "visible");
+            imageElement.setAttribute("x", String(projected.bounds.x));
+            imageElement.setAttribute("y", String(projected.bounds.y));
+            imageElement.setAttribute("width", String(projected.bounds.width));
+            imageElement.setAttribute("height", String(projected.bounds.height));
+          }
+        });
+
+        safetyPopups.forEach((popup) => {
+          const areaPoint = getPopupAreaPoint(popup);
+          const arrowPoint = getPopupArrowPoint(popup);
+          const boxPosition = hasPopupPoint(areaPoint)
+            ? projectPanoPointToScreen(areaPoint, viewer, element)
+            : null;
+          const arrowPosition = hasPopupPoint(arrowPoint)
+            ? projectPanoPointToScreen(arrowPoint, viewer, element)
+            : null;
+          const box = popupBoxRefs.current.get(popup.id);
+          const line = popupLineRefs.current.get(popup.id);
+          const arrow = popupArrowRefs.current.get(popup.id);
+
+          if (!boxPosition) {
+            if (box) box.style.visibility = "hidden";
+            line?.setAttribute("visibility", "hidden");
+            arrow?.setAttribute("visibility", "hidden");
+            return;
+          }
+
+          if (box) {
+            box.style.visibility = "visible";
+            box.style.transform = `translate3d(${boxPosition.x}px, ${boxPosition.y}px, 0)`;
+          }
+
+          if (line && arrowPosition) {
+            line.setAttribute("visibility", "visible");
+            line.setAttribute("x1", String(boxPosition.x));
+            line.setAttribute("y1", String(boxPosition.y));
+            line.setAttribute("x2", String(arrowPosition.x));
+            line.setAttribute("y2", String(arrowPosition.y));
+          } else {
+            line?.setAttribute("visibility", "hidden");
+          }
+
+          if (arrow && arrowPosition) {
+            arrow.setAttribute("visibility", "visible");
+            arrow.setAttribute("cx", String(arrowPosition.x));
+            arrow.setAttribute("cy", String(arrowPosition.y));
+          } else {
+            arrow?.setAttribute("visibility", "hidden");
+          }
+        });
       }
 
-      const nextProjected = getProjectedMachineAreas(
-        machineAreas,
-        viewer,
-        element,
-      );
-      const nextSignature =
-        nextProjected
-          .map((item) => `${item.id}:${item.pointsAttr}`)
-          .join("|") || "__empty__";
-
-      if (nextSignature !== lastSignature) {
-        lastSignature = nextSignature;
-        setProjectedMachineAreas(nextProjected);
-      }
-
-      animationFrame = window.requestAnimationFrame(
-        updateProjectedMachineAreas,
-      );
+      animationFrame = window.requestAnimationFrame(updateOverlayPositions);
     }
 
-    updateProjectedMachineAreas();
-    return () => {
-      setProjectedMachineAreas([]);
-      window.cancelAnimationFrame(animationFrame);
-    };
-  }, [machineAreas, selectedSceneId]);
+    updateOverlayPositions();
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [machineAreas, safetyPopups, selectedSceneId]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -768,70 +918,127 @@ function PannellumStage({
         />
       )}
 
-      {showAreaLayer && projectedMachineAreas.length > 0 && (
+      {showAreaLayer && machineAreas.length > 0 && (
         <svg
           className={`machine-area-screen-overlay admin-machine-area-screen-overlay is-${areaMode}`}
-          aria-hidden="true"
         >
           <defs>
-            {projectedMachineAreas.map((item) => {
-              const previewImage = getMachineAreaHoverImage(item.area);
-              if (!previewImage) return null;
-              const patternId = getMachineAreaPatternId(
-                "admin-machine-area-fill",
-                item.id,
-              );
+            {machineAreas.map((machineArea) => {
+              const id = machineArea.id || getMachineAreaTitle(machineArea);
               return (
-                <pattern
-                  key={patternId}
-                  id={patternId}
-                  patternUnits="objectBoundingBox"
-                  patternContentUnits="objectBoundingBox"
-                  width="1"
-                  height="1"
-                >
-                  <image
-                    href={previewImage}
-                    x="0"
-                    y="0"
-                    width="1"
-                    height="1"
-                    preserveAspectRatio="xMidYMid slice"
+                <clipPath key={`clip-${id}`} id={`admin-machine-clip-${id}`}>
+                  <polygon
+                    ref={(node) => {
+                      if (node) machineClipRefs.current.set(id, node);
+                      else machineClipRefs.current.delete(id);
+                    }}
                   />
-                </pattern>
+                </clipPath>
               );
             })}
           </defs>
 
-          {projectedMachineAreas.map((item) => {
-            const isActive = hoveredMachineArea?.id === item.area.id;
-            const previewImage = isActive
-              ? getMachineAreaHoverImage(item.area)
-              : "";
-            const patternId = getMachineAreaPatternId(
-              "admin-machine-area-fill",
-              item.id,
-            );
+          {areaMode === "safety" &&
+            machineAreas.map((machineArea) => {
+              const id = machineArea.id || getMachineAreaTitle(machineArea);
+              const hoverImage = resolveAssetUrl(machineArea.hoverImage);
+              if (!hoverImage) return null;
 
+              return (
+                <image
+                  key={`hover-${id}`}
+                  ref={(node) => {
+                    if (node) machineImageRefs.current.set(id, node);
+                    else machineImageRefs.current.delete(id);
+                  }}
+                  className={`machine-area-hover-image ${hoveredMachineAreaId === machineArea.id ? "is-visible" : ""}`}
+                  href={hoverImage}
+                  preserveAspectRatio="xMidYMid slice"
+                  clipPath={`url(#admin-machine-clip-${id})`}
+                />
+              );
+            })}
+
+          {machineAreas.map((machineArea) => {
+            const id = machineArea.id || getMachineAreaTitle(machineArea);
+            const isActive = hoveredMachineArea?.id === machineArea.id;
+            const isHovered = hoveredMachineAreaId === machineArea.id;
             return (
               <polygon
-                key={item.id}
-                className={`machine-area-screen-polygon ${isActive ? "is-active" : ""} ${previewImage ? "has-preview-fill" : ""}`}
-                points={item.pointsAttr}
-                style={
-                  previewImage ? { fill: `url(#${patternId})` } : undefined
-                }
-                onMouseEnter={() => showMachineArea(item.area)}
-                onMouseLeave={scheduleMachineAreaClose}
+                key={id}
+                ref={(node) => {
+                  if (node) machinePolygonRefs.current.set(id, node);
+                  else machinePolygonRefs.current.delete(id);
+                }}
+                className={`machine-area-screen-polygon ${isActive || isHovered ? "is-active" : ""}`}
+                onMouseEnter={() => setHoveredMachineAreaId(machineArea.id)}
+                onMouseLeave={() => setHoveredMachineAreaId(null)}
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
-                  showMachineArea(item.area);
+                  showMachineArea(machineArea);
                 }}
               />
             );
           })}
         </svg>
+      )}
+
+      {areaMode === "safety" && safetyPopups.length > 0 && (
+        <>
+          <svg className="admin-safety-popup-links" aria-hidden="true">
+            <defs>
+              <marker
+                id="admin-safety-popup-arrowhead"
+                viewBox="0 0 10 10"
+                refX="8"
+                refY="5"
+                markerWidth="6"
+                markerHeight="6"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" />
+              </marker>
+            </defs>
+            {safetyPopups.map((popup) => (
+              <g key={`link-${popup.id}`}>
+                <line
+                  ref={(node) => {
+                    if (node) popupLineRefs.current.set(popup.id, node);
+                    else popupLineRefs.current.delete(popup.id);
+                  }}
+                  markerEnd="url(#admin-safety-popup-arrowhead)"
+                />
+                <circle
+                  ref={(node) => {
+                    if (node) popupArrowRefs.current.set(popup.id, node);
+                    else popupArrowRefs.current.delete(popup.id);
+                  }}
+                  r="5"
+                />
+              </g>
+            ))}
+          </svg>
+          <div className="admin-safety-popup-boxes">
+            {safetyPopups.map((popup) => (
+              <button
+                key={popup.id}
+                ref={(node) => {
+                  if (node) popupBoxRefs.current.set(popup.id, node);
+                  else popupBoxRefs.current.delete(popup.id);
+                }}
+                type="button"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onEditSafetyPopup?.(popup);
+                }}
+              >
+                {popup.title || "Popup"}
+              </button>
+            ))}
+          </div>
+        </>
       )}
 
       <div
@@ -851,40 +1058,49 @@ function PannellumStage({
 
       {showAreaLayer && hoveredMachineArea && (
         <aside
-          className="machine-area-info-card admin-machine-area-info-card"
-          onMouseEnter={cancelMachineAreaClose}
-          onMouseLeave={scheduleMachineAreaClose}
+          className={`machine-area-info-card admin-machine-area-info-card is-${areaMode}`}
           onClick={(event) => event.stopPropagation()}
         >
           <div className="machine-area-info-header">
-            <span>{areaMode === "safety" ? "Safety Area" : "Tutor Area"}</span>
+            <span>
+              {areaMode === "safety" ? "Safety Machine" : "Tour Machine"}
+            </span>
             <button type="button" onClick={() => setHoveredMachineArea(null)}>
               ×
             </button>
           </div>
-          <strong>{getMachineAreaTitle(hoveredMachineArea)}</strong>
-          {hoveredMachineArea.machineType && (
-            <em>{hoveredMachineArea.machineType}</em>
-          )}
-          {getMachineAreaPopupImage(hoveredMachineArea) && (
+          {areaMode === "safety" && hoveredMachineArea.image && (
             <img
-              src={getMachineAreaPopupImage(hoveredMachineArea)}
+              className="machine-area-popup-image"
+              src={resolveAssetUrl(hoveredMachineArea.image)}
               alt={getMachineAreaTitle(hoveredMachineArea)}
             />
           )}
-          {hoveredMachineArea.hazard && (
-            <p>
-              <b>Hazard:</b> {hoveredMachineArea.hazard}
-            </p>
-          )}
-          {hoveredMachineArea.safetyNote && (
-            <p>
-              <b>Safety:</b> {hoveredMachineArea.safetyNote}
-            </p>
-          )}
-          {hoveredMachineArea.description && (
-            <p>{hoveredMachineArea.description}</p>
-          )}
+          <dl className="machine-area-details">
+            <div>
+              <dt>Machine Name</dt>
+              <dd>{getMachineAreaTitle(hoveredMachineArea)}</dd>
+            </div>
+            <div>
+              <dt>{areaMode === "safety" ? "Safety Purpose" : "Purpose"}</dt>
+              <dd>
+                {getMachineAreaPurpose(hoveredMachineArea, areaMode) ||
+                  "No purpose added."}
+              </dd>
+            </div>
+            {areaMode === "safety" && hoveredMachineArea.hazard && (
+              <div>
+                <dt>Hazard</dt>
+                <dd>{hoveredMachineArea.hazard}</dd>
+              </div>
+            )}
+            {areaMode === "safety" && hoveredMachineArea.safetyNote && (
+              <div>
+                <dt>Safety</dt>
+                <dd>{hoveredMachineArea.safetyNote}</dd>
+              </div>
+            )}
+          </dl>
           <div className="machine-area-card-actions">
             <button
               type="button"
@@ -978,9 +1194,13 @@ function AdminAreaConfigPage() {
   const [machineAreaDraftPoints, setMachineAreaDraftPoints] = useState([]);
   const [isMachineModalOpen, setIsMachineModalOpen] = useState(false);
   const [machineForm, setMachineForm] = useState(EMPTY_MACHINE_FORM);
-  const [editingMachineAreaId, setEditingMachineAreaId] = useState(null);
   const [machineImageFile, setMachineImageFile] = useState(null);
   const [machineHoverImageFile, setMachineHoverImageFile] = useState(null);
+  const [safetyPopups, setSafetyPopups] = useState([]);
+  const [safetyPopupForm, setSafetyPopupForm] = useState(EMPTY_SAFETY_POPUP_FORM);
+  const [editingSafetyPopupId, setEditingSafetyPopupId] = useState(null);
+  const [safetyEditorTab, setSafetyEditorTab] = useState("safety");
+  const [editingMachineAreaId, setEditingMachineAreaId] = useState(null);
   const [isLocationManagerOpen, setIsLocationManagerOpen] = useState(false);
   const [mapModalMode, setMapModalMode] = useState("jump");
   const [adminStationMode, setAdminStationMode] = useState("tutor");
@@ -1060,6 +1280,9 @@ function AdminAreaConfigPage() {
       ),
     [selectedMachineAreas, adminStationMode],
   );
+  const activeSafetyPopup = editingSafetyPopupId
+    ? safetyPopups.find((popup) => popup.id === editingSafetyPopupId) || null
+    : null;
 
   const selectedHotspots = useMemo(() => {
     return (selectedScene?.hotspots || []).filter(
@@ -1285,8 +1508,6 @@ function AdminAreaConfigPage() {
     if (editingMachineAreaId === machineAreaId) {
       setEditingMachineAreaId(null);
       setMachineAreaDraftPoints([]);
-      setMachineImageFile(null);
-      setMachineHoverImageFile(null);
       setMachineForm(EMPTY_MACHINE_FORM);
     }
   }
@@ -1387,7 +1608,11 @@ function AdminAreaConfigPage() {
     setMachineForm(EMPTY_MACHINE_FORM);
     setMachineImageFile(null);
     setMachineHoverImageFile(null);
+    setSafetyPopups(getSceneSafetyPopups(selectedScene));
+    setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+    setEditingSafetyPopupId(null);
     setEditingMachineAreaId(null);
+    setSafetyEditorTab("safety");
     setIsMachineModalOpen(true);
   }
 
@@ -1395,19 +1620,27 @@ function AdminAreaConfigPage() {
     if (!machineArea?.id) return;
     setAdminStationMode(getMachineAreaMode(machineArea));
     setEditingMachineAreaId(machineArea.id);
+    const machineMode = getMachineAreaMode(machineArea);
     setMachineForm({
       machineName: machineArea.machineName || machineArea.name || "",
-      machineType: machineArea.machineType || "",
+      purpose: getMachineAreaPurpose(machineArea, machineMode),
       hazard: machineArea.hazard || "",
-      safetyNote: machineArea.safetyNote || "",
-      description: machineArea.description || "",
-      image: machineArea.image || "",
-      hoverImage: machineArea.hoverImage || "",
+      safetyNote: machineArea.safetyNote || machineArea.safety || "",
+      image: machineArea.image || machineArea.machineImage || "",
+      hoverImage:
+        machineArea.hoverImage ||
+        machineArea.openImage ||
+        machineArea.overlayImage ||
+        "",
     });
     setMachineImageFile(null);
     setMachineHoverImageFile(null);
+    setSafetyPopups(getSceneSafetyPopups(selectedScene));
+    setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+    setEditingSafetyPopupId(null);
     setMachineAreaDraftPoints(getMachineAreaPoints(machineArea));
     setMode("preview");
+    setSafetyEditorTab("safety");
     setIsMachineModalOpen(true);
   }
 
@@ -1417,9 +1650,128 @@ function AdminAreaConfigPage() {
     setMachineForm(EMPTY_MACHINE_FORM);
     setMachineImageFile(null);
     setMachineHoverImageFile(null);
+    setSafetyPopups(getSceneSafetyPopups(selectedScene));
+    setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+    setEditingSafetyPopupId(null);
     setMachineAreaDraftPoints([]);
     setMode("preview");
+    setSafetyEditorTab("safety");
     setIsMachineModalOpen(true);
+  }
+
+  function openSafetyPopupEditor(popup) {
+    if (!popup?.id) return;
+    setAdminStationMode("safety");
+    setSafetyPopups(getSceneSafetyPopups(selectedScene));
+    setEditingSafetyPopupId(popup.id);
+    setSafetyEditorTab("popup");
+    setSafetyPopupForm({
+      title: popup.title || "",
+      content: popup.content || popup.paragraph || popup.description || "",
+      hazard: popup.hazard || "",
+      safetyNote: popup.safetyNote || popup.safety || "",
+    });
+    setMode("preview");
+    setIsMachineModalOpen(true);
+  }
+
+  function saveSceneSafetyPopups(nextPopups, message = "Popup saved") {
+    if (!selectedScene?.id) return;
+
+    const nextMachineAreas = Array.isArray(selectedScene.machineAreas)
+      ? selectedScene.machineAreas.map((machineArea) => {
+          const { safetyPopups: legacySafetyPopups, ...rest } = machineArea;
+          return rest;
+        })
+      : [];
+    const nextScene = {
+      ...selectedScene,
+      machineAreas: nextMachineAreas,
+      safetyPopups: nextPopups,
+    };
+
+    setSafetyPopups(nextPopups);
+    saveTour(
+      { ...tour, scenes: { ...tour.scenes, [selectedScene.id]: nextScene } },
+      message,
+    );
+  }
+
+  function removeSafetyPopup(popupId) {
+    const nextPopups = safetyPopups.filter((popup) => popup.id !== popupId);
+    saveSceneSafetyPopups(nextPopups, "Popup removed");
+    if (editingSafetyPopupId === popupId) {
+      setEditingSafetyPopupId(null);
+      setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+    }
+  }
+
+  function startNewSafetyPopup() {
+    setEditingSafetyPopupId(null);
+    setSafetyEditorTab("popup");
+    setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+  }
+
+  function startSafetyPopupAreaPick() {
+    if (adminStationMode !== "safety") return;
+    if (!safetyPopupForm.title.trim()) return alert("Popup title is required.");
+    setIsMachineModalOpen(false);
+    setMode("mark-safety-popup-area");
+  }
+
+  function startSafetyPopupArrowPick() {
+    if (adminStationMode !== "safety") return;
+    if (!safetyPopupForm.title.trim()) return alert("Popup title is required.");
+
+    const existingPopup = editingSafetyPopupId
+      ? safetyPopups.find((popup) => popup.id === editingSafetyPopupId)
+      : null;
+    if (!existingPopup || !hasPopupPoint(getPopupAreaPoint(existingPopup))) {
+      alert("Map the popup rectangle first.");
+      return;
+    }
+
+    setIsMachineModalOpen(false);
+    setMode("mark-safety-popup-arrow");
+  }
+
+  function saveSafetyPopupDetails() {
+    if (!safetyPopupForm.title.trim()) {
+      alert("Popup title is required.");
+      return false;
+    }
+
+    const existingPopup = editingSafetyPopupId
+      ? safetyPopups.find((popup) => popup.id === editingSafetyPopupId)
+      : null;
+
+    if (!existingPopup || !hasPopupPoint(getPopupAreaPoint(existingPopup))) {
+      alert("Click Map Popup, then click once in the panorama to place the rectangle.");
+      return false;
+    }
+
+    if (!hasPopupPoint(getPopupArrowPoint(existingPopup))) {
+      alert("Click Map Arrow, then choose where the arrow should point.");
+      return false;
+    }
+
+    const nextPopup = {
+      ...existingPopup,
+      title: safetyPopupForm.title.trim(),
+      content: safetyPopupForm.content.trim(),
+      hazard: safetyPopupForm.hazard.trim(),
+      safetyNote: safetyPopupForm.safetyNote.trim(),
+    };
+    const nextPopups = safetyPopups.map((popup) =>
+      popup.id === nextPopup.id ? nextPopup : popup,
+    );
+
+    saveSceneSafetyPopups(nextPopups, "Popup updated");
+    setIsMachineModalOpen(false);
+    setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+    setEditingSafetyPopupId(null);
+    setMode("preview");
+    return true;
   }
 
   function startMachineAreaPick({ reset = false } = {}) {
@@ -1450,12 +1802,22 @@ function AdminAreaConfigPage() {
     setEditingMachineAreaId(null);
     setMachineImageFile(null);
     setMachineHoverImageFile(null);
+    setSafetyPopups([]);
+    setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+    setEditingSafetyPopupId(null);
+    setSafetyEditorTab("safety");
     setMachineForm(EMPTY_MACHINE_FORM);
   }
 
   async function saveMachineArea(event) {
     event.preventDefault();
     if (!selectedScene?.id) return;
+
+    if (adminStationMode === "safety" && safetyEditorTab === "popup") {
+      saveSafetyPopupDetails();
+      return;
+    }
+
     if (machineAreaDraftPoints.length < 3)
       return alert(
         `Please mark at least 3 points around the ${adminStationMode} area.`,
@@ -1479,42 +1841,33 @@ function AdminAreaConfigPage() {
           currentMachineAreas.map((item) => item.id),
         );
 
-      let machineImagePath = machineForm.image || existing?.image || "";
-      let machineHoverImagePath =
-        machineForm.hoverImage || existing?.hoverImage || "";
+      let image = machineForm.image ?? existing?.image ?? "";
+      let hoverImage = machineForm.hoverImage ?? existing?.hoverImage ?? "";
 
-      if (machineImageFile) {
-        const uploadedImage = await uploadAssetFile(
-          machineImageFile,
-          "machines",
-        );
-        machineImagePath =
-          uploadedImage.publicPath || uploadedImage.url || machineImagePath;
+      if (adminStationMode === "safety" && machineImageFile) {
+        image = await uploadAdminImage(machineImageFile, "machines");
       }
 
-      if (machineHoverImageFile) {
-        const uploadedHoverImage = await uploadAssetFile(
-          machineHoverImageFile,
-          "machines",
-        );
-        machineHoverImagePath =
-          uploadedHoverImage.publicPath ||
-          uploadedHoverImage.url ||
-          machineHoverImagePath;
+      if (adminStationMode === "safety" && machineHoverImageFile) {
+        hoverImage = await uploadAdminImage(machineHoverImageFile, "machines");
       }
 
+      const purpose = machineForm.purpose.trim();
       const nextMachineArea = {
         ...(existing || {}),
         id: machineId,
         type: "machineArea",
         mode: adminStationMode,
         machineName: machineForm.machineName.trim(),
-        machineType: machineForm.machineType.trim(),
-        hazard: machineForm.hazard.trim(),
-        safetyNote: machineForm.safetyNote.trim(),
-        description: machineForm.description.trim(),
-        image: machineImagePath,
-        hoverImage: machineHoverImagePath,
+        purpose,
+        tutorPurpose: adminStationMode === "tutor" ? purpose : "",
+        safetyPurpose: adminStationMode === "safety" ? purpose : "",
+        hazard:
+          adminStationMode === "safety" ? machineForm.hazard.trim() : "",
+        safetyNote:
+          adminStationMode === "safety" ? machineForm.safetyNote.trim() : "",
+        image: adminStationMode === "safety" ? image : "",
+        hoverImage: adminStationMode === "safety" ? hoverImage : "",
         points: machineAreaDraftPoints,
       };
 
@@ -1527,9 +1880,10 @@ function AdminAreaConfigPage() {
       const nextScene = {
         ...selectedScene,
         machineAreas: nextMachineAreas,
+        safetyPopups: getSceneSafetyPopups(selectedScene),
       };
 
-      const modeLabel = adminStationMode === "safety" ? "Safety" : "Tutor";
+      const modeLabel = adminStationMode === "safety" ? "Safety" : "Tour";
       saveTour(
         { ...tour, scenes: { ...tour.scenes, [selectedScene.id]: nextScene } },
         existing ? `${modeLabel} area updated` : `${modeLabel} area saved`,
@@ -1538,6 +1892,10 @@ function AdminAreaConfigPage() {
       setMachineAreaDraftPoints([]);
       setMachineImageFile(null);
       setMachineHoverImageFile(null);
+      setSafetyPopups([]);
+      setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+      setEditingSafetyPopupId(null);
+      setSafetyEditorTab("safety");
       setMachineForm(EMPTY_MACHINE_FORM);
       setEditingMachineAreaId(null);
       setMode("preview");
@@ -1555,6 +1913,79 @@ function AdminAreaConfigPage() {
 
       if (mode === "mark-machine-area") {
         setMachineAreaDraftPoints((currentPoints) => [...currentPoints, point]);
+        return;
+      }
+
+      if (
+        mode === "mark-safety-popup-area" ||
+        mode === "mark-safety-popup-arrow"
+      ) {
+        const popupId =
+          editingSafetyPopupId ||
+          createUniqueId(
+            `safety-popup-${safetyPopupForm.title}`,
+            safetyPopups.map((popup) => popup.id),
+          );
+        const existingPopup =
+          safetyPopups.find((popup) => popup.id === popupId) || {};
+        const popupArea =
+          mode === "mark-safety-popup-area"
+            ? point
+            : getPopupAreaPoint(existingPopup);
+        const arrowPoint =
+          mode === "mark-safety-popup-arrow"
+            ? point
+            : getPopupArrowPoint(existingPopup);
+        const mappedMachineArea = hasPopupPoint(arrowPoint)
+          ? findMachineAreaForPopupPoint(
+              arrowPoint,
+              selectedMachineAreas.filter(
+                (machineArea) => getMachineAreaMode(machineArea) === "safety",
+              ),
+            )
+          : null;
+        const nextPopup = {
+          ...existingPopup,
+          id: popupId,
+          title: safetyPopupForm.title.trim(),
+          content: safetyPopupForm.content.trim(),
+          hazard: safetyPopupForm.hazard.trim(),
+          safetyNote: safetyPopupForm.safetyNote.trim(),
+          machineAreaId:
+            mappedMachineArea?.id ||
+            existingPopup.machineAreaId ||
+            editingMachineAreaId ||
+            null,
+          popupArea,
+          arrowPoint: hasPopupPoint(arrowPoint) ? arrowPoint : null,
+          pitch: popupArea.pitch,
+          yaw: popupArea.yaw,
+          x: popupArea.x,
+          y: popupArea.y,
+        };
+
+        const nextPopups = safetyPopups.some((popup) => popup.id === popupId)
+          ? safetyPopups.map((popup) =>
+              popup.id === popupId ? nextPopup : popup,
+            )
+          : [...safetyPopups, nextPopup];
+
+        saveSceneSafetyPopups(
+          nextPopups,
+          mode === "mark-safety-popup-area"
+            ? "Popup rectangle mapped"
+            : "Popup arrow mapped",
+        );
+        setSafetyPopupForm({
+          title: nextPopup.title,
+          content: nextPopup.content,
+          hazard: nextPopup.hazard,
+          safetyNote: nextPopup.safetyNote,
+        });
+        setEditingSafetyPopupId(popupId);
+        setSafetyEditorTab("popup");
+        setMode("preview");
+        setIsMachineModalOpen(true);
         return;
       }
 
@@ -1615,7 +2046,20 @@ function AdminAreaConfigPage() {
         setMode("preview");
       }
     },
-    [mode, pendingTargetSceneId, selectedScene, tour],
+    [
+      editingMachineAreaId,
+      editingSafetyPopupId,
+      mode,
+      pendingTargetSceneId,
+      safetyPopupForm.content,
+      safetyPopupForm.hazard,
+      safetyPopupForm.safetyNote,
+      safetyPopupForm.title,
+      safetyPopups,
+      selectedMachineAreas,
+      selectedScene,
+      tour,
+    ],
   );
 
   function changeStationMode(nextMode) {
@@ -1623,6 +2067,15 @@ function AdminAreaConfigPage() {
     setMode("preview");
     setPendingTargetSceneId(null);
     setMachineAreaDraftPoints([]);
+    setIsMachineModalOpen(false);
+    setEditingMachineAreaId(null);
+    setMachineImageFile(null);
+    setMachineHoverImageFile(null);
+    setSafetyPopups([]);
+    setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+    setEditingSafetyPopupId(null);
+    setSafetyEditorTab("safety");
+    setMachineForm(EMPTY_MACHINE_FORM);
   }
 
   const goToScene = useCallback(
@@ -1999,7 +2452,7 @@ function AdminAreaConfigPage() {
                   className={adminStationMode === "tutor" ? "active" : ""}
                   onClick={() => changeStationMode("tutor")}
                 >
-                  Tutor Mode
+                  Tour Mode
                 </button>
                 <button
                   type="button"
@@ -2047,21 +2500,30 @@ function AdminAreaConfigPage() {
               showAreaLayer={mode !== "mark-location"}
               areaMode={adminStationMode}
               isPicking={
-                mode === "mark-location" || mode === "mark-machine-area"
+                mode === "mark-location" ||
+                mode === "mark-machine-area" ||
+                mode === "mark-safety-popup-area" ||
+                mode === "mark-safety-popup-arrow"
               }
               pickLabel={
                 mode === "mark-machine-area"
                   ? `Click ${adminStationMode} area corners (${machineAreaDraftPoints.length} point(s))`
-                  : mode === "mark-location" && pendingTargetScene
-                    ? `Click direction toward ${getSceneTitle(pendingTargetScene)}`
-                    : "Click inside the panorama"
+                  : mode === "mark-safety-popup-area"
+                    ? "Click where the popup rectangle should appear"
+                    : mode === "mark-safety-popup-arrow"
+                      ? "Click where the popup arrow should point"
+                      : mode === "mark-location" && pendingTargetScene
+                        ? `Click direction toward ${getSceneTitle(pendingTargetScene)}`
+                        : "Click inside the panorama"
               }
               onPickPoint={handlePanoPick}
               onGoToScene={goToScene}
               machineDraftPoints={machineAreaDraftPoints}
               machineAreas={activeMachineAreas}
+              safetyPopups={getSceneSafetyPopups(selectedScene)}
               onEditMachineArea={openMachineAreaEditor}
               onRemoveMachineArea={removeMachineArea}
+              onEditSafetyPopup={openSafetyPopupEditor}
               isDirectionPicking={mode === "mark-location"}
               directionTargetTitle={
                 pendingTargetScene ? getSceneTitle(pendingTargetScene) : ""
@@ -2104,7 +2566,7 @@ function AdminAreaConfigPage() {
               disabled={!selectedScene}
             >
               <span>
-                {adminStationMode === "safety" ? "Safety Mode" : "Tutor Mode"}
+                {adminStationMode === "safety" ? "Safety Mode" : "Tour Mode"}
               </span>
               <strong>
                 {mode === "mark-machine-area" ? "Cancel Edit" : "Edit"}
@@ -2252,14 +2714,14 @@ function AdminAreaConfigPage() {
           onMouseDown={() => !isSaving && cancelMachineAreaDraft()}
         >
           <form
-            className="admin-config-add-modal-v2 machine-area-modal"
+            className={`admin-config-add-modal-v2 machine-area-modal ${adminStationMode === "safety" ? "is-safety" : "is-tour"}`}
             onMouseDown={(event) => event.stopPropagation()}
             onSubmit={saveMachineArea}
           >
-            <div className="admin-config-modal-header-v2">
+            <div className="admin-config-modal-header-v2 machine-area-modal-header">
               <div>
                 <span>
-                  {adminStationMode === "safety" ? "Safety Area" : "Tutor Area"}
+                  {adminStationMode === "safety" ? "Safety Area" : "Tour Area"}
                 </span>
                 <strong>
                   {editingMachineAreaId
@@ -2267,213 +2729,496 @@ function AdminAreaConfigPage() {
                     : "Add information first, then mark the area"}
                 </strong>
               </div>
-              <button
-                type="button"
-                disabled={isSaving}
-                onClick={cancelMachineAreaDraft}
-              >
-                ×
-              </button>
+
+              <div className="machine-area-modal-header-actions">
+                {adminStationMode === "safety" && (
+                  <div
+                    className={`admin-mode-switch-v3 machine-area-editor-switch ${safetyEditorTab === "popup" ? "is-safety" : "is-tutor"}`}
+                    role="group"
+                    aria-label="Safety editor section"
+                  >
+                    <button
+                      type="button"
+                      className={safetyEditorTab === "safety" ? "active" : ""}
+                      onClick={() => setSafetyEditorTab("safety")}
+                    >
+                      Safety
+                    </button>
+                    <button
+                      type="button"
+                      className={safetyEditorTab === "popup" ? "active safety" : ""}
+                      onClick={() => setSafetyEditorTab("popup")}
+                    >
+                      Pop up
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  className="machine-area-modal-close"
+                  disabled={isSaving}
+                  onClick={cancelMachineAreaDraft}
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
             </div>
 
             <div className="machine-area-point-summary">
-              <strong>{machineAreaDraftPoints.length}</strong> marked point
-              {machineAreaDraftPoints.length === 1 ? "" : "s"}. Fill the fields,
-              then click Mark Area whenever you are ready.
+              {adminStationMode === "safety" && safetyEditorTab === "popup" ? (
+                <>
+                  <strong>2</strong> mapping steps: place the popup rectangle, then
+                  place its connecting arrow.
+                </>
+              ) : (
+                <>
+                  <strong>{machineAreaDraftPoints.length}</strong> marked point
+                  {machineAreaDraftPoints.length === 1 ? "" : "s"}. Fill the fields,
+                  then click Mark Area whenever you are ready.
+                </>
+              )}
             </div>
 
-            {activeMachineAreas.length > 0 && (
-              <section className="machine-area-saved-list">
-                <div className="machine-area-saved-list-head">
-                  <div>
-                    <span>Marked Entries</span>
-                    <strong>{activeMachineAreas.length} saved</strong>
-                  </div>
-                  <button type="button" onClick={startNewMachineAreaForm}>
-                    New
-                  </button>
-                </div>
+            {adminStationMode === "safety" ? (
+              <div className="machine-area-modal-layout is-safety">
+                <section className="machine-area-main-panel is-editor-panel">
+                  {safetyEditorTab === "safety" ? (
+                    <>
+                      <div className="machine-area-panel-head compact">
+                        <div>
+                          <span>Safety</span>
+                          <strong>Area information</strong>
+                        </div>
+                      </div>
 
-                <div className="machine-area-saved-items">
-                  {activeMachineAreas.map((machineArea, index) => {
-                    const isEditing = editingMachineAreaId === machineArea.id;
-                    const points = getMachineAreaPoints(machineArea).length;
-                    return (
-                      <article
-                        key={machineArea.id || index}
-                        className={`machine-area-saved-item ${isEditing ? "is-editing" : ""}`}
-                      >
+                      <div className="machine-area-field-grid machine-area-field-grid-safety">
+                        <label className="admin-config-form-field-v2 machine-name-field">
+                          <span>Machine Name</span>
+                          <input
+                            value={machineForm.machineName}
+                            onChange={(event) =>
+                              setMachineForm((current) => ({
+                                ...current,
+                                machineName: event.target.value,
+                              }))
+                            }
+                            placeholder="Example: FD12A Filler"
+                            autoFocus
+                          />
+                        </label>
+
+                        <label className="admin-config-form-field-v2">
+                          <span>Description</span>
+                          <textarea
+                            value={machineForm.purpose}
+                            onChange={(event) =>
+                              setMachineForm((current) => ({
+                                ...current,
+                                purpose: event.target.value,
+                              }))
+                            }
+                            placeholder="Example: Prevents access to moving parts while the machine is running."
+                          />
+                        </label>
+                      </div>
+
+                      <div className="machine-area-media-grid compact-media-grid">
+                        <div className="machine-area-media-field compact-media-field">
+                          <div>
+                            <strong>Popup Image</strong>
+                            <span>Shown when the Safety area is opened.</span>
+                          </div>
+                          <label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(event) =>
+                                setMachineImageFile(event.target.files?.[0] || null)
+                              }
+                            />
+                            <b>
+                              {machineImageFile?.name ||
+                                (machineForm.image ? "Replace image" : "Choose image")}
+                            </b>
+                          </label>
+                          {(machineForm.image || machineImageFile) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setMachineImageFile(null);
+                                setMachineForm((current) => ({
+                                  ...current,
+                                  image: "",
+                                }));
+                              }}
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="machine-area-media-field compact-media-field">
+                          <div>
+                            <strong>Hover Image</strong>
+                            <span>Shown while pointing at the marked area.</span>
+                          </div>
+                          <label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(event) =>
+                                setMachineHoverImageFile(event.target.files?.[0] || null)
+                              }
+                            />
+                            <b>
+                              {machineHoverImageFile?.name ||
+                                (machineForm.hoverImage ? "Replace image" : "Choose image")}
+                            </b>
+                          </label>
+                          {(machineForm.hoverImage || machineHoverImageFile) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setMachineHoverImageFile(null);
+                                setMachineForm((current) => ({
+                                  ...current,
+                                  hoverImage: "",
+                                }));
+                              }}
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="machine-area-mark-card">
+                        <div>
+                          <strong>Mark area on panorama</strong>
+                          <span>Click the button, then mark the machine outline in the panorama.</span>
+                        </div>
                         <button
                           type="button"
-                          className="machine-area-saved-main"
-                          onClick={() => openMachineAreaEditor(machineArea)}
+                          onClick={() => startMachineAreaPick({ reset: true })}
                         >
-                          <b>{String(index + 1).padStart(2, "0")}</b>
+                          {machineAreaDraftPoints.length ? "Re-mark Area" : "Mark Area"}
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="machine-area-panel-head compact">
+                        <div>
+                          <span>Pop up</span>
+                          <strong>Information details</strong>
+                        </div>
+                      </div>
+
+                      <div className="machine-area-popup-form">
+                        <label className="admin-config-form-field-v2">
+                          <span>Popup Title</span>
+                          <input
+                            value={safetyPopupForm.title}
+                            onChange={(event) =>
+                              setSafetyPopupForm((current) => ({
+                                ...current,
+                                title: event.target.value,
+                              }))
+                            }
+                            placeholder="Example: Keep Hands Clear"
+                          />
+                        </label>
+
+                        <label className="admin-config-form-field-v2 popup-description-field">
+                          <span>Popup Description</span>
+                          <textarea
+                            value={safetyPopupForm.content}
+                            onChange={(event) =>
+                              setSafetyPopupForm((current) => ({
+                                ...current,
+                                content: event.target.value,
+                              }))
+                            }
+                            placeholder="Example: This area contains moving parts. Do not reach through the guard while the machine is running."
+                          />
+                        </label>
+
+                        <label className="admin-config-form-field-v2">
+                          <span>Hazard</span>
+                          <textarea
+                            value={safetyPopupForm.hazard}
+                            onChange={(event) =>
+                              setSafetyPopupForm((current) => ({
+                                ...current,
+                                hazard: event.target.value,
+                              }))
+                            }
+                            placeholder="Example: Moving parts and pinch points."
+                          />
+                        </label>
+
+                        <label className="admin-config-form-field-v2">
+                          <span>Safety Instructions</span>
+                          <textarea
+                            value={safetyPopupForm.safetyNote}
+                            onChange={(event) =>
+                              setSafetyPopupForm((current) => ({
+                                ...current,
+                                safetyNote: event.target.value,
+                              }))
+                            }
+                            placeholder="Example: Keep guards closed and isolate power before access."
+                          />
+                        </label>
+                      </div>
+
+                      <div className="popup-placement-grid">
+                        <div className="machine-area-mark-card popup-mark-card">
                           <div>
-                            <strong>{getMachineAreaTitle(machineArea)}</strong>
+                            <strong>Map popup rectangle</strong>
                             <span>
-                              {machineArea.hazard ||
-                                machineArea.safetyNote ||
-                                `${points} point${points === 1 ? "" : "s"}`}
+                              {hasPopupPoint(getPopupAreaPoint(activeSafetyPopup || {}))
+                                ? "Popup position mapped. Click again to move it."
+                                : "Click once where the popup rectangle should appear."}
                             </span>
                           </div>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => openMachineAreaEditor(machineArea)}
-                        >
-                          {isEditing ? "Editing" : "Edit"}
-                        </button>
-                        <button
-                          type="button"
-                          className="danger"
-                          onClick={() => removeMachineArea(machineArea.id)}
-                        >
-                          Delete
-                        </button>
-                      </article>
-                    );
-                  })}
-                </div>
-              </section>
+                          <button type="button" onClick={startSafetyPopupAreaPick}>
+                            {hasPopupPoint(getPopupAreaPoint(activeSafetyPopup || {}))
+                              ? "Re-map Popup"
+                              : "Map Popup"}
+                          </button>
+                        </div>
+
+                        <div className="machine-area-mark-card popup-mark-card">
+                          <div>
+                            <strong>Map connecting arrow</strong>
+                            <span>
+                              {hasPopupPoint(getPopupArrowPoint(activeSafetyPopup || {}))
+                                ? "Arrow target mapped. Click again to move it."
+                                : "Click once where the arrow should point."}
+                            </span>
+                          </div>
+                          <button type="button" onClick={startSafetyPopupArrowPick}>
+                            {hasPopupPoint(getPopupArrowPoint(activeSafetyPopup || {}))
+                              ? "Re-map Arrow"
+                              : "Map Arrow"}
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </section>
+
+                <section className="machine-area-popup-panel is-list-panel">
+                  <div className="machine-area-panel-head">
+                    <div>
+                      <span>{safetyEditorTab === "safety" ? "Safety areas" : "Popup markers"}</span>
+                      <strong>
+                        {safetyEditorTab === "safety"
+                          ? "Marked machine areas"
+                          : "Popup markers on panorama"}
+                      </strong>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="machine-area-new-button"
+                      onClick={
+                        safetyEditorTab === "safety"
+                          ? startNewMachineAreaForm
+                          : startNewSafetyPopup
+                      }
+                    >
+                      {safetyEditorTab === "safety" ? "+ New Area" : "+ New Popup"}
+                    </button>
+                  </div>
+
+                  <div className="safety-popup-help">
+                    {safetyEditorTab === "safety"
+                      ? "Manage your marked Safety areas here. Click Edit to load the selected area back into the form."
+                      : "Manage your popup markers here. Click Edit to load the selected popup details back into the form."}
+                  </div>
+
+                  {safetyEditorTab === "safety" ? (
+                    activeMachineAreas.length > 0 ? (
+                      <div className="machine-area-saved-items machine-area-safety-list">
+                        {activeMachineAreas.map((machineArea, index) => {
+                          const isEditing = editingMachineAreaId === machineArea.id;
+                          const points = getMachineAreaPoints(machineArea).length;
+                          return (
+                            <article
+                              key={machineArea.id || index}
+                              className={`machine-area-saved-item ${isEditing ? "is-editing" : ""}`}
+                            >
+                              <button
+                                type="button"
+                                className="machine-area-saved-main"
+                                onClick={() => openMachineAreaEditor(machineArea)}
+                              >
+                                <b>{String(index + 1).padStart(2, "0")}</b>
+                                <div>
+                                  <strong>{getMachineAreaTitle(machineArea)}</strong>
+                                  <span>
+                                    {getMachineAreaPurpose(
+                                      machineArea,
+                                      getMachineAreaMode(machineArea),
+                                    ) || `${points} point${points === 1 ? "" : "s"}`}
+                                  </span>
+                                </div>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => openMachineAreaEditor(machineArea)}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                className="danger"
+                                onClick={() => removeMachineArea(machineArea.id)}
+                              >
+                                Delete
+                              </button>
+                            </article>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="machine-area-empty-state">No Safety areas yet.</div>
+                    )
+                  ) : safetyPopups.length > 0 ? (
+                    <div className="machine-area-saved-items safety-popup-saved-items">
+                      {safetyPopups.map((popup, index) => {
+                        const isEditingPopup = editingSafetyPopupId === popup.id;
+                        return (
+                          <article
+                            key={popup.id || index}
+                            className={`machine-area-saved-item ${isEditingPopup ? "is-editing" : ""}`}
+                          >
+                            <button
+                              type="button"
+                              className="machine-area-saved-main"
+                              onClick={() => openSafetyPopupEditor(popup)}
+                            >
+                              <b>{String(index + 1).padStart(2, "0")}</b>
+                              <div>
+                                <strong>{popup.title || "Popup"}</strong>
+                                <span>{popup.content || "No details added."}</span>
+                              </div>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openSafetyPopupEditor(popup)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="danger"
+                              onClick={() => removeSafetyPopup(popup.id)}
+                            >
+                              Delete
+                            </button>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="machine-area-empty-state">No popup markers yet.</div>
+                  )}
+                </section>
+              </div>
+            ) : (
+              <>
+                {activeMachineAreas.length > 0 && (
+                  <section className="machine-area-saved-list">
+                    <div className="machine-area-saved-list-head">
+                      <div>
+                        <span>Marked Entries</span>
+                        <strong>{activeMachineAreas.length} saved</strong>
+                      </div>
+                      <button type="button" onClick={startNewMachineAreaForm}>
+                        New
+                      </button>
+                    </div>
+
+                    <div className="machine-area-saved-items">
+                      {activeMachineAreas.map((machineArea, index) => {
+                        const isEditing = editingMachineAreaId === machineArea.id;
+                        const points = getMachineAreaPoints(machineArea).length;
+                        return (
+                          <article
+                            key={machineArea.id || index}
+                            className={`machine-area-saved-item ${isEditing ? "is-editing" : ""}`}
+                          >
+                            <button
+                              type="button"
+                              className="machine-area-saved-main"
+                              onClick={() => openMachineAreaEditor(machineArea)}
+                            >
+                              <b>{String(index + 1).padStart(2, "0")}</b>
+                              <div>
+                                <strong>{getMachineAreaTitle(machineArea)}</strong>
+                                <span>
+                                  {getMachineAreaPurpose(
+                                    machineArea,
+                                    getMachineAreaMode(machineArea),
+                                  ) || `${points} point${points === 1 ? "" : "s"}`}
+                                </span>
+                              </div>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openMachineAreaEditor(machineArea)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="danger"
+                              onClick={() => removeMachineArea(machineArea.id)}
+                            >
+                              Delete
+                            </button>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
+
+                <label className="admin-config-form-field-v2">
+                  <span>Machine Name</span>
+                  <input
+                    value={machineForm.machineName}
+                    onChange={(event) =>
+                      setMachineForm((current) => ({
+                        ...current,
+                        machineName: event.target.value,
+                      }))
+                    }
+                    placeholder="Example: FD12A Filler"
+                    autoFocus
+                  />
+                </label>
+
+                <label className="admin-config-form-field-v2">
+                  <span>Purpose</span>
+                  <textarea
+                    value={machineForm.purpose}
+                    onChange={(event) =>
+                      setMachineForm((current) => ({
+                        ...current,
+                        purpose: event.target.value,
+                      }))
+                    }
+                    placeholder="Example: Fills product into sachets before sealing."
+                  />
+                </label>
+              </>
             )}
-
-            <label className="admin-config-form-field-v2">
-              <span>
-                {adminStationMode === "safety" ? "Name" : "Machine / Area Name"}
-              </span>
-              <input
-                value={machineForm.machineName}
-                onChange={(event) =>
-                  setMachineForm((current) => ({
-                    ...current,
-                    machineName: event.target.value,
-                  }))
-                }
-                placeholder={
-                  adminStationMode === "safety"
-                    ? "Example: Mespack Door / Guard Door / Conveyor Section"
-                    : "Example: FD12A Filler / Conveyor Infeed / Guard Door"
-                }
-                autoFocus
-              />
-            </label>
-
-            <label className="admin-config-form-field-v2">
-              <span>
-                {adminStationMode === "safety"
-                  ? "Category"
-                  : "Purpose / Function"}
-              </span>
-              <input
-                value={machineForm.machineType}
-                onChange={(event) =>
-                  setMachineForm((current) => ({
-                    ...current,
-                    machineType: event.target.value,
-                  }))
-                }
-                placeholder={
-                  adminStationMode === "safety"
-                    ? "Example: Cartoner / Conveyor / Filler"
-                    : "Example: Fills product into sachets / Transfers packs to the next conveyor"
-                }
-              />
-            </label>
-
-            <label className="admin-config-form-field-v2">
-              <span>
-                {adminStationMode === "safety" ? "Hazard" : "Short popup title"}
-              </span>
-              <input
-                value={machineForm.hazard}
-                onChange={(event) =>
-                  setMachineForm((current) => ({
-                    ...current,
-                    hazard: event.target.value,
-                  }))
-                }
-                placeholder={
-                  adminStationMode === "safety"
-                    ? "Example: Moving parts / pinch point"
-                    : "Example: Product transfer point / Main filler head"
-                }
-              />
-            </label>
-
-            <label className="admin-config-form-field-v2">
-              <span>
-                {adminStationMode === "safety" ? "Safety" : "Tutor note"}
-              </span>
-              <textarea
-                value={machineForm.safetyNote}
-                onChange={(event) =>
-                  setMachineForm((current) => ({
-                    ...current,
-                    safetyNote: event.target.value,
-                  }))
-                }
-                placeholder={
-                  adminStationMode === "safety"
-                    ? "Example: Do not open door while machine is running."
-                    : "Example: This section shows the product flow before sealing."
-                }
-              />
-            </label>
-
-            <label className="admin-config-form-field-v2">
-              <span>Note</span>
-              <textarea
-                value={machineForm.description}
-                onChange={(event) =>
-                  setMachineForm((current) => ({
-                    ...current,
-                    description: event.target.value,
-                  }))
-                }
-                placeholder="Add another item shown on hover."
-              />
-            </label>
-
-            <div className="machine-area-file-grid">
-              <label className="admin-config-upload-box-v2 compact">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) =>
-                    setMachineImageFile(event.target.files?.[0] || null)
-                  }
-                  disabled={isSaving}
-                />
-                <b>
-                  {machineImageFile
-                    ? machineImageFile.name
-                    : machineForm.image
-                      ? "Current image saved"
-                      : "Optional Image"}
-                </b>
-                <span>Shown in the popup/card</span>
-              </label>
-
-              <label className="admin-config-upload-box-v2 compact">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) =>
-                    setMachineHoverImageFile(event.target.files?.[0] || null)
-                  }
-                  disabled={isSaving}
-                />
-                <b>
-                  {machineHoverImageFile
-                    ? machineHoverImageFile.name
-                    : machineForm.hoverImage
-                      ? "Current hover image saved"
-                      : "Optional Hover Image"}
-                </b>
-                <span>Shown when the marked area is hovered</span>
-              </label>
-            </div>
 
             <div className="admin-config-modal-actions-v2">
               <button
@@ -2483,19 +3228,23 @@ function AdminAreaConfigPage() {
               >
                 Cancel
               </button>
-              <button
-                type="button"
-                disabled={isSaving}
-                onClick={() => startMachineAreaPick({ reset: true })}
-              >
-                {machineAreaDraftPoints.length ? "Re-mark Area" : "Mark Area"}
-              </button>
+              {adminStationMode !== "safety" && (
+                <button
+                  type="button"
+                  disabled={isSaving}
+                  onClick={() => startMachineAreaPick({ reset: true })}
+                >
+                  {machineAreaDraftPoints.length ? "Re-mark Area" : "Mark Area"}
+                </button>
+              )}
               <button type="submit" className="primary" disabled={isSaving}>
                 {isSaving
                   ? "Saving..."
-                  : editingMachineAreaId
-                    ? `Update ${adminStationMode === "safety" ? "Safety" : "Tutor"} Area`
-                    : `Save ${adminStationMode === "safety" ? "Safety" : "Tutor"} Area`}
+                  : adminStationMode === "safety" && safetyEditorTab === "popup"
+                    ? "Save Popup"
+                    : editingMachineAreaId
+                      ? `Update ${adminStationMode === "safety" ? "Safety" : "Tour"} Area`
+                      : `Save ${adminStationMode === "safety" ? "Safety" : "Tour"} Area`}
               </button>
             </div>
           </form>
