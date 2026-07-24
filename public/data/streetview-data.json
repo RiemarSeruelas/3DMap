@@ -3,7 +3,7 @@
     "savoury": {
       "id": "savoury",
       "name": "Savoury Block",
-      "mapImage": "/uploads/maps/chatgpt-image-jun-2-2026-10-37-40-am-20260602024432-0293c30e-20260713052133-30134ae7.png",
+      "mapImage": "/uploads/maps/chatgpt-image-jun-2-2026-10-37-40-am-20260602024432-0293c30e-20260724011036-a0419291.jpg",
       "areas": [
         {
           "id": "savoury",
@@ -1099,10 +1099,10 @@
                 "safetyPopups": [
                   {
                     "id": "safety-popup-trial-2",
-                    "title": "Trial 2",
+                    "title": "Machine Moving Parts",
                     "content": "",
-                    "hazard": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
-                    "safetyNote": "",
+                    "hazard": "reaching in the machine or bypassing the guard may cause limb injury",
+                    "safetyNote": "Machine intervention should be done only using the interlock guard ensuring machine is in complete stop",
                     "machineAreaId": "machine-fd12a-2",
                     "popupArea": {
                       "pitch": -5.93,
@@ -1123,7 +1123,7 @@
                   },
                   {
                     "id": "safety-popup-trial",
-                    "title": "Trial",
+                    "title": "Machinery safety Risk",
                     "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
                     "hazard": "",
                     "safetyNote": "",
@@ -1147,7 +1147,7 @@
                   },
                   {
                     "id": "safety-popup-keep-hands-clear",
-                    "title": "Keep Hands Clear",
+                    "title": "Pinch Point during Change over",
                     "content": "DO NOT TOUCH",
                     "hazard": "",
                     "safetyNote": "",
@@ -1171,7 +1171,7 @@
                   },
                   {
                     "id": "safety-popup-pls-dont-touch",
-                    "title": "Pls Dont touch",
+                    "title": "Machinery safety Risk",
                     "content": "Clean ur hands cuh",
                     "hazard": "",
                     "safetyNote": "",
