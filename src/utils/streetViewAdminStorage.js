@@ -71,6 +71,24 @@ function normalizePoint(point = {}) {
   };
 }
 
+function normalizeImageList(...values) {
+  const seen = new Set();
+
+  return values
+    .flatMap((value) => (Array.isArray(value) ? value : [value]))
+    .map((image) =>
+      typeof image === "string"
+        ? image
+        : image?.publicPath || image?.url || image?.src || "",
+    )
+    .map((image) => image.trim())
+    .filter((image) => {
+      if (!image || seen.has(image)) return false;
+      seen.add(image);
+      return true;
+    });
+}
+
 function normalizeSafetyPopup(popup = {}) {
   const legacyPoint = normalizePoint(popup);
   const popupArea = normalizePoint(
@@ -87,6 +105,7 @@ function normalizeSafetyPopup(popup = {}) {
     content: popup.content || popup.paragraph || popup.description || "",
     hazard: popup.hazard || "",
     safetyNote: popup.safetyNote || popup.safety || "",
+    images: normalizeImageList(popup.images, popup.image, popup.popupImage),
     machineAreaId: popup.machineAreaId || popup.safetyAreaId || null,
     popupArea,
     arrowPoint,
@@ -106,9 +125,7 @@ function normalizeMachineArea(area = {}) {
     area.machineType ||
     "";
   const safetyPurpose =
-    area.safetyPurpose ||
-    (mode === "safety" ? area.purpose : "") ||
-    "";
+    area.safetyPurpose || (mode === "safety" ? area.purpose : "") || "";
 
   return {
     ...area,
@@ -122,8 +139,7 @@ function normalizeMachineArea(area = {}) {
     hazard: area.hazard || "",
     safetyNote: area.safetyNote || area.safety || "",
     image: area.image || area.machineImage || area.popupImage || "",
-    hoverImage:
-      area.hoverImage || area.openImage || area.overlayImage || "",
+    hoverImage: area.hoverImage || area.openImage || area.overlayImage || "",
     safetyPopups: Array.isArray(area.safetyPopups)
       ? area.safetyPopups.map(normalizeSafetyPopup)
       : [],

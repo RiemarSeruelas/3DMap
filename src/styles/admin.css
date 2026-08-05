@@ -1484,6 +1484,12 @@ button.danger {
   border-radius: 18px;
   background: #fbfdff;
 }
+.machine-area-main-panel.is-editor-panel {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #a8c5f5 transparent;
+}
 .machine-area-panel-head {
   flex: 0 0 auto;
   display: flex;
@@ -1677,6 +1683,136 @@ button.danger {
   display: grid;
   grid-template-columns: 1fr;
   gap: 9px;
+}
+.safety-popup-image-field {
+  grid-column: 1 / -1;
+  min-width: 0;
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid #d9e5f7;
+  border-radius: 13px;
+  background: #f8fbff;
+}
+.safety-popup-image-field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.safety-popup-image-field-head > div {
+  min-width: 0;
+}
+.safety-popup-image-field-head strong,
+.safety-popup-image-field-head span {
+  display: block;
+}
+.safety-popup-image-field-head strong {
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 950;
+}
+.safety-popup-image-field-head span {
+  max-width: 460px;
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+.safety-popup-image-picker {
+  flex: 0 0 auto;
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed #75a6f5;
+  border-radius: 10px;
+  padding: 7px 11px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  cursor: pointer;
+}
+.safety-popup-image-picker input {
+  display: none;
+}
+.safety-popup-image-picker b {
+  font-size: 10px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+.safety-popup-image-preview-grid {
+  min-height: 0;
+  max-height: 168px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 8px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #a8c5f5 transparent;
+}
+.safety-popup-image-preview-grid figure {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 4 / 3;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #cbdcf5;
+  border-radius: 10px;
+  background: #0b1220;
+}
+.safety-popup-image-preview-grid figure.is-new {
+  border-color: #60a5fa;
+  box-shadow: inset 0 0 0 1px #60a5fa;
+}
+.safety-popup-image-preview-grid img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+.safety-popup-image-preview-grid figure > span {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  border-radius: 999px;
+  padding: 3px 6px;
+  background: rgba(37, 99, 235, 0.92);
+  color: #ffffff;
+  font-size: 8px;
+  font-weight: 950;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.safety-popup-image-preview-grid figure > button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  padding: 0;
+  background: rgba(15, 23, 42, 0.84);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 950;
+  line-height: 1;
+  box-shadow: none;
+}
+.safety-popup-image-empty {
+  min-height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed #cbdcf5;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #71819c;
+  font-size: 10px;
+  font-weight: 800;
 }
 .popup-placement-grid {
   display: grid;
@@ -1898,6 +2034,19 @@ button.danger {
 
   .machine-area-media-grid {
     grid-template-columns: 1fr;
+  }
+
+  .safety-popup-image-field-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .safety-popup-image-picker {
+    width: 100%;
+  }
+
+  .safety-popup-image-preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .machine-area-saved-item {
@@ -3271,8 +3420,8 @@ button.danger {
 }
 
 .viewer-safety-popup-marker.is-expanded {
-  width: min(228px, calc(100vw - 28px));
-  max-width: min(228px, calc(100vw - 28px));
+  width: min(320px, calc(100vw - 28px));
+  max-width: min(320px, calc(100vw - 28px));
   padding: 10px 36px 12px 13px;
   box-shadow: 0 18px 42px rgba(4, 15, 39, 0.44);
 }
@@ -3309,6 +3458,43 @@ button.danger {
   color: rgba(255, 255, 255, 0.88);
   font-size: 9px;
   line-height: 1.4;
+}
+
+.viewer-safety-popup-gallery {
+  min-width: 0;
+  max-height: min(190px, 34vh);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: default;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+  animation: safety-popup-details-fade-in-down 220ms ease both;
+}
+.viewer-safety-popup-gallery[data-image-count="1"] {
+  grid-template-columns: 1fr;
+}
+.viewer-safety-popup-gallery img {
+  width: 100%;
+  height: auto;
+  min-height: 76px;
+  max-height: 150px;
+  display: block;
+  aspect-ratio: 4 / 3;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.34);
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .viewer-safety-popup-marker dl {
@@ -3381,7 +3567,8 @@ button.danger {
 @media (prefers-reduced-motion: reduce) {
   .viewer-safety-popup-marker.is-visible,
   .viewer-safety-popup-marker.is-expanded > p,
-  .viewer-safety-popup-marker.is-expanded dl {
+  .viewer-safety-popup-marker.is-expanded dl,
+  .viewer-safety-popup-gallery {
     animation: none;
   }
 }
@@ -3398,8 +3585,8 @@ button.danger {
   }
 
   .viewer-safety-popup-marker.is-expanded {
-    width: min(260px, calc(100vw - 24px));
-    max-width: min(260px, calc(100vw - 24px));
+    width: min(320px, calc(100vw - 24px));
+    max-width: min(320px, calc(100vw - 24px));
   }
 }
 
@@ -3448,7 +3635,6 @@ button.danger {
   font-size: 11px;
   line-height: 1.4;
 }
-
 
 .machine-area-point-target-control {
   display: inline-flex;
@@ -4643,8 +4829,16 @@ button.danger {
   place-items: center;
   padding: 34px;
   background:
-    radial-gradient(circle at 84% 80%, rgba(139, 92, 246, 0.16), transparent 30%),
-    radial-gradient(circle at 18% 16%, rgba(59, 130, 246, 0.17), transparent 34%),
+    radial-gradient(
+      circle at 84% 80%,
+      rgba(139, 92, 246, 0.16),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 18% 16%,
+      rgba(59, 130, 246, 0.17),
+      transparent 34%
+    ),
     #f4f8ff;
 }
 

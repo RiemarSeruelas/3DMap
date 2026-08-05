@@ -265,8 +265,7 @@ function getPopupArrowPoint(popup = {}) {
 
 function hasPopupPoint(point) {
   return (
-    Number.isFinite(Number(point?.pitch)) &&
-    Number.isFinite(Number(point?.yaw))
+    Number.isFinite(Number(point?.pitch)) && Number.isFinite(Number(point?.yaw))
   );
 }
 
@@ -278,6 +277,28 @@ function getSafetyPopups(area = {}) {
     : [];
 }
 
+function getSafetyPopupImages(popup = {}) {
+  const candidates = [
+    ...(Array.isArray(popup.images) ? popup.images : []),
+    popup.image,
+    popup.popupImage,
+  ];
+  const seen = new Set();
+
+  return candidates
+    .map((image) =>
+      typeof image === "string"
+        ? image
+        : image?.publicPath || image?.url || image?.src || "",
+    )
+    .map((image) => image.trim())
+    .filter((image) => {
+      if (!image || seen.has(image)) return false;
+      seen.add(image);
+      return true;
+    });
+}
+
 function getSceneSafetyPopups(scene = {}) {
   const directPopups = getSafetyPopups(scene);
   const legacyPopups = Array.isArray(scene.machineAreas)
@@ -286,7 +307,8 @@ function getSceneSafetyPopups(scene = {}) {
   const seen = new Set();
 
   return [...directPopups, ...legacyPopups].filter((popup) => {
-    const key = popup?.id || `${popup?.title || "popup"}-${popup?.yaw}-${popup?.pitch}`;
+    const key =
+      popup?.id || `${popup?.title || "popup"}-${popup?.yaw}-${popup?.pitch}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
@@ -314,9 +336,11 @@ function isPointInsideMachineArea(point, machineArea) {
   }));
 
   let inside = false;
-  for (let currentIndex = 0, previousIndex = polygon.length - 1;
+  for (
+    let currentIndex = 0, previousIndex = polygon.length - 1;
     currentIndex < polygon.length;
-    previousIndex = currentIndex, currentIndex += 1) {
+    previousIndex = currentIndex, currentIndex += 1
+  ) {
     const current = polygon[currentIndex];
     const previous = polygon[previousIndex];
     const crosses =
@@ -349,7 +373,10 @@ function getPointDistanceToMachineArea(point, machineArea) {
 
 function getPopupMachineAreaId(popup, machineAreas = []) {
   const explicitId = popup?.machineAreaId || popup?.safetyAreaId || null;
-  if (explicitId && machineAreas.some((machineArea) => machineArea.id === explicitId)) {
+  if (
+    explicitId &&
+    machineAreas.some((machineArea) => machineArea.id === explicitId)
+  ) {
     return explicitId;
   }
 
@@ -384,9 +411,7 @@ function getMachineAreaTitle(area = {}) {
 function getMachineAreaPurpose(area = {}, mode = getMachineAreaMode(area)) {
   if (mode === "safety") {
     return (
-      area.safetyPurpose ||
-      (area.mode === "safety" ? area.purpose : "") ||
-      ""
+      area.safetyPurpose || (area.mode === "safety" ? area.purpose : "") || ""
     );
   }
 
@@ -553,7 +578,7 @@ function getPopupCollisionPosition({
   const blockedRects = shellElement
     ? Array.from(
         shellElement.querySelectorAll(
-          '.street-right-stack, .street-minimap-card, .street-viewer-controls-clean',
+          ".street-right-stack, .street-minimap-card, .street-viewer-controls-clean",
         ),
       ).map((node) => {
         const rect = node.getBoundingClientRect();
@@ -872,6 +897,12 @@ function StreetViewer({ mapData, site, area }) {
   }
 
   function handlePopupWheel(event) {
+    if (event.target.closest?.(".viewer-safety-popup-gallery")) {
+      event.stopPropagation();
+      clearSafetyCloseTimer();
+      return;
+    }
+
     const viewer = pannellumInstanceRef.current;
     if (!viewer?.getHfov || !viewer?.setHfov) return;
 
@@ -999,7 +1030,6 @@ function StreetViewer({ mapData, site, area }) {
         suppressMachineAreaClickRef.current = false;
       }, 0);
     }
-
   }
 
   function handlePopupPointerDown(event, popupId) {
@@ -1156,7 +1186,10 @@ function StreetViewer({ mapData, site, area }) {
             imageElement.setAttribute("x", String(projected.bounds.x));
             imageElement.setAttribute("y", String(projected.bounds.y));
             imageElement.setAttribute("width", String(projected.bounds.width));
-            imageElement.setAttribute("height", String(projected.bounds.height));
+            imageElement.setAttribute(
+              "height",
+              String(projected.bounds.height),
+            );
           }
         });
 
@@ -1230,7 +1263,6 @@ function StreetViewer({ mapData, site, area }) {
             }
           });
         }
-
       }
 
       animationFrame = window.requestAnimationFrame(updateOverlayPositions);
@@ -1446,7 +1478,12 @@ function StreetViewer({ mapData, site, area }) {
         if (viewerMode !== "safety" || !activeSafetyAreaIdRef.current) return;
         const target = event.target;
         if (!(target instanceof Element)) return;
-        if (target.closest("[data-machine-area-id], [data-popup-id], .street-right-stack, .street-minimap-card, .street-viewer-controls-clean")) return;
+        if (
+          target.closest(
+            "[data-machine-area-id], [data-popup-id], .street-right-stack, .street-minimap-card, .street-viewer-controls-clean",
+          )
+        )
+          return;
         closeSafetyExperience();
       }}
     >
@@ -1488,7 +1525,6 @@ function StreetViewer({ mapData, site, area }) {
             </p>
           </aside>
         )}
-
       </div>
 
       {viewerMode === "safety" && sceneSafetyPopups.length > 0 && (
@@ -1539,7 +1575,11 @@ function StreetViewer({ mapData, site, area }) {
                 tabIndex={0}
                 aria-expanded={expandedPopupId === popup.id}
                 aria-label={`${popup.title || "Safety information"}. ${expandedPopupId === popup.id ? "Click to collapse details" : "Click to open full details"}`}
-                title={expandedPopupId === popup.id ? "Click to collapse details" : "Click to open full details"}
+                title={
+                  expandedPopupId === popup.id
+                    ? "Click to collapse details"
+                    : "Click to open full details"
+                }
                 className={`viewer-safety-popup-marker ${expandedPopupId === popup.id ? "is-expanded" : ""}`}
                 onPointerEnter={() => handleSafetyPopupEnter(popup.id)}
                 onPointerLeave={() => handleSafetyPopupLeave(popup.id)}
@@ -1585,6 +1625,29 @@ function StreetViewer({ mapData, site, area }) {
                 )}
                 <strong>{popup.title || "Safety information"}</strong>
                 {popup.content && <p>{popup.content}</p>}
+                {expandedPopupId === popup.id &&
+                  getSafetyPopupImages(popup).length > 0 && (
+                    <div
+                      className="viewer-safety-popup-gallery"
+                      data-image-count={Math.min(
+                        getSafetyPopupImages(popup).length,
+                        4,
+                      )}
+                      aria-label={`${popup.title || "Safety"} images`}
+                      onPointerDown={(event) => event.stopPropagation()}
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      {getSafetyPopupImages(popup).map((image, index) => (
+                        <img
+                          key={`${image}-${index}`}
+                          src={resolveAssetUrl(image)}
+                          alt={`${popup.title || "Safety information"} ${index + 1}`}
+                          loading="lazy"
+                          draggable="false"
+                        />
+                      ))}
+                    </div>
+                  )}
                 {(popup.hazard || popup.safetyNote) && (
                   <dl>
                     {popup.hazard && (

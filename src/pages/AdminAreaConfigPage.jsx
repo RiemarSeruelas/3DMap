@@ -36,6 +36,7 @@ const EMPTY_SAFETY_POPUP_FORM = {
   content: "",
   hazard: "",
   safetyNote: "",
+  images: [],
 };
 
 function getSaveAssetBase() {
@@ -224,9 +225,7 @@ function getMachineAreaTitle(area = {}) {
 function getMachineAreaPurpose(area = {}, mode = getMachineAreaMode(area)) {
   if (mode === "safety") {
     return (
-      area.safetyPurpose ||
-      (area.mode === "safety" ? area.purpose : "") ||
-      ""
+      area.safetyPurpose || (area.mode === "safety" ? area.purpose : "") || ""
     );
   }
 
@@ -263,8 +262,7 @@ function getPopupArrowPoint(popup = {}) {
 
 function hasPopupPoint(point) {
   return (
-    Number.isFinite(Number(point?.pitch)) &&
-    Number.isFinite(Number(point?.yaw))
+    Number.isFinite(Number(point?.pitch)) && Number.isFinite(Number(point?.yaw))
   );
 }
 
@@ -374,6 +372,28 @@ function getSafetyPopups(area = {}) {
   return Array.isArray(area.safetyPopups) ? area.safetyPopups : [];
 }
 
+function getSafetyPopupImages(popup = {}) {
+  const candidates = [
+    ...(Array.isArray(popup.images) ? popup.images : []),
+    popup.image,
+    popup.popupImage,
+  ];
+  const seen = new Set();
+
+  return candidates
+    .map((image) =>
+      typeof image === "string"
+        ? image
+        : image?.publicPath || image?.url || image?.src || "",
+    )
+    .map((image) => image.trim())
+    .filter((image) => {
+      if (!image || seen.has(image)) return false;
+      seen.add(image);
+      return true;
+    });
+}
+
 function getSceneSafetyPopups(scene = {}) {
   const directPopups = Array.isArray(scene.safetyPopups)
     ? scene.safetyPopups
@@ -384,7 +404,8 @@ function getSceneSafetyPopups(scene = {}) {
   const seen = new Set();
 
   return [...directPopups, ...legacyPopups].filter((popup) => {
-    const key = popup?.id || `${popup?.title || "popup"}-${popup?.yaw}-${popup?.pitch}`;
+    const key =
+      popup?.id || `${popup?.title || "popup"}-${popup?.yaw}-${popup?.pitch}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
@@ -758,7 +779,10 @@ function PannellumStage({
             imageElement.setAttribute("x", String(projected.bounds.x));
             imageElement.setAttribute("y", String(projected.bounds.y));
             imageElement.setAttribute("width", String(projected.bounds.width));
-            imageElement.setAttribute("height", String(projected.bounds.height));
+            imageElement.setAttribute(
+              "height",
+              String(projected.bounds.height),
+            );
           }
         });
 
@@ -1230,7 +1254,10 @@ function AdminAreaConfigPage() {
   const [machineImageFile, setMachineImageFile] = useState(null);
   const [machineHoverImageFile, setMachineHoverImageFile] = useState(null);
   const [safetyPopups, setSafetyPopups] = useState([]);
-  const [safetyPopupForm, setSafetyPopupForm] = useState(EMPTY_SAFETY_POPUP_FORM);
+  const [safetyPopupForm, setSafetyPopupForm] = useState(
+    EMPTY_SAFETY_POPUP_FORM,
+  );
+  const [safetyPopupImageFiles, setSafetyPopupImageFiles] = useState([]);
   const [editingSafetyPopupId, setEditingSafetyPopupId] = useState(null);
   const [safetyEditorTab, setSafetyEditorTab] = useState("safety");
   const [editingMachineAreaId, setEditingMachineAreaId] = useState(null);
@@ -1247,6 +1274,20 @@ function AdminAreaConfigPage() {
     originX: 0,
     originY: 0,
   });
+  const safetyPopupImageFilesRef = useRef([]);
+
+  useEffect(() => {
+    safetyPopupImageFilesRef.current = safetyPopupImageFiles;
+  }, [safetyPopupImageFiles]);
+
+  useEffect(
+    () => () => {
+      safetyPopupImageFilesRef.current.forEach(({ previewUrl }) => {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+      });
+    },
+    [],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -1370,6 +1411,54 @@ function AdminAreaConfigPage() {
     setTour(nextTour);
     updateAreaTour(siteId, areaId, nextTour);
     showSaved(message);
+  }
+
+  function clearSafetyPopupImageFiles() {
+    setSafetyPopupImageFiles((currentFiles) => {
+      currentFiles.forEach(({ previewUrl }) => {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+      });
+      return [];
+    });
+  }
+
+  function handleSafetyPopupImagesSelect(event) {
+    const files = Array.from(event.target.files || []).filter((file) =>
+      file.type.startsWith("image/"),
+    );
+
+    if (files.length) {
+      const queuedFiles = files.map((file) => ({
+        id: `${file.name}-${file.size}-${file.lastModified}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        file,
+        previewUrl: URL.createObjectURL(file),
+      }));
+      setSafetyPopupImageFiles((currentFiles) => [
+        ...currentFiles,
+        ...queuedFiles,
+      ]);
+    }
+
+    event.target.value = "";
+  }
+
+  function removeQueuedSafetyPopupImage(imageId) {
+    setSafetyPopupImageFiles((currentFiles) =>
+      currentFiles.filter((image) => {
+        if (image.id !== imageId) return true;
+        if (image.previewUrl) URL.revokeObjectURL(image.previewUrl);
+        return false;
+      }),
+    );
+  }
+
+  function removeSavedSafetyPopupImage(imageIndex) {
+    setSafetyPopupForm((current) => ({
+      ...current,
+      images: getSafetyPopupImages(current).filter(
+        (_, index) => index !== imageIndex,
+      ),
+    }));
   }
 
   function handleFileSelect(event) {
@@ -1648,6 +1737,7 @@ function AdminAreaConfigPage() {
       ),
     );
     setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+    clearSafetyPopupImageFiles();
     setEditingSafetyPopupId(null);
     setEditingMachineAreaId(null);
     setSafetyEditorTab("safety");
@@ -1680,6 +1770,7 @@ function AdminAreaConfigPage() {
       ),
     );
     setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+    clearSafetyPopupImageFiles();
     setEditingSafetyPopupId(null);
     setMachineAreaDraftPoints(getMachineAreaPoints(machineArea));
     setMode("preview");
@@ -1700,6 +1791,7 @@ function AdminAreaConfigPage() {
       ),
     );
     setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+    clearSafetyPopupImageFiles();
     setEditingSafetyPopupId(null);
     setMachineAreaDraftPoints([]);
     setMode("preview");
@@ -1718,11 +1810,13 @@ function AdminAreaConfigPage() {
     );
     setEditingSafetyPopupId(popup.id);
     setSafetyEditorTab("popup");
+    clearSafetyPopupImageFiles();
     setSafetyPopupForm({
       title: popup.title || "",
       content: popup.content || popup.paragraph || popup.description || "",
       hazard: popup.hazard || "",
       safetyNote: popup.safetyNote || popup.safety || "",
+      images: getSafetyPopupImages(popup),
     });
     setMode("preview");
     setIsMachineModalOpen(true);
@@ -1760,6 +1854,7 @@ function AdminAreaConfigPage() {
     if (editingSafetyPopupId === popupId) {
       setEditingSafetyPopupId(null);
       setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+      clearSafetyPopupImageFiles();
     }
   }
 
@@ -1767,6 +1862,7 @@ function AdminAreaConfigPage() {
     setEditingSafetyPopupId(null);
     setSafetyEditorTab("popup");
     setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+    clearSafetyPopupImageFiles();
   }
 
   function startSafetyPopupAreaPick() {
@@ -1792,7 +1888,7 @@ function AdminAreaConfigPage() {
     setMode("mark-safety-popup-arrow");
   }
 
-  function saveSafetyPopupDetails() {
+  async function saveSafetyPopupDetails() {
     if (!safetyPopupForm.title.trim()) {
       alert("Popup title is required.");
       return false;
@@ -1803,7 +1899,9 @@ function AdminAreaConfigPage() {
       : null;
 
     if (!existingPopup || !hasPopupPoint(getPopupAreaPoint(existingPopup))) {
-      alert("Click Map Popup, then click once in the panorama to place the rectangle.");
+      alert(
+        "Click Map Popup, then click once in the panorama to place the rectangle.",
+      );
       return false;
     }
 
@@ -1817,28 +1915,45 @@ function AdminAreaConfigPage() {
       : getPopupAreaPoint(existingPopup);
     const parentAreaId =
       existingPopup.machineAreaId ||
-      getSafetyAreaIdForPoint(
-        targetPoint,
-        selectedScene?.machineAreas || [],
-      );
-    const nextPopup = {
-      ...existingPopup,
-      machineAreaId: parentAreaId || null,
-      title: safetyPopupForm.title.trim(),
-      content: safetyPopupForm.content.trim(),
-      hazard: safetyPopupForm.hazard.trim(),
-      safetyNote: safetyPopupForm.safetyNote.trim(),
-    };
-    const nextPopups = safetyPopups.map((popup) =>
-      popup.id === nextPopup.id ? nextPopup : popup,
-    );
+      getSafetyAreaIdForPoint(targetPoint, selectedScene?.machineAreas || []);
+    setIsSaving(true);
 
-    saveSceneSafetyPopups(nextPopups, "Popup updated");
-    setIsMachineModalOpen(false);
-    setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
-    setEditingSafetyPopupId(null);
-    setMode("preview");
-    return true;
+    try {
+      const uploadedImages = await Promise.all(
+        safetyPopupImageFiles.map(({ file }) =>
+          uploadAdminImage(file, "safety-popups"),
+        ),
+      );
+      const images = getSafetyPopupImages({
+        images: [...getSafetyPopupImages(safetyPopupForm), ...uploadedImages],
+      });
+      const nextPopup = {
+        ...existingPopup,
+        machineAreaId: parentAreaId || null,
+        title: safetyPopupForm.title.trim(),
+        content: safetyPopupForm.content.trim(),
+        hazard: safetyPopupForm.hazard.trim(),
+        safetyNote: safetyPopupForm.safetyNote.trim(),
+        images,
+      };
+      const nextPopups = safetyPopups.map((popup) =>
+        popup.id === nextPopup.id ? nextPopup : popup,
+      );
+
+      saveSceneSafetyPopups(nextPopups, "Popup updated");
+      setIsMachineModalOpen(false);
+      setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+      clearSafetyPopupImageFiles();
+      setEditingSafetyPopupId(null);
+      setMode("preview");
+      return true;
+    } catch (error) {
+      console.error(error);
+      alert("Failed to upload the Safety popup images.");
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   function startMachineAreaPick({ reset = false } = {}) {
@@ -1871,6 +1986,7 @@ function AdminAreaConfigPage() {
     setMachineHoverImageFile(null);
     setSafetyPopups([]);
     setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+    clearSafetyPopupImageFiles();
     setEditingSafetyPopupId(null);
     setSafetyEditorTab("safety");
     setMachineForm(EMPTY_MACHINE_FORM);
@@ -1881,7 +1997,7 @@ function AdminAreaConfigPage() {
     if (!selectedScene?.id) return;
 
     if (adminStationMode === "safety" && safetyEditorTab === "popup") {
-      saveSafetyPopupDetails();
+      await saveSafetyPopupDetails();
       return;
     }
 
@@ -1929,8 +2045,7 @@ function AdminAreaConfigPage() {
         purpose,
         tutorPurpose: adminStationMode === "tutor" ? purpose : "",
         safetyPurpose: adminStationMode === "safety" ? purpose : "",
-        hazard:
-          adminStationMode === "safety" ? machineForm.hazard.trim() : "",
+        hazard: adminStationMode === "safety" ? machineForm.hazard.trim() : "",
         safetyNote:
           adminStationMode === "safety" ? machineForm.safetyNote.trim() : "",
         image: adminStationMode === "safety" ? image : "",
@@ -1961,6 +2076,7 @@ function AdminAreaConfigPage() {
       setMachineHoverImageFile(null);
       setSafetyPopups([]);
       setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+      clearSafetyPopupImageFiles();
       setEditingSafetyPopupId(null);
       setSafetyEditorTab("safety");
       setMachineForm(EMPTY_MACHINE_FORM);
@@ -2024,6 +2140,7 @@ function AdminAreaConfigPage() {
           content: safetyPopupForm.content.trim(),
           hazard: safetyPopupForm.hazard.trim(),
           safetyNote: safetyPopupForm.safetyNote.trim(),
+          images: getSafetyPopupImages(safetyPopupForm),
           popupArea,
           arrowPoint: hasPopupPoint(arrowPoint) ? arrowPoint : null,
           pitch: popupArea.pitch,
@@ -2049,6 +2166,7 @@ function AdminAreaConfigPage() {
           content: nextPopup.content,
           hazard: nextPopup.hazard,
           safetyNote: nextPopup.safetyNote,
+          images: getSafetyPopupImages(nextPopup),
         });
         setEditingSafetyPopupId(popupId);
         setSafetyEditorTab("popup");
@@ -2120,6 +2238,7 @@ function AdminAreaConfigPage() {
       pendingTargetSceneId,
       safetyPopupForm.content,
       safetyPopupForm.hazard,
+      safetyPopupForm.images,
       safetyPopupForm.safetyNote,
       safetyPopupForm.title,
       safetyPopups,
@@ -2139,6 +2258,7 @@ function AdminAreaConfigPage() {
     setMachineHoverImageFile(null);
     setSafetyPopups([]);
     setSafetyPopupForm(EMPTY_SAFETY_POPUP_FORM);
+    clearSafetyPopupImageFiles();
     setEditingSafetyPopupId(null);
     setSafetyEditorTab("safety");
     setMachineForm(EMPTY_MACHINE_FORM);
@@ -2812,7 +2932,9 @@ function AdminAreaConfigPage() {
                     </button>
                     <button
                       type="button"
-                      className={safetyEditorTab === "popup" ? "active safety" : ""}
+                      className={
+                        safetyEditorTab === "popup" ? "active safety" : ""
+                      }
                       onClick={() => setSafetyEditorTab("popup")}
                     >
                       Pop up
@@ -2835,14 +2957,14 @@ function AdminAreaConfigPage() {
             <div className="machine-area-point-summary">
               {adminStationMode === "safety" && safetyEditorTab === "popup" ? (
                 <>
-                  <strong>2</strong> mapping steps: place the popup rectangle, then
-                  place its connecting arrow.
+                  <strong>2</strong> mapping steps: place the popup rectangle,
+                  then place its connecting arrow.
                 </>
               ) : (
                 <>
                   <strong>{machineAreaDraftPoints.length}</strong> marked point
-                  {machineAreaDraftPoints.length === 1 ? "" : "s"}. Fill the fields,
-                  then click Mark Area whenever you are ready.
+                  {machineAreaDraftPoints.length === 1 ? "" : "s"}. Fill the
+                  fields, then click Mark Area whenever you are ready.
                 </>
               )}
             </div>
@@ -2901,12 +3023,16 @@ function AdminAreaConfigPage() {
                               type="file"
                               accept="image/*"
                               onChange={(event) =>
-                                setMachineImageFile(event.target.files?.[0] || null)
+                                setMachineImageFile(
+                                  event.target.files?.[0] || null,
+                                )
                               }
                             />
                             <b>
                               {machineImageFile?.name ||
-                                (machineForm.image ? "Replace image" : "Choose image")}
+                                (machineForm.image
+                                  ? "Replace image"
+                                  : "Choose image")}
                             </b>
                           </label>
                           {(machineForm.image || machineImageFile) && (
@@ -2928,22 +3054,29 @@ function AdminAreaConfigPage() {
                         <div className="machine-area-media-field compact-media-field">
                           <div>
                             <strong>Hover Image</strong>
-                            <span>Shown while pointing at the marked area.</span>
+                            <span>
+                              Shown while pointing at the marked area.
+                            </span>
                           </div>
                           <label>
                             <input
                               type="file"
                               accept="image/*"
                               onChange={(event) =>
-                                setMachineHoverImageFile(event.target.files?.[0] || null)
+                                setMachineHoverImageFile(
+                                  event.target.files?.[0] || null,
+                                )
                               }
                             />
                             <b>
                               {machineHoverImageFile?.name ||
-                                (machineForm.hoverImage ? "Replace image" : "Choose image")}
+                                (machineForm.hoverImage
+                                  ? "Replace image"
+                                  : "Choose image")}
                             </b>
                           </label>
-                          {(machineForm.hoverImage || machineHoverImageFile) && (
+                          {(machineForm.hoverImage ||
+                            machineHoverImageFile) && (
                             <button
                               type="button"
                               onClick={() => {
@@ -2963,13 +3096,18 @@ function AdminAreaConfigPage() {
                       <div className="machine-area-mark-card">
                         <div>
                           <strong>Mark area on panorama</strong>
-                          <span>Click the button, then mark the machine outline in the panorama.</span>
+                          <span>
+                            Click the button, then mark the machine outline in
+                            the panorama.
+                          </span>
                         </div>
                         <button
                           type="button"
                           onClick={() => startMachineAreaPick({ reset: true })}
                         >
-                          {machineAreaDraftPoints.length ? "Re-mark Area" : "Mark Area"}
+                          {machineAreaDraftPoints.length
+                            ? "Re-mark Area"
+                            : "Mark Area"}
                         </button>
                       </div>
                     </>
@@ -3038,6 +3176,78 @@ function AdminAreaConfigPage() {
                             placeholder="Example: Keep guards closed and isolate power before access."
                           />
                         </label>
+
+                        <div className="safety-popup-image-field">
+                          <div className="safety-popup-image-field-head">
+                            <div>
+                              <strong>Popup Images</strong>
+                              <span>
+                                Add one or more images to the full Safety popup.
+                                These are separate from the area Hover Image.
+                              </span>
+                            </div>
+                            <label className="safety-popup-image-picker">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleSafetyPopupImagesSelect}
+                              />
+                              <b>+ Add Images</b>
+                            </label>
+                          </div>
+
+                          {getSafetyPopupImages(safetyPopupForm).length > 0 ||
+                          safetyPopupImageFiles.length > 0 ? (
+                            <div className="safety-popup-image-preview-grid">
+                              {getSafetyPopupImages(safetyPopupForm).map(
+                                (image, index) => (
+                                  <figure key={`${image}-${index}`}>
+                                    <img
+                                      src={resolveAssetUrl(image)}
+                                      alt={`Saved popup image ${index + 1}`}
+                                    />
+                                    <button
+                                      type="button"
+                                      aria-label={`Remove saved popup image ${index + 1}`}
+                                      title="Remove image"
+                                      onClick={() =>
+                                        removeSavedSafetyPopupImage(index)
+                                      }
+                                    >
+                                      ×
+                                    </button>
+                                  </figure>
+                                ),
+                              )}
+                              {safetyPopupImageFiles.map(
+                                ({ id, file, previewUrl }) => (
+                                  <figure className="is-new" key={id}>
+                                    <img
+                                      src={previewUrl}
+                                      alt={file.name || "New popup image"}
+                                    />
+                                    <span>New</span>
+                                    <button
+                                      type="button"
+                                      aria-label={`Remove ${file.name || "new popup image"}`}
+                                      title="Remove image"
+                                      onClick={() =>
+                                        removeQueuedSafetyPopupImage(id)
+                                      }
+                                    >
+                                      ×
+                                    </button>
+                                  </figure>
+                                ),
+                              )}
+                            </div>
+                          ) : (
+                            <div className="safety-popup-image-empty">
+                              No popup images added.
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       <div className="popup-placement-grid">
@@ -3045,13 +3255,20 @@ function AdminAreaConfigPage() {
                           <div>
                             <strong>Map popup rectangle</strong>
                             <span>
-                              {hasPopupPoint(getPopupAreaPoint(activeSafetyPopup || {}))
+                              {hasPopupPoint(
+                                getPopupAreaPoint(activeSafetyPopup || {}),
+                              )
                                 ? "Popup position mapped. Click again to move it."
                                 : "Click once where the popup rectangle should appear."}
                             </span>
                           </div>
-                          <button type="button" onClick={startSafetyPopupAreaPick}>
-                            {hasPopupPoint(getPopupAreaPoint(activeSafetyPopup || {}))
+                          <button
+                            type="button"
+                            onClick={startSafetyPopupAreaPick}
+                          >
+                            {hasPopupPoint(
+                              getPopupAreaPoint(activeSafetyPopup || {}),
+                            )
                               ? "Re-map Popup"
                               : "Map Popup"}
                           </button>
@@ -3061,13 +3278,20 @@ function AdminAreaConfigPage() {
                           <div>
                             <strong>Map connecting arrow</strong>
                             <span>
-                              {hasPopupPoint(getPopupArrowPoint(activeSafetyPopup || {}))
+                              {hasPopupPoint(
+                                getPopupArrowPoint(activeSafetyPopup || {}),
+                              )
                                 ? "Arrow target mapped. Click again to move it."
                                 : "Click once where the arrow should point."}
                             </span>
                           </div>
-                          <button type="button" onClick={startSafetyPopupArrowPick}>
-                            {hasPopupPoint(getPopupArrowPoint(activeSafetyPopup || {}))
+                          <button
+                            type="button"
+                            onClick={startSafetyPopupArrowPick}
+                          >
+                            {hasPopupPoint(
+                              getPopupArrowPoint(activeSafetyPopup || {}),
+                            )
                               ? "Re-map Arrow"
                               : "Map Arrow"}
                           </button>
@@ -3080,7 +3304,11 @@ function AdminAreaConfigPage() {
                 <section className="machine-area-popup-panel is-list-panel">
                   <div className="machine-area-panel-head">
                     <div>
-                      <span>{safetyEditorTab === "safety" ? "Safety areas" : "Popup markers"}</span>
+                      <span>
+                        {safetyEditorTab === "safety"
+                          ? "Safety areas"
+                          : "Popup markers"}
+                      </span>
                       <strong>
                         {safetyEditorTab === "safety"
                           ? "Marked machine areas"
@@ -3097,7 +3325,9 @@ function AdminAreaConfigPage() {
                           : startNewSafetyPopup
                       }
                     >
-                      {safetyEditorTab === "safety" ? "+ New Area" : "+ New Popup"}
+                      {safetyEditorTab === "safety"
+                        ? "+ New Area"
+                        : "+ New Popup"}
                     </button>
                   </div>
 
@@ -3111,8 +3341,10 @@ function AdminAreaConfigPage() {
                     activeMachineAreas.length > 0 ? (
                       <div className="machine-area-saved-items machine-area-safety-list">
                         {activeMachineAreas.map((machineArea, index) => {
-                          const isEditing = editingMachineAreaId === machineArea.id;
-                          const points = getMachineAreaPoints(machineArea).length;
+                          const isEditing =
+                            editingMachineAreaId === machineArea.id;
+                          const points =
+                            getMachineAreaPoints(machineArea).length;
                           return (
                             <article
                               key={machineArea.id || index}
@@ -3121,29 +3353,38 @@ function AdminAreaConfigPage() {
                               <button
                                 type="button"
                                 className="machine-area-saved-main"
-                                onClick={() => openMachineAreaEditor(machineArea)}
+                                onClick={() =>
+                                  openMachineAreaEditor(machineArea)
+                                }
                               >
                                 <b>{String(index + 1).padStart(2, "0")}</b>
                                 <div>
-                                  <strong>{getMachineAreaTitle(machineArea)}</strong>
+                                  <strong>
+                                    {getMachineAreaTitle(machineArea)}
+                                  </strong>
                                   <span>
                                     {getMachineAreaPurpose(
                                       machineArea,
                                       getMachineAreaMode(machineArea),
-                                    ) || `${points} point${points === 1 ? "" : "s"}`}
+                                    ) ||
+                                      `${points} point${points === 1 ? "" : "s"}`}
                                   </span>
                                 </div>
                               </button>
                               <button
                                 type="button"
-                                onClick={() => openMachineAreaEditor(machineArea)}
+                                onClick={() =>
+                                  openMachineAreaEditor(machineArea)
+                                }
                               >
                                 Edit
                               </button>
                               <button
                                 type="button"
                                 className="danger"
-                                onClick={() => removeMachineArea(machineArea.id)}
+                                onClick={() =>
+                                  removeMachineArea(machineArea.id)
+                                }
                               >
                                 Delete
                               </button>
@@ -3152,12 +3393,15 @@ function AdminAreaConfigPage() {
                         })}
                       </div>
                     ) : (
-                      <div className="machine-area-empty-state">No Safety areas yet.</div>
+                      <div className="machine-area-empty-state">
+                        No Safety areas yet.
+                      </div>
                     )
                   ) : safetyPopups.length > 0 ? (
                     <div className="machine-area-saved-items safety-popup-saved-items">
                       {safetyPopups.map((popup, index) => {
-                        const isEditingPopup = editingSafetyPopupId === popup.id;
+                        const isEditingPopup =
+                          editingSafetyPopupId === popup.id;
                         return (
                           <article
                             key={popup.id || index}
@@ -3171,7 +3415,9 @@ function AdminAreaConfigPage() {
                               <b>{String(index + 1).padStart(2, "0")}</b>
                               <div>
                                 <strong>{popup.title || "Popup"}</strong>
-                                <span>{popup.content || "No details added."}</span>
+                                <span>
+                                  {popup.content || "No details added."}
+                                </span>
                               </div>
                             </button>
                             <button
@@ -3192,7 +3438,9 @@ function AdminAreaConfigPage() {
                       })}
                     </div>
                   ) : (
-                    <div className="machine-area-empty-state">No popup markers yet.</div>
+                    <div className="machine-area-empty-state">
+                      No popup markers yet.
+                    </div>
                   )}
                 </section>
               </div>
@@ -3212,7 +3460,8 @@ function AdminAreaConfigPage() {
 
                     <div className="machine-area-saved-items">
                       {activeMachineAreas.map((machineArea, index) => {
-                        const isEditing = editingMachineAreaId === machineArea.id;
+                        const isEditing =
+                          editingMachineAreaId === machineArea.id;
                         const points = getMachineAreaPoints(machineArea).length;
                         return (
                           <article
@@ -3226,12 +3475,15 @@ function AdminAreaConfigPage() {
                             >
                               <b>{String(index + 1).padStart(2, "0")}</b>
                               <div>
-                                <strong>{getMachineAreaTitle(machineArea)}</strong>
+                                <strong>
+                                  {getMachineAreaTitle(machineArea)}
+                                </strong>
                                 <span>
                                   {getMachineAreaPurpose(
                                     machineArea,
                                     getMachineAreaMode(machineArea),
-                                  ) || `${points} point${points === 1 ? "" : "s"}`}
+                                  ) ||
+                                    `${points} point${points === 1 ? "" : "s"}`}
                                 </span>
                               </div>
                             </button>
