@@ -17,14 +17,13 @@ export const factoryMaps = {
   savoury: {
     id: "savoury",
     name: "Savoury Block",
-    mapImage: "/maps/savoury-placeholder.jpg",
+    mapImage: "",
     areas: [],
   },
-
   dressings: {
     id: "dressings",
     name: "Dressings",
-    mapImage: "/maps/dressings-placeholder.jpg",
+    mapImage: "",
     areas: [],
   },
 };

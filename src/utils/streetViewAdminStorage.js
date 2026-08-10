@@ -4,6 +4,7 @@ export const STORAGE_KEY = "streetViewAdminFactoryMaps";
 
 let memoryFactoryMaps = null;
 let publicJsonHydrated = false;
+let saveSequence = Promise.resolve();
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -21,17 +22,6 @@ function hasUsableMaps(value) {
   return value && typeof value === "object" && Object.keys(value).length > 0;
 }
 
-function getSaveApiBase() {
-  if (typeof window === "undefined") return "http://localhost:3010";
-
-  const override = window.__STREETVIEW_SAVE_API_BASE__;
-  if (typeof override === "string" && override.trim()) {
-    return override.trim().replace(/\/$/, "");
-  }
-
-  return "";
-}
-
 function normalizeNumber(value, fallback = 0) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
@@ -40,23 +30,11 @@ function normalizeNumber(value, fallback = 0) {
 function normalizeSceneView(scene = {}) {
   const view = scene.view || {};
   return {
-    initialYaw: normalizeNumber(
-      view.initialYaw,
-      normalizeNumber(scene.initialYaw, 0),
-    ),
-    initialPitch: normalizeNumber(
-      view.initialPitch,
-      normalizeNumber(scene.initialPitch, 0),
-    ),
-    initialHfov: normalizeNumber(
-      view.initialHfov,
-      normalizeNumber(scene.initialHfov, 110),
-    ),
+    initialYaw: normalizeNumber(view.initialYaw, normalizeNumber(scene.initialYaw, 0)),
+    initialPitch: normalizeNumber(view.initialPitch, normalizeNumber(scene.initialPitch, 0)),
+    initialHfov: normalizeNumber(view.initialHfov, normalizeNumber(scene.initialHfov, 110)),
     northOffset: normalizeNumber(
-      view.northOffset ??
-        view.yawOffset ??
-        scene.northOffset ??
-        scene.yawOffset,
+      view.northOffset ?? view.yawOffset ?? scene.northOffset ?? scene.yawOffset,
       0,
     ),
   };
@@ -73,7 +51,6 @@ function normalizePoint(point = {}) {
 
 function normalizeImageList(...values) {
   const seen = new Set();
-
   return values
     .flatMap((value) => (Array.isArray(value) ? value : [value]))
     .map((image) =>
@@ -94,8 +71,7 @@ function normalizeSafetyPopup(popup = {}) {
   const popupArea = normalizePoint(
     popup.popupArea || popup.areaPoint || popup.position || legacyPoint,
   );
-  const arrowSource =
-    popup.arrowPoint || popup.pointerPoint || popup.targetPoint || null;
+  const arrowSource = popup.arrowPoint || popup.pointerPoint || popup.targetPoint || null;
   const arrowPoint = arrowSource ? normalizePoint(arrowSource) : null;
 
   return {
@@ -151,9 +127,7 @@ function normalizeScene(scene = {}) {
   return {
     ...scene,
     hotspots: Array.isArray(scene.hotspots) ? scene.hotspots : [],
-    machineMarkers: Array.isArray(scene.machineMarkers)
-      ? scene.machineMarkers
-      : [],
+    machineMarkers: Array.isArray(scene.machineMarkers) ? scene.machineMarkers : [],
     machineAreas: Array.isArray(scene.machineAreas)
       ? scene.machineAreas.map(normalizeMachineArea)
       : [],
@@ -175,6 +149,29 @@ function normalizeScenes(scenes = {}) {
   );
 }
 
+function normalizeMaps(maps) {
+  const source = hasUsableMaps(maps) ? maps : factoryMaps;
+  const next = clone(source);
+  Object.values(next).forEach((site) => {
+    site.areas = Array.isArray(site.areas) ? site.areas : [];
+    site.areas = site.areas.map((area) => ({
+      ...area,
+      points: area.points || "",
+      tour: ensureTour(area.tour, area),
+    }));
+  });
+  return next;
+}
+
+function cacheMaps(maps) {
+  memoryFactoryMaps = normalizeMaps(maps);
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryFactoryMaps));
+  } catch {}
+  window.dispatchEvent(new Event("streetview-admin-storage-updated"));
+  return memoryFactoryMaps;
+}
+
 export function getBaseFactoryMaps() {
   return factoryMaps;
 }
@@ -183,22 +180,16 @@ export async function hydrateFactoryMapsFromPublicJson({ force = false } = {}) {
   if (publicJsonHydrated && !force) return getEffectiveFactoryMaps();
 
   try {
-    const response = await fetch(`/data/streetview-data.json?_=${Date.now()}`, {
+    const response = await fetch(`/api/map-data?_=${Date.now()}`, {
       cache: "no-store",
+      credentials: "same-origin",
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
     const payload = await response.json();
     const maps = payload?.factoryMaps || payload;
-
-    if (hasUsableMaps(maps)) {
-      memoryFactoryMaps = normalizeMaps(maps);
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryFactoryMaps));
-      } catch {}
-      window.dispatchEvent(new Event("streetview-admin-storage-updated"));
-    }
-  } catch {
+    if (hasUsableMaps(maps)) cacheMaps(maps);
+  } catch (error) {
+    console.warn("[streetview] Database map load failed; using local cache.", error);
   } finally {
     publicJsonHydrated = true;
   }
@@ -211,15 +202,13 @@ function dataUrlToFile(dataUrl, filename) {
   const mime = header.match(/data:(.*?);base64/)?.[1] || "image/jpeg";
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
-  for (let index = 0; index < binary.length; index += 1)
+  for (let index = 0; index < binary.length; index += 1) {
     bytes[index] = binary.charCodeAt(index);
+  }
   return new File([bytes], filename, { type: mime });
 }
 
-export function createImageThumbnail(
-  file,
-  { maxWidth = 420, quality = 0.78 } = {},
-) {
+export function createImageThumbnail(file, { maxWidth = 420, quality = 0.78 } = {}) {
   return new Promise((resolve) => {
     const image = new Image();
     const objectUrl = URL.createObjectURL(file);
@@ -227,21 +216,16 @@ export function createImageThumbnail(
     image.onload = () => {
       try {
         const ratio = image.width ? maxWidth / image.width : 1;
-        const width = Math.max(
-          1,
-          Math.round(Math.min(maxWidth, image.width || maxWidth)),
-        );
+        const width = Math.max(1, Math.round(Math.min(maxWidth, image.width || maxWidth)));
         const height = Math.max(
           1,
           Math.round((image.height || maxWidth / 2) * Math.min(1, ratio)),
         );
-
         const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
         const context = canvas.getContext("2d");
         context.drawImage(image, 0, 0, width, height);
-
         const dataUrl = canvas.toDataURL("image/jpeg", quality);
         const thumbName = file.name.replace(/\.[^/.]+$/, "") + "-thumb.jpg";
         resolve(dataUrlToFile(dataUrl, thumbName));
@@ -256,47 +240,36 @@ export function createImageThumbnail(
       URL.revokeObjectURL(objectUrl);
       resolve(null);
     };
-
     image.src = objectUrl;
   });
 }
 
-export async function uploadAdminImage(file, kind = "panos") {
-  if (!file) return "";
+async function uploadAdminAsset(file, kind = "panos") {
+  if (!file) return null;
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("kind", kind);
 
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("kind", kind);
-
-    const response = await fetch(`${getSaveApiBase()}/api/admin/upload-asset`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const text = await response.text().catch(() => "");
-      throw new Error(text || `Upload server responded ${response.status}`);
-    }
-
-    const payload = await response.json();
-    return payload.publicPath || payload.path || payload.url || "";
-  } catch (error) {
-    console.warn(
-      "[streetview-admin] Image upload server unavailable. Falling back to temporary browser URL.",
-      error,
-    );
-    return URL.createObjectURL(file);
+  const response = await fetch("/api/admin/upload-asset", {
+    method: "POST",
+    credentials: "same-origin",
+    body: formData,
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.error || `Upload server responded ${response.status}`);
   }
+  const publicPath = payload.publicPath || payload.path || payload.url || "";
+  return { ...payload, publicPath, path: publicPath, url: publicPath, fallback: false };
+}
+
+export async function uploadAdminImage(file, kind = "panos") {
+  const payload = await uploadAdminAsset(file, kind);
+  return payload?.publicPath || "";
 }
 
 export async function uploadAssetFile(file, folder = "panos") {
-  const publicPath = await uploadAdminImage(file, folder);
-  return {
-    url: publicPath,
-    publicPath,
-    fallback: publicPath?.startsWith("blob:") || false,
-  };
+  return uploadAdminAsset(file, folder);
 }
 
 export async function uploadPanoramaAsset(file) {
@@ -306,79 +279,47 @@ export async function uploadPanoramaAsset(file) {
   ]);
 
   let thumbnail = null;
-  if (thumbnailFile) {
-    thumbnail = await uploadAssetFile(thumbnailFile, "thumbs");
-  }
+  if (thumbnailFile) thumbnail = await uploadAssetFile(thumbnailFile, "thumbs");
 
   return {
-    panorama: full.publicPath || full.url,
+    panorama: full?.publicPath || full?.url || "",
     thumbnail:
-      thumbnail?.publicPath || thumbnail?.url || full.publicPath || full.url,
+      thumbnail?.publicPath ||
+      thumbnail?.url ||
+      full?.publicPath ||
+      full?.url ||
+      "",
+    panoramaAssetId: full?.assetId || null,
+    panoramaType: full?.panoramaType || (full?.multiRes ? "multires" : "equirectangular"),
+    multiRes: full?.multiRes || null,
+    multiresStatus: full?.multiresStatus || null,
+    multiresError: full?.multiresError || null,
   };
 }
 
-async function syncMapsToDataFile(nextMaps) {
-  try {
-    const response = await fetch(`${getSaveApiBase()}/api/admin/save-mapdata`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ factoryMaps: nextMaps }),
-    });
-
-    if (!response.ok) {
-      const text = await response.text().catch(() => "");
-      throw new Error(text || `Save server responded ${response.status}`);
-    }
-
-    const payload = await response.json().catch(() => ({}));
-    if (hasUsableMaps(payload.factoryMaps)) {
-      memoryFactoryMaps = normalizeMaps(payload.factoryMaps);
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryFactoryMaps));
-      } catch (error) {
-        console.error(
-          "[streetview-admin] Failed to save maps to localStorage.",
-          error,
-        );
-      }
-    }
-
-    window.dispatchEvent(
-      new CustomEvent("streetview-admin-js-save-status", {
-        detail: { ok: true, savedTo: payload.savedTo },
-      }),
-    );
-  } catch (error) {
-    window.dispatchEvent(
-      new CustomEvent("streetview-admin-js-save-status", {
-        detail: { ok: false, error: error.message },
-      }),
-    );
-  }
-}
-
-function normalizeMaps(maps) {
-  const source = hasUsableMaps(maps) ? maps : getBaseFactoryMaps();
-  const next = clone(source);
-
-  Object.values(next).forEach((site) => {
-    site.areas = Array.isArray(site.areas) ? site.areas : [];
-    site.areas = site.areas.map((area) => ({
-      ...area,
-      points: area.points || "",
-      tour: ensureTour(area.tour, area),
-    }));
+async function syncMapsToDatabase(nextMaps) {
+  const response = await fetch("/api/admin/save-mapdata", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ factoryMaps: nextMaps }),
   });
-
-  return next;
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.error || `Save server responded ${response.status}`);
+  }
+  if (hasUsableMaps(payload.factoryMaps)) cacheMaps(payload.factoryMaps);
+  window.dispatchEvent(
+    new CustomEvent("streetview-admin-js-save-status", {
+      detail: { ok: true, savedTo: "PostgreSQL", version: payload.version },
+    }),
+  );
 }
 
 export function ensureTour(tour, area = {}) {
   const areaSlug = area.id || `area-${Date.now()}`;
-
   if (tour?.scenes && tour?.settings) {
     const normalizedScenes = normalizeScenes(tour.scenes || {});
-
     return {
       ...tour,
       id: tour.id || `${areaSlug}-tour`,
@@ -386,10 +327,7 @@ export function ensureTour(tour, area = {}) {
       version: tour.version || 1,
       mapImage: tour.mapImage || undefined,
       settings: {
-        firstScene:
-          tour.settings.firstScene ||
-          Object.keys(normalizedScenes || {})[0] ||
-          null,
+        firstScene: tour.settings.firstScene || Object.keys(normalizedScenes)[0] || null,
         defaultHfov: tour.settings.defaultHfov || 110,
         mobileHfov: tour.settings.mobileHfov || 90,
         ...tour.settings,
@@ -416,24 +354,25 @@ export function getSavedFactoryMaps() {
 }
 
 export function saveFactoryMaps(nextMaps) {
-  const normalized = normalizeMaps(nextMaps);
-  memoryFactoryMaps = normalized;
-  syncMapsToDataFile(normalized);
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
-  } catch (error) {
-    console.warn(
-      "[streetview-admin] localStorage save failed. The JSON save server is required for persistence.",
-      error,
-    );
-  }
-  window.dispatchEvent(new Event("streetview-admin-storage-updated"));
+  const normalized = cacheMaps(nextMaps);
+  saveSequence = saveSequence
+    .catch(() => {})
+    .then(() => syncMapsToDatabase(normalized))
+    .catch((error) => {
+      console.error("[streetview] PostgreSQL save failed.", error);
+      window.dispatchEvent(
+        new CustomEvent("streetview-admin-js-save-status", {
+          detail: { ok: false, error: error.message },
+        }),
+      );
+    });
   return normalized;
 }
 
 export function resetSavedFactoryMaps() {
   memoryFactoryMaps = null;
   localStorage.removeItem(STORAGE_KEY);
+  publicJsonHydrated = false;
   window.dispatchEvent(new Event("streetview-admin-storage-updated"));
 }
 
@@ -442,7 +381,7 @@ export async function getEffectiveFactoryMapsAsync({ force = false } = {}) {
 }
 
 export function getEffectiveFactoryMaps() {
-  return getSavedFactoryMaps() || normalizeMaps(getBaseFactoryMaps());
+  return getSavedFactoryMaps() || normalizeMaps(factoryMaps);
 }
 
 export function getMergedSite(siteId) {
@@ -471,7 +410,6 @@ export function saveArea(siteId, area) {
   const maps = getEffectiveFactoryMaps();
   const site = maps[siteId];
   if (!site) return maps;
-
   const cleanArea = {
     ...area,
     id: area.id || createId(area.name || "area"),
@@ -479,7 +417,6 @@ export function saveArea(siteId, area) {
     points: area.points || "",
     tour: ensureTour(area.tour, area),
   };
-
   const exists = site.areas.some((item) => item.id === cleanArea.id);
   site.areas = exists
     ? site.areas.map((item) => (item.id === cleanArea.id ? cleanArea : item))
@@ -499,11 +436,9 @@ export function updateAreaTour(siteId, areaId, nextTour) {
   const maps = getEffectiveFactoryMaps();
   const site = maps[siteId];
   if (!site) return maps;
-
   site.areas = site.areas.map((area) =>
     area.id === areaId ? { ...area, tour: ensureTour(nextTour, area) } : area,
   );
-
   return saveFactoryMaps(maps);
 }
 

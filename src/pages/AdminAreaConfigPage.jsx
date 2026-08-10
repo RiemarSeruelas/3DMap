@@ -13,6 +13,7 @@ import {
   saveFactoryMaps,
   createUniqueId,
 } from "../utils/streetViewAdminStorage";
+import { logout as logoutSession } from "../utils/auth";
 import "../styles/admin.css";
 
 const CARD_PAGE_SIZE = 20;
@@ -710,9 +711,13 @@ function PannellumStage({
       },
     }));
 
+    const useMultiRes =
+      scene?.panoramaType === "multires" && scene?.multiRes && typeof scene.multiRes === "object";
+
     viewerRef.current = window.pannellum.viewer(mount, {
-      type: "equirectangular",
-      panorama: image,
+      type: useMultiRes ? "multires" : "equirectangular",
+      ...(useMultiRes ? { multiRes: scene.multiRes } : { panorama: image }),
+      ...(scene?.thumbnail ? { preview: scene.thumbnail } : {}),
       autoLoad: true,
       showControls: false,
       compass: false,
@@ -739,7 +744,15 @@ function PannellumStage({
       } catch {}
       viewerRef.current = null;
     };
-  }, [image, selectedSceneId, hotspotSignature, scenesById]);
+  }, [
+    image,
+    selectedSceneId,
+    hotspotSignature,
+    scenesById,
+    scene?.panoramaType,
+    scene?.multiRes,
+    scene?.thumbnail,
+  ]);
 
   useEffect(() => {
     setHoveredMachineArea(null);
@@ -1243,6 +1256,7 @@ function AdminAreaConfigPage() {
   const [pendingTargetSceneId, setPendingTargetSceneId] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editLocationName, setEditLocationName] = useState("");
+  const [editLocationFile, setEditLocationFile] = useState(null);
   const [saveMessage, setSaveMessage] = useState("");
   const [mapZoom, setMapZoom] = useState(1);
   const [mapPan, setMapPan] = useState({ x: 0, y: 0 });
@@ -1392,9 +1406,8 @@ function AdminAreaConfigPage() {
     return () => observer.disconnect();
   }, [filteredScenes.length, visibleCount]);
 
-  function logout() {
-    sessionStorage.removeItem("streetViewAuth");
-    sessionStorage.removeItem("streetViewRole");
+  async function logout() {
+    await logoutSession();
     navigate("/login", { replace: true });
   }
 
@@ -1542,6 +1555,9 @@ function AdminAreaConfigPage() {
           label: baseTitle,
           panorama: uploaded.panorama,
           thumbnail: uploaded.thumbnail,
+          panoramaAssetId: uploaded.panoramaAssetId || null,
+          panoramaType: uploaded.panoramaType || "equirectangular",
+          multiRes: uploaded.multiRes || undefined,
           mapPoint: null,
           minimap: null,
           hotspots: [],
@@ -1578,29 +1594,73 @@ function AdminAreaConfigPage() {
     }
   }
 
-  function openEditName() {
+  function openEditLocation() {
     if (!selectedScene?.id) return;
     setEditLocationName(getSceneTitle(selectedScene));
+    setEditLocationFile(null);
     setIsEditOpen(true);
   }
 
-  function saveEditedName(event) {
+  async function saveEditedLocation(event) {
     event.preventDefault();
-    if (!selectedScene?.id) return;
+    if (!selectedScene?.id || isSaving) return;
+
     const cleanName = editLocationName.trim();
     if (!cleanName) return alert("Location name cannot be blank.");
 
-    const nextScene = {
-      ...selectedScene,
-      title: cleanName,
-      name: cleanName,
-      label: cleanName,
-    };
-    saveTour(
-      { ...tour, scenes: { ...tour.scenes, [selectedScene.id]: nextScene } },
-      "Name saved",
-    );
+    setIsSaving(true);
+    try {
+      let panorama = selectedScene.panorama;
+      let thumbnail = selectedScene.thumbnail;
+      let panoramaAssetId = selectedScene.panoramaAssetId || null;
+      let panoramaType = selectedScene.panoramaType || (selectedScene.multiRes ? "multires" : "equirectangular");
+      let multiRes = selectedScene.multiRes || undefined;
+
+      if (editLocationFile) {
+        const uploaded = await uploadPanoramaAsset(editLocationFile);
+        panorama = uploaded.panorama;
+        thumbnail = uploaded.thumbnail;
+        panoramaAssetId = uploaded.panoramaAssetId || null;
+        panoramaType = uploaded.panoramaType || "equirectangular";
+        multiRes = uploaded.multiRes || undefined;
+      }
+
+      const nextScene = {
+        ...selectedScene,
+        title: cleanName,
+        name: cleanName,
+        label: cleanName,
+        panorama,
+        thumbnail,
+        panoramaAssetId,
+        panoramaType,
+        multiRes,
+      };
+
+      saveTour(
+        { ...tour, scenes: { ...tour.scenes, [selectedScene.id]: nextScene } },
+        editLocationFile ? "Location and 360 image saved" : "Location saved",
+      );
+      setEditLocationFile(null);
+      setIsEditOpen(false);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update the location.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  function openEditLocationMap() {
     setIsEditOpen(false);
+    openMapModal("place");
+  }
+
+  function openEditLocationLinks() {
+    setMode("preview");
+    setPendingTargetSceneId(null);
+    setIsEditOpen(false);
+    setIsLocationManagerOpen(true);
   }
 
   function removeMachineArea(machineAreaId) {
@@ -2720,29 +2780,11 @@ function AdminAreaConfigPage() {
           <div className="admin-station-details-v3 compact-admin-actions-v5">
             <button
               type="button"
-              onClick={openEditName}
+              onClick={openEditLocation}
               disabled={!selectedScene}
             >
-              <span>Details</span>
-              <strong>Change Name</strong>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => openMapModal("jump")}
-              disabled={!selectedScene}
-            >
-              <span>Station</span>
-              <strong>Map</strong>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsLocationManagerOpen(true)}
-              disabled={!selectedScene}
-            >
-              <span>Map</span>
-              <strong>Locations</strong>
+              <span>Location</span>
+              <strong>Edit Location</strong>
             </button>
 
             <button
@@ -2751,11 +2793,11 @@ function AdminAreaConfigPage() {
               onClick={openMachineAreaPicker}
               disabled={!selectedScene}
             >
-              <span>
-                {adminStationMode === "safety" ? "Safety Mode" : "Tour Mode"}
-              </span>
+              <span>Mode</span>
               <strong>
-                {mode === "mark-machine-area" ? "Cancel Edit" : "Edit"}
+                {mode === "mark-machine-area"
+                  ? `Cancel ${adminStationMode === "safety" ? "Safety" : "Tour"} Edit`
+                  : `Edit ${adminStationMode === "safety" ? "Safety" : "Tour"} Mode`}
               </strong>
             </button>
 
@@ -2858,36 +2900,89 @@ function AdminAreaConfigPage() {
       {isEditOpen && (
         <div
           className="admin-config-modal-backdrop-v2"
-          onMouseDown={() => setIsEditOpen(false)}
+          onMouseDown={() => !isSaving && setIsEditOpen(false)}
         >
           <form
-            className="admin-config-add-modal-v2 admin-config-edit-modal-v2"
+            className="admin-config-add-modal-v2 admin-config-edit-modal-v2 edit-location-modal-v6"
             onMouseDown={(event) => event.stopPropagation()}
-            onSubmit={saveEditedName}
+            onSubmit={saveEditedLocation}
           >
             <div className="admin-config-modal-header-v2">
               <div>
                 <span>Location</span>
-                <strong>Change panorama name</strong>
+                <strong>Edit Location</strong>
               </div>
-              <button type="button" onClick={() => setIsEditOpen(false)}>
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={() => setIsEditOpen(false)}
+              >
                 ×
               </button>
             </div>
+
             <label className="admin-config-form-field-v2">
-              <span>Name</span>
+              <span>Location Name</span>
               <input
                 value={editLocationName}
                 onChange={(event) => setEditLocationName(event.target.value)}
+                disabled={isSaving}
                 autoFocus
               />
             </label>
+
+            <label className="admin-config-upload-box-v2 edit-location-image-upload-v6">
+              <input
+                type="file"
+                accept="image/*"
+                disabled={isSaving}
+                onChange={(event) =>
+                  setEditLocationFile(event.target.files?.[0] || null)
+                }
+              />
+              <b>
+                {editLocationFile
+                  ? editLocationFile.name
+                  : "Change 360 Image"}
+              </b>
+              <span>
+                {editLocationFile
+                  ? "This image will replace the current panorama when you save."
+                  : "Choose a new panorama only when you need to replace the current 360 image."}
+              </span>
+            </label>
+
+            <div className="edit-location-tools-v6">
+              <button
+                type="button"
+                disabled={isSaving || !siteMapImage}
+                onClick={openEditLocationMap}
+              >
+                <span>Site Position</span>
+                <strong>Map</strong>
+                <small>Place or update this location on the site map.</small>
+              </button>
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={openEditLocationLinks}
+              >
+                <span>Navigation</span>
+                <strong>Map Locations</strong>
+                <small>Add or relocate links to other panoramas.</small>
+              </button>
+            </div>
+
             <div className="admin-config-modal-actions-v2">
-              <button type="button" onClick={() => setIsEditOpen(false)}>
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={() => setIsEditOpen(false)}
+              >
                 Cancel
               </button>
-              <button type="submit" className="primary">
-                Save Name
+              <button type="submit" className="primary" disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </form>

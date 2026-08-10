@@ -6,6 +6,7 @@ import AreaMapPage from "./pages/AreaMapPage";
 import StreetViewPage from "./pages/StreetViewPage";
 import AdminPage from "./pages/AdminPage";
 import AdminAreaConfigPage from "./pages/AdminAreaConfigPage";
+import AdminStoragePage from "./pages/AdminStoragePage";
 import "./styles/admin.css";
 import { hydrateFactoryMapsFromPublicJson } from "./utils/streetViewAdminStorage";
 
@@ -13,18 +14,9 @@ function ProtectedRoute({ children, role }) {
   const isLoggedIn = sessionStorage.getItem("streetViewAuth") === "true";
   const userRole = sessionStorage.getItem("streetViewRole");
 
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (userRole === "admin") {
-    return children;
-  }
-
-  if (role && userRole !== role) {
-    return <Navigate to="/" replace />;
-  }
-
+  if (!isLoggedIn) return <Navigate to="/login" replace />;
+  if (userRole === "admin") return children;
+  if (role && userRole !== role) return <Navigate to="/" replace />;
   return children;
 }
 
@@ -36,46 +28,12 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute role="user">
-            <KioskPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/map/:siteId"
-        element={
-          <ProtectedRoute role="user">
-            <AreaMapPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/viewer/:siteId/:areaId"
-        element={
-          <ProtectedRoute role="user">
-            <StreetViewPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute role="admin">
-            <AdminPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/config/:siteId/:areaId"
-        element={
-          <ProtectedRoute role="admin">
-            <AdminAreaConfigPage />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/" element={<ProtectedRoute role="user"><KioskPage /></ProtectedRoute>} />
+      <Route path="/map/:siteId" element={<ProtectedRoute role="user"><AreaMapPage /></ProtectedRoute>} />
+      <Route path="/viewer/:siteId/:areaId" element={<ProtectedRoute role="user"><StreetViewPage /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute role="admin"><AdminPage /></ProtectedRoute>} />
+      <Route path="/admin/config/:siteId/:areaId" element={<ProtectedRoute role="admin"><AdminAreaConfigPage /></ProtectedRoute>} />
+      <Route path="/admin/storage" element={<ProtectedRoute role="admin"><AdminStoragePage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

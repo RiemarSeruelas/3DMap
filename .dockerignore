@@ -1,17 +1,9 @@
 node_modules
 dist
 .git
-.gitignore
-npm-debug.log
-.DS_Store
+.env
+*.zip
+package-lock.original.json
 
-# Keep uploads/data OUT of the Docker image when using volume mounts.
-# They will come from the host folder instead:
-#   C:\StreetViewData\uploads -> /app/public/uploads
-#   C:\StreetViewData\data    -> /app/public/data
-public/uploads/panos/*
-public/uploads/thumbs/*
-public/uploads/maps/*
-!public/uploads/panos/.gitkeep
-!public/uploads/thumbs/.gitkeep
-!public/uploads/maps/.gitkeep
+# Uploaded panoramas are runtime data, not Docker build context.
+public/uploads

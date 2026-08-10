@@ -4622,7 +4622,7 @@ button.danger {
 
 .youtube-admin-config-page .compact-admin-actions-v5 {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   min-height: 54px;
   overflow: visible;
@@ -5098,5 +5098,399 @@ button.danger {
   .admin-config-map-zoom-controls-v2 {
     justify-content: flex-start;
     border-radius: 14px;
+  }
+}
+
+
+/* =========================================================
+   EDIT LOCATION V6
+   - Bottom station actions are limited to 3.
+   - Name, panorama replacement, map position, and scene links
+     are grouped into one Edit Location modal.
+   ========================================================= */
+.youtube-admin-config-page .edit-location-modal-v6 {
+  width: min(620px, 94vw);
+}
+
+.youtube-admin-config-page .edit-location-image-upload-v6 {
+  min-height: 96px;
+  margin-top: 4px;
+}
+
+.youtube-admin-config-page .edit-location-tools-v6 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.youtube-admin-config-page .edit-location-tools-v6 > button {
+  min-width: 0;
+  min-height: 94px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  border: 1px solid #cbdafa;
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: #f8fbff;
+  color: #10204d;
+  text-align: left;
+  box-shadow: none;
+}
+
+.youtube-admin-config-page .edit-location-tools-v6 > button:hover:not(:disabled) {
+  border-color: #60a5fa;
+  background: #eff6ff;
+}
+
+.youtube-admin-config-page .edit-location-tools-v6 > button span {
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.youtube-admin-config-page .edit-location-tools-v6 > button strong {
+  margin-top: 4px;
+  color: #1d4ed8;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.youtube-admin-config-page .edit-location-tools-v6 > button small {
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+@media (max-width: 620px) {
+  .youtube-admin-config-page .edit-location-tools-v6 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   STORAGE + MULTIRES ADMIN
+   ============================================================ */
+.admin-select-footer-actions {
+  justify-self: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.admin-storage-page {
+  min-height: 100vh;
+  padding: 24px;
+  background: linear-gradient(135deg, #dfeafe 0%, #f8fbff 58%, #eef4ff 100%);
+  color: #0f172a;
+  overflow-y: auto;
+}
+
+.admin-storage-topbar {
+  max-width: 1320px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 24px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+}
+
+.admin-storage-topbar h1,
+.admin-storage-panel h2 {
+  margin: 4px 0 6px;
+  letter-spacing: -0.04em;
+}
+
+.admin-storage-topbar h1 {
+  font-size: clamp(28px, 4vw, 44px);
+}
+
+.admin-storage-topbar p,
+.admin-storage-panel-head p {
+  margin: 0;
+  max-width: 800px;
+  color: #64748b;
+  line-height: 1.55;
+}
+
+.admin-storage-topbar > button,
+.admin-storage-panel button,
+.admin-storage-row button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 13px;
+  padding: 9px 14px;
+  background: #e2e8f0;
+  color: #0f172a;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-storage-panel button.primary {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.admin-storage-panel button.danger,
+.admin-storage-row button.danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.admin-storage-panel button:disabled,
+.admin-storage-row button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.admin-storage-alert {
+  max-width: 1320px;
+  margin: 0 auto 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #dbeafe;
+  color: #1e3a8a;
+  font-weight: 850;
+}
+
+.admin-storage-alert.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.admin-storage-stats {
+  max-width: 1320px;
+  margin: 0 auto 18px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-storage-stats article {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.admin-storage-stats span,
+.admin-storage-stats small {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-storage-stats strong {
+  display: block;
+  margin: 7px 0 5px;
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+
+.admin-storage-panel {
+  max-width: 1320px;
+  margin: 0 auto 18px;
+  padding: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.07);
+}
+
+.admin-storage-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.admin-storage-runtime {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px 12px;
+  align-items: center;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #f8fafc;
+  font-size: 13px;
+}
+
+.admin-storage-runtime span {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.admin-storage-runtime strong.ok {
+  color: #166534;
+}
+
+.admin-storage-runtime strong.warn {
+  color: #92400e;
+}
+
+.admin-storage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-storage-list.compact {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.admin-storage-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px 110px 110px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+  background: #fff;
+}
+
+.admin-storage-row.unused {
+  grid-template-columns: minmax(0, 1fr) 120px auto;
+}
+
+.admin-storage-row strong,
+.admin-storage-row small,
+.admin-storage-row em {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.admin-storage-row small,
+.admin-storage-row em {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 11px;
+  font-style: normal;
+}
+
+.asset-status {
+  justify-self: start;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: capitalize;
+}
+
+.asset-status.ready {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.asset-status.failed,
+.asset-status.unavailable {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.asset-status.processing {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.admin-storage-row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.admin-storage-cleanup-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.admin-storage-cleanup-controls label {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.admin-storage-cleanup-controls label > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 5px;
+}
+
+.admin-storage-cleanup-controls input {
+  width: 82px;
+  min-height: 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  padding: 0 10px;
+  background: #fff;
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.admin-storage-empty {
+  padding: 24px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 15px;
+  color: #64748b;
+  text-align: center;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .admin-storage-page {
+    padding: 12px;
+  }
+
+  .admin-storage-topbar,
+  .admin-storage-panel-head,
+  .cleanup-head,
+  .admin-storage-cleanup-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-storage-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-storage-row,
+  .admin-storage-row.unused {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-storage-row-actions {
+    justify-content: flex-start;
+  }
+
+  .admin-storage-runtime {
+    grid-template-columns: auto 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .admin-storage-stats {
+    grid-template-columns: 1fr;
   }
 }

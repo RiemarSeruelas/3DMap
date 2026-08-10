@@ -1,0 +1,37 @@
+services:
+  streetview-api:
+    build:
+      context: .
+      target: backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      API_HOST: 0.0.0.0
+      API_PORT: 3010
+      STREETVIEW_STORAGE_DIR: /app/public
+      STREETVIEW_TEMP_DIR: /tmp/riems-streetview
+      IMPORT_JSON_PATH: /app/migration/streetview-data.json
+    volumes:
+      - "./public/uploads:/app/public/uploads"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3010/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 5
+
+  streetview:
+    build:
+      context: .
+      target: frontend
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-5055}:80"
+    volumes:
+      - "./public/uploads:/srv/streetview/uploads:ro"
+    depends_on:
+      streetview-api:
+        condition: service_healthy

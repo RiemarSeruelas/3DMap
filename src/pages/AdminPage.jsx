@@ -11,6 +11,7 @@ import {
   saveFactoryMaps,
   uploadAdminImage,
 } from "../utils/streetViewAdminStorage";
+import { logout as logoutSession } from "../utils/auth";
 import "../styles/admin.css";
 
 function createBlankDraft(site) {
@@ -90,9 +91,8 @@ function AdminPage() {
     };
   }, []);
 
-  function logout() {
-    sessionStorage.removeItem("streetViewAuth");
-    sessionStorage.removeItem("streetViewRole");
+  async function logout() {
+    await logoutSession();
     navigate("/login", { replace: true });
   }
 
@@ -311,13 +311,22 @@ function AdminPage() {
             })}
           </section>
 
-          <button
-            className="admin-select-open-viewer"
-            type="button"
-            onClick={() => navigate("/")}
-          >
-            Open Viewer
-          </button>
+          <div className="admin-select-footer-actions">
+            <button
+              className="admin-select-open-viewer"
+              type="button"
+              onClick={() => navigate("/")}
+            >
+              Open Viewer
+            </button>
+            <button
+              className="admin-select-open-viewer"
+              type="button"
+              onClick={() => navigate("/admin/storage")}
+            >
+              Storage & Multires
+            </button>
+          </div>
         </main>
       </div>
     );
@@ -386,6 +395,9 @@ function AdminPage() {
           </button>
           <button type="button" onClick={() => navigate("/")}>
             Open Viewer
+          </button>
+          <button type="button" onClick={() => navigate("/admin/storage")}>
+            Storage & Multires
           </button>
           <button type="button" className="danger" onClick={logout}>
             Logout

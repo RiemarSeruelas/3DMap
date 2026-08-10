@@ -1,0 +1,4 @@
+-- Metadata backup example (run from a shell, not inside pgAdmin query tool):
+-- pg_dump -h YOUR_POSTGRES_SERVER -U YOUR_DEDICATED_APP_USER -d YOUR_DATABASE -n map -Fc -f streetview-map.backup
+--
+-- The panorama storage directory must be backed up separately.

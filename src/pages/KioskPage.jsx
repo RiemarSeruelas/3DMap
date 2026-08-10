@@ -1,22 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getEffectiveFactoryMaps } from "../utils/streetViewAdminStorage";
+import {
+  getEffectiveFactoryMaps,
+  hydrateFactoryMapsFromPublicJson,
+} from "../utils/streetViewAdminStorage";
+import { logout } from "../utils/auth";
 
 function KioskPage() {
   const navigate = useNavigate();
   const userRole = sessionStorage.getItem("streetViewRole");
-
   const [maps, setMaps] = useState(() => getEffectiveFactoryMaps());
   const [selectedSite, setSelectedSite] = useState(null);
 
   useEffect(() => {
+    let active = true;
+    hydrateFactoryMapsFromPublicJson({ force: true }).then((nextMaps) => {
+      if (active) setMaps(nextMaps);
+    });
     function refresh() {
       setMaps(getEffectiveFactoryMaps());
     }
-
     window.addEventListener("streetview-admin-storage-updated", refresh);
     window.addEventListener("storage", refresh);
     return () => {
+      active = false;
       window.removeEventListener("streetview-admin-storage-updated", refresh);
       window.removeEventListener("storage", refresh);
     };
@@ -29,22 +36,17 @@ function KioskPage() {
     setTimeout(() => navigate(`/map/${site.id}`), 450);
   }
 
-  function logout() {
-    sessionStorage.removeItem("streetViewAuth");
-    sessionStorage.removeItem("streetViewRole");
+  async function handleLogout() {
+    await logout();
     navigate("/login", { replace: true });
   }
 
   return (
     <div className={`kiosk-page clean-kiosk-page ${selectedSite ? "site-switching" : ""}`}>
-      <button className="floating-logout-btn" onClick={logout}>Logout</button>
-
+      <button className="floating-logout-btn" onClick={handleLogout}>Logout</button>
       {userRole === "admin" && (
-        <button className="floating-admin-btn" onClick={() => navigate("/admin")}>
-          Admin
-        </button>
+        <button className="floating-admin-btn" onClick={() => navigate("/admin")}>Admin</button>
       )}
-
       <main className="clean-kiosk-body">
         <section className="clean-kiosk-hero">
           <div className="clean-kiosk-badge">360</div>
@@ -54,7 +56,6 @@ function KioskPage() {
             <p className="clean-kiosk-subtitle">Choose a factory block to open its interactive map.</p>
           </div>
         </section>
-
         <section className="kiosk-selection-panel">
           <div className="kiosk-grid">
             {siteOptions.map((site) => (
@@ -66,11 +67,7 @@ function KioskPage() {
                 <div className="kiosk-card-glow" />
                 <div className="kiosk-card-top">
                   <div className="kiosk-card-icon">
-                    {site.name
-                      .split(" ")
-                      .map((word) => word[0])
-                      .join("")
-                      .slice(0, 2)}
+                    {site.name.split(" ").map((word) => word[0]).join("").slice(0, 2)}
                   </div>
                   <span className="kiosk-arrow">→</span>
                 </div>
@@ -83,15 +80,11 @@ function KioskPage() {
           </div>
         </section>
       </main>
-
       {selectedSite && (
         <div className="site-open-transition">
           <div className="site-open-ring" />
           <div className="site-open-pulse" />
-          <div className="site-open-label">
-            <span>OPENING MAP</span>
-            <strong>{selectedSite.name}</strong>
-          </div>
+          <div className="site-open-label"><span>OPENING MAP</span><strong>{selectedSite.name}</strong></div>
         </div>
       )}
     </div>

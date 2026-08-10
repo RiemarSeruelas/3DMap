@@ -1,56 +1,18 @@
-# Dependencies
 node_modules/
-.pnpm-store/
-.yarn/
-.yarn-cache/
-
-# Build output
 dist/
-build/
-.vite/
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Environment files
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+*.log
 
-# OS / editor files
-.DS_Store
-Thumbs.db
-desktop.ini
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-.idea/
-
-# React / Vite cache
-.cache/
-.parcel-cache/
-.eslintcache
-
-# Uploaded runtime files - do not push live uploaded images
-public/uploads/panos/*
-public/uploads/maps/*
-
-# Keep upload folders in Git
+# Large uploaded assets stay on the host and are not committed.
+public/uploads/*
+!public/uploads/.gitkeep
+!public/uploads/panos/
+!public/uploads/thumbs/
+!public/uploads/maps/
+!public/uploads/machines/
+!public/uploads/safety-popups/
 !public/uploads/panos/.gitkeep
+!public/uploads/thumbs/.gitkeep
 !public/uploads/maps/.gitkeep
-
-# Optional: ignore live saved admin data
-# Uncomment this if the deployed network/server should own the live config.
-# public/data/streetview-data.json
-
-# Optional backups
-*.bak
-*.tmp
-*.old
+!public/uploads/machines/.gitkeep
+!public/uploads/safety-popups/.gitkeep

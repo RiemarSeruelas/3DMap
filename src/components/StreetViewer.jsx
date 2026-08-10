@@ -719,6 +719,12 @@ function StreetViewer({ mapData, site, area }) {
   const currentScene = scenes[currentSceneId] || sceneList[0];
   const currentSceneIdResolved = currentScene?.id || currentSceneId;
   const currentPanorama = resolveAssetUrl(currentScene?.panorama);
+  const currentThumbnail = resolveAssetUrl(currentScene?.thumbnail);
+  const currentMultiRes = currentScene?.multiRes || null;
+  const useCurrentMultiRes =
+    currentScene?.panoramaType === "multires" &&
+    currentMultiRes &&
+    typeof currentMultiRes === "object";
   const mapImage = getMapImage(mapData, site, area);
   const machineAreas = useMemo(
     () =>
@@ -1105,14 +1111,9 @@ function StreetViewer({ mapData, site, area }) {
     });
   }, [mapData, requestedSceneId, requestedSceneExists, scenes]);
 
-  useEffect(() => {
-    const nextImages = sceneConnections
-      .map((connection) => scenes[connection.to]?.panorama)
-      .filter(Boolean)
-      .slice(0, 5);
-
-    nextImages.forEach((src) => preloadImage(src));
-  }, [sceneConnections, scenes]);
+  // Do not preload every connected full-resolution panorama. A panorama is
+  // loaded only when the user actually selects it in switchScene(), which
+  // prevents one viewer from pulling tens of megabytes of unused images.
 
   useEffect(() => {
     clearSafetyCloseTimer();
@@ -1386,9 +1387,19 @@ function StreetViewer({ mapData, site, area }) {
         };
       });
 
+    const resolvedMultiRes = useCurrentMultiRes
+      ? {
+          ...currentMultiRes,
+          basePath: resolveAssetUrl(currentMultiRes.basePath),
+        }
+      : null;
+
     const viewer = pannellumGlobal.viewer(viewerRef.current, {
-      type: "equirectangular",
-      panorama: currentPanorama,
+      type: resolvedMultiRes ? "multires" : "equirectangular",
+      ...(resolvedMultiRes
+        ? { multiRes: resolvedMultiRes }
+        : { panorama: currentPanorama }),
+      ...(currentThumbnail ? { preview: currentThumbnail } : {}),
       autoLoad: true,
       showControls: false,
       showFullscreenCtrl: false,
@@ -1420,6 +1431,9 @@ function StreetViewer({ mapData, site, area }) {
   }, [
     currentSceneIdResolved,
     currentPanorama,
+    currentThumbnail,
+    currentMultiRes,
+    useCurrentMultiRes,
     mapData,
     sceneConnections,
     scenes,

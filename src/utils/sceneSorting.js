@@ -4,12 +4,11 @@ export function getSceneTitle(scene, fallback = "Untitled Location") {
 
 export function getAlphabeticalScenes(tourOrMapData) {
   const scenes = Object.values(tourOrMapData?.scenes || {}).filter(Boolean);
-
   return [...scenes].sort((a, b) =>
     getSceneTitle(a, a?.id).localeCompare(getSceneTitle(b, b?.id), undefined, {
       numeric: true,
       sensitivity: "base",
-    })
+    }),
   );
 }
 
