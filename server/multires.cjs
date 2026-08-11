@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const path = require("node:path");
+const os = require("node:os");
 const { spawn, spawnSync } = require("node:child_process");
 
 const multiresEnabled = !["0", "false", "no", "off"].includes(
@@ -24,6 +25,42 @@ function generatorPath() {
   ]);
 }
 
+
+function makeGeneratorPythonCompatible(sourcePath) {
+  try {
+    const source = fs.readFileSync(sourcePath, "utf8");
+    let patched = source;
+
+    // Pannellum 2.5.7 imports find_executable from distutils.spawn.
+    // distutils is no longer included with newer Python runtimes, while
+    // shutil.which provides the same executable lookup behavior needed here.
+    patched = patched.replace(
+      /from\s+distutils\.spawn\s+import\s+find_executable/g,
+      "from shutil import which as find_executable",
+    );
+
+    // Keep the older Pannellum script compatible with newer Pillow releases.
+    if (patched.includes("Image.ANTIALIAS")) {
+      patched = patched.replace(
+        "Image.MAX_IMAGE_PIXELS = None",
+        "Image.MAX_IMAGE_PIXELS = None\nif not hasattr(Image, 'ANTIALIAS'):\n    Image.ANTIALIAS = Image.Resampling.LANCZOS",
+      );
+    }
+
+    if (patched === source) return sourcePath;
+
+    const targetPath = path.join(os.tmpdir(), "riems-pannellum-generate.py");
+    fs.writeFileSync(targetPath, patched, "utf8");
+    return targetPath;
+  } catch (error) {
+    console.warn(
+      "[streetview] Could not prepare Pannellum generator compatibility copy:",
+      error?.message || error,
+    );
+    return sourcePath;
+  }
+}
+
 function pythonCommand() {
   if (process.env.MULTIRES_PYTHON) return process.env.MULTIRES_PYTHON;
   return process.platform === "win32" ? "python" : "python3";
@@ -43,8 +80,8 @@ function getMultiresAvailability() {
     return { available: false, reason: "disabled", generatorPath: null };
   }
 
-  const generator = generatorPath();
-  if (!generator) {
+  const rawGenerator = generatorPath();
+  if (!rawGenerator) {
     return {
       available: false,
       reason: "generator_missing",
@@ -53,6 +90,7 @@ function getMultiresAvailability() {
     };
   }
 
+  const generator = makeGeneratorPythonCompatible(rawGenerator);
   const python = pythonCommand();
   if (!commandExists(python)) {
     return { available: false, reason: "python_missing", generatorPath: generator, python };

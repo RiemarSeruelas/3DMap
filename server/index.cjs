@@ -38,6 +38,7 @@ const {
   generateAssetMultires,
   reconcileReferencedAssets,
   deleteAssetFiles,
+  resolveAssetStoragePath,
   getMultiresAvailability,
 } = require("./storage.cjs");
 const { getMultiresQueueStatus } = require("./multires.cjs");
@@ -232,10 +233,13 @@ app.get("/api/admin/storage-assets", requireAdmin, async (req, res, next) => {
     });
     res.json({
       ok: true,
-      assets: assets.map((asset) => ({
-        ...asset,
-        fileExists: fs.existsSync(asset.storage_path),
-      })),
+      assets: assets.map((asset) => {
+        const resolvedPath = resolveAssetStoragePath(asset);
+        return {
+          ...asset,
+          fileExists: Boolean(resolvedPath && fs.existsSync(resolvedPath)),
+        };
+      }),
       multires: getMultiresQueueStatus(),
     });
   } catch (error) {
@@ -282,7 +286,15 @@ app.post("/api/admin/storage-cleanup", requireAdmin, async (req, res, next) => {
       return res.status(400).json({ ok: false, error: "Cleanup confirmation is required" });
     }
     const days = Math.max(0, Number(req.body?.days ?? 30));
-    const candidates = await getCleanupCandidates({ days });
+    const ids = Array.isArray(req.body?.ids)
+      ? req.body.ids.map(Number).filter(Number.isFinite)
+      : null;
+
+    if (Array.isArray(ids) && ids.length === 0) {
+      return res.status(400).json({ ok: false, error: "Select at least one old file to delete" });
+    }
+
+    const candidates = await getCleanupCandidates({ days, ids });
     const deleted = [];
     const failed = [];
     for (const asset of candidates) {
@@ -299,10 +311,11 @@ app.post("/api/admin/storage-cleanup", requireAdmin, async (req, res, next) => {
     }
     await audit("storage_cleanup_completed", req.auth.username, {
       days,
+      requestedIds: ids,
       deletedCount: deleted.length,
       failedCount: failed.length,
     });
-    return res.json({ ok: true, days, deleted, failed });
+    return res.json({ ok: true, days, requestedIds: ids, deleted, failed });
   } catch (error) {
     next(error);
   }

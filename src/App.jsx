@@ -6,7 +6,6 @@ import AreaMapPage from "./pages/AreaMapPage";
 import StreetViewPage from "./pages/StreetViewPage";
 import AdminPage from "./pages/AdminPage";
 import AdminAreaConfigPage from "./pages/AdminAreaConfigPage";
-import AdminStoragePage from "./pages/AdminStoragePage";
 import "./styles/admin.css";
 import { hydrateFactoryMapsFromPublicJson } from "./utils/streetViewAdminStorage";
 
@@ -33,7 +32,7 @@ function App() {
       <Route path="/viewer/:siteId/:areaId" element={<ProtectedRoute role="user"><StreetViewPage /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute role="admin"><AdminPage /></ProtectedRoute>} />
       <Route path="/admin/config/:siteId/:areaId" element={<ProtectedRoute role="admin"><AdminAreaConfigPage /></ProtectedRoute>} />
-      <Route path="/admin/storage" element={<ProtectedRoute role="admin"><AdminStoragePage /></ProtectedRoute>} />
+      <Route path="/admin/storage" element={<Navigate to="/admin" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

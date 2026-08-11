@@ -214,8 +214,8 @@ async function processOptimizedUpload(file, kind, targetDir) {
   };
 }
 
-function getMultiresPaths(asset) {
-  const sourcePath = path.resolve(asset.storage_path);
+function getMultiresPaths(asset, resolvedSourcePath = null) {
+  const sourcePath = path.resolve(resolvedSourcePath || asset.storage_path);
   const ext = path.extname(sourcePath);
   const basename = path.basename(sourcePath, ext);
   const parent = path.dirname(sourcePath);
@@ -240,7 +240,7 @@ function getMultiresPaths(asset) {
 }
 
 async function generateAssetMultires(assetOrId, username = "admin") {
-  const asset =
+  let asset =
     typeof assetOrId === "object" && assetOrId
       ? assetOrId
       : await getAssetById(assetOrId);
@@ -256,18 +256,43 @@ async function generateAssetMultires(assetOrId, username = "admin") {
     });
   }
 
-  const sourcePath = path.resolve(asset.storage_path);
-  if (!fs.existsSync(sourcePath)) {
+  // Repair stale absolute paths left by an older installation. The portable
+  // public path identifies the same file under the current project's uploads
+  // folder, so the DB row is refreshed as soon as the asset is used.
+  const canonicalPath = publicPathToStoragePath(asset.public_path);
+  if (
+    canonicalPath &&
+    fs.existsSync(canonicalPath) &&
+    path.resolve(asset.storage_path || "") !== path.resolve(canonicalPath)
+  ) {
+    const stats = await fsp.stat(canonicalPath);
+    asset = await reconcileAsset({
+      kind: asset.kind,
+      publicPath: asset.public_path,
+      storagePath: canonicalPath,
+      originalName: asset.original_name || path.basename(canonicalPath),
+      mimeType: asset.mime_type || mimeFromPath(canonicalPath),
+      size: stats.size,
+      username: "system-path-repair",
+    });
+  }
+
+  const sourcePath = resolveAssetStoragePath(asset);
+  if (!sourcePath || !fs.existsSync(sourcePath)) {
+    const expected = publicPathToStoragePath(asset.public_path);
+    const message = expected
+      ? `Original panorama file is missing from public/uploads: ${asset.public_path}`
+      : "Original panorama file is missing from public/uploads";
     await updateAssetMultires(asset.id, {
       status: "failed",
-      error: "Original panorama file is missing from storage",
+      error: message,
     });
-    throw Object.assign(new Error("Original panorama file is missing from storage"), {
+    throw Object.assign(new Error(message), {
       status: 404,
     });
   }
 
-  const paths = getMultiresPaths(asset);
+  const paths = getMultiresPaths(asset, sourcePath);
   await updateAssetMultires(asset.id, {
     status: "processing",
     error: null,
@@ -349,7 +374,7 @@ async function processUpload(file, kind, username) {
       : `/uploads/${cleanKind}/${processed.outputName}`;
   const checksum = await sha256File(processed.outputPath);
 
-  let asset = await recordAsset({
+  const asset = await recordAsset({
     kind: cleanKind,
     publicPath,
     storagePath: processed.outputPath,
@@ -358,28 +383,15 @@ async function processUpload(file, kind, username) {
     size: stats.size,
     sha256: checksum,
     username,
-    processingStatus: cleanKind === "panos" ? "processing" : "ready",
+    // Panorama optimization is intentionally manual. This keeps uploads fast
+    // and gives future admins one clear workflow: upload / replace the image,
+    // then click "Optimize 360 Image" in Location Configuration.
+    processingStatus: cleanKind === "panos" ? "not_generated" : "ready",
   });
 
-  let multiRes = null;
-  let multiresStatus = asset.processing_status;
-  let multiresError = null;
-
-  if (cleanKind === "panos") {
-    try {
-      const generated = await generateAssetMultires(asset, username);
-      asset = generated.asset;
-      multiRes = generated.multiRes;
-      multiresStatus = "ready";
-    } catch (error) {
-      // Never discard the untouched source panorama merely because tile
-      // generation is unavailable or fails. The viewer can use the original
-      // equirectangular file until an admin retries generation.
-      multiresStatus = error.multiresStatus || "failed";
-      multiresError = String(error?.message || error);
-      asset = (await getAssetById(asset.id)) || asset;
-    }
-  }
+  const multiRes = null;
+  const multiresStatus = cleanKind === "panos" ? "not_generated" : undefined;
+  const multiresError = null;
 
   return {
     ok: true,
@@ -417,6 +429,21 @@ function publicPathToStoragePath(publicPath) {
   const relativeToRoot = path.relative(uploadsDir, candidate);
   if (relativeToRoot.startsWith("..") || path.isAbsolute(relativeToRoot)) return null;
   return candidate;
+}
+
+function resolveAssetStoragePath(asset) {
+  // The public /uploads/... path is portable across machines and Docker hosts.
+  // Prefer it over the absolute storage_path saved in PostgreSQL, because an
+  // older DB row may still point to a previous machine such as C:/RIEMS-Data.
+  const canonical = publicPathToStoragePath(asset?.public_path);
+  if (canonical && fs.existsSync(canonical)) return canonical;
+
+  const stored = asset?.storage_path ? path.resolve(asset.storage_path) : null;
+  if (stored && fs.existsSync(stored)) return stored;
+
+  // Return the canonical project-local location for a useful missing-file
+  // check / message even when neither candidate currently exists.
+  return canonical || stored || null;
 }
 
 function collectScenePanoramaMetadata(factoryMaps) {
@@ -539,8 +566,8 @@ async function deleteAssetFiles(asset, username, reason = "manual_cleanup") {
     );
   }
 
-  const sourcePath = path.resolve(asset.storage_path);
-  if (isInsideUploads(sourcePath)) {
+  const sourcePath = resolveAssetStoragePath(asset);
+  if (sourcePath && isInsideUploads(sourcePath)) {
     await fsp.rm(sourcePath, { force: true }).catch(() => {});
   }
   if (asset.multires_dir) {
@@ -549,7 +576,7 @@ async function deleteAssetFiles(asset, username, reason = "manual_cleanup") {
       await fsp.rm(multiresDir, { recursive: true, force: true }).catch(() => {});
     }
   }
-  await removeEmptyParent(path.dirname(sourcePath));
+  if (sourcePath) await removeEmptyParent(path.dirname(sourcePath));
 
   const deleted = await markAssetDeleted(asset.id, username, reason);
   await safeAudit("asset_deleted", username, {
@@ -574,5 +601,6 @@ module.exports = {
   reconcileReferencedAssets,
   deleteAssetFiles,
   publicPathToStoragePath,
+  resolveAssetStoragePath,
   getMultiresAvailability,
 };

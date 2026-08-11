@@ -369,6 +369,10 @@ export function saveFactoryMaps(nextMaps) {
   return normalized;
 }
 
+export async function waitForFactoryMapsSave() {
+  await saveSequence;
+}
+
 export function resetSavedFactoryMaps() {
   memoryFactoryMaps = null;
   localStorage.removeItem(STORAGE_KEY);

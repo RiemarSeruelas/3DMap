@@ -2,6 +2,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "pannellum/build/pannellum.css";
 import "pannellum";
+import ImageMaintenancePanel from "../components/ImageMaintenancePanel";
 import {
   getEffectiveSite,
   getEffectiveArea,
@@ -1332,6 +1333,26 @@ function AdminAreaConfigPage() {
     };
   }, [siteId, areaId, searchParams]);
 
+  const refreshConfigurationAfterOptimization = useCallback(async () => {
+    const nextSite = await getEffectiveSite(siteId);
+    const nextArea = await getEffectiveArea(siteId, areaId);
+    const nextTour = ensureTour(nextArea?.tour, nextArea);
+
+    setSite(nextSite);
+    setArea(nextArea);
+    setTour(nextTour);
+    setSelectedSceneId((currentSceneId) => {
+      if (currentSceneId && nextTour?.scenes?.[currentSceneId]) {
+        return currentSceneId;
+      }
+      return (
+        nextTour?.settings?.firstScene ||
+        Object.keys(nextTour?.scenes || {})[0] ||
+        null
+      );
+    });
+  }, [siteId, areaId]);
+
   const scenesById = useMemo(() => tour?.scenes || {}, [tour]);
   const scenes = useMemo(
     () => sortScenesAlphabetically(Object.values(tour?.scenes || {})),
@@ -1577,7 +1598,10 @@ function AdminAreaConfigPage() {
         await new Promise((resolve) => setTimeout(resolve, 0));
       }
 
-      saveTour(nextTour, `${newLocationFiles.length} image(s) added`);
+      saveTour(
+        nextTour,
+        `${newLocationFiles.length} image(s) added — optimize new images for faster viewing`,
+      );
       setSelectedSceneId(selectedFirstNewScene);
       setIsAddOpen(false);
       setNewLocationName("");
@@ -1639,7 +1663,9 @@ function AdminAreaConfigPage() {
 
       saveTour(
         { ...tour, scenes: { ...tour.scenes, [selectedScene.id]: nextScene } },
-        editLocationFile ? "Location and 360 image saved" : "Location saved",
+        editLocationFile
+          ? "360 image saved — click Optimize 360 Image for faster viewing"
+          : "Location saved",
       );
       setEditLocationFile(null);
       setIsEditOpen(false);
@@ -2596,6 +2622,11 @@ function AdminAreaConfigPage() {
             </div>
           </button>
 
+          <ImageMaintenancePanel
+            selectedScene={selectedScene}
+            onOptimizationComplete={refreshConfigurationAfterOptimization}
+          />
+
           <div className="admin-config-rail-title-v2">
             <span>Uploaded Images</span>
             <strong>{scenes.length}</strong>
@@ -2951,6 +2982,11 @@ function AdminAreaConfigPage() {
                   : "Choose a new panorama only when you need to replace the current 360 image."}
               </span>
             </label>
+
+            <div className="edit-location-optimize-note-v7">
+              <strong>After replacing the 360 image</strong>
+              <span>Save your changes, then click <b>Optimize 360 Image</b> in Location Configuration so the new image loads faster for viewers.</span>
+            </div>
 
             <div className="edit-location-tools-v6">
               <button

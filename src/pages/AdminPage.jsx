@@ -319,13 +319,6 @@ function AdminPage() {
             >
               Open Viewer
             </button>
-            <button
-              className="admin-select-open-viewer"
-              type="button"
-              onClick={() => navigate("/admin/storage")}
-            >
-              Storage & Multires
-            </button>
           </div>
         </main>
       </div>
@@ -395,9 +388,6 @@ function AdminPage() {
           </button>
           <button type="button" onClick={() => navigate("/")}>
             Open Viewer
-          </button>
-          <button type="button" onClick={() => navigate("/admin/storage")}>
-            Storage & Multires
           </button>
           <button type="button" className="danger" onClick={logout}>
             Logout

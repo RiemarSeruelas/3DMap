@@ -1,324 +1,507 @@
-# Company Street View — PostgreSQL + Local Storage + Pannellum Multires
+# Company Street View
 
-This build is designed for internal/on-premise hosting.
+The Company Street View system provides an internal 360-degree navigation experience for plant areas. It allows authorized administrators to upload and configure panorama locations, connect one location to another, map each panorama to a floor or area map, and maintain Tour Mode and Safety Mode information.
 
-- PostgreSQL is the source of truth for map configuration and metadata.
-- Actual image files stay inside this project under `public/uploads`.
-- Nginx serves images and multires tiles directly.
-- New 360 panoramas keep their original bytes and automatically generate Pannellum multires tiles when the generator is available.
-- Existing panoramas can be converted from the Admin **Storage & Multires** page.
-- Unused files are **never deleted automatically**. Cleanup only happens after an admin explicitly presses a delete / cleanup button and confirms it.
-- No cloud storage or external runtime service is required.
+The application stores map configuration in PostgreSQL and keeps the actual image files in the project `public/uploads` folder. High-resolution panoramas can be optimized into multiresolution tiles so users do not need to download an entire large 360 image at once.
 
-## Architecture
+## Who Should Use This System
 
-```text
-Internal users
-    |
-    v
-Nginx
-    |-- React application
-    |-- /uploads/* -> project-local image / tile storage
-    `-- /api/* -> Node / Express API
-                      |-- PostgreSQL
-                      `-- public/uploads
-```
+- Employees using the Street View viewer to navigate plant areas
+- Authorized administrators maintaining 360 locations
+- Engineering or digital personnel responsible for map configuration
+- System owners responsible for Docker, PostgreSQL, backups, and image storage
 
-## What is stored where
+## Main Features
+
+- 360-degree panorama viewer
+- Multiple sites and plant areas
+- Location search
+- Configurable panorama names
+- Replaceable 360 images
+- Map positioning for each panorama
+- Panorama-to-panorama navigation links
+- Tour Mode configuration
+- Safety Mode configuration
+- Machine and safety popup configuration
+- 360 image optimization for faster viewing
+- Batch optimization for newly added or updated panoramas
+- Old unused image review and manual cleanup
+- PostgreSQL map configuration storage
+- PostgreSQL asset, session, and audit tracking
+- Local image storage under `public/uploads`
+- Docker and Nginx deployment
+- Admin and Viewer accounts
+
+## System Areas
+
+| Area | Purpose |
+| --- | --- |
+| **Viewer** | Navigate configured plant locations using 360 images and panorama links. |
+| **Location Configuration** | Add, rename, replace, map, connect, edit, and delete panorama locations. |
+| **Tour Mode** | Configure machine areas, interactive locations, and other Tour Mode information for a panorama. |
+| **Safety Mode** | Configure safety-related areas, markers, and popups for a panorama. |
+| **360 Image Maintenance** | Optimize newly added or replaced 360 images and review old unused image files. |
+| **Map** | Position panorama locations on the correct site or area map. |
+
+## How to Use the System
+
+### 1. Sign In
+
+Open the application and sign in using the authorized Admin or Viewer account.
+
+Viewer access is intended for normal Street View navigation. Admin access provides the configuration tools.
+
+### 2. Open a Site and Area
+
+Select the required site and area, then open the Street View viewer or Location Configuration page.
+
+### 3. Add a 360 Location
+
+From Location Configuration, select **Add 360 Images** and upload the panorama file.
+
+After upload:
+
+1. Confirm that the new location appears in the uploaded-image list.
+2. Select the new location.
+3. Use **Edit Location** to change the location name if needed.
+4. Map the location to the correct area.
+5. Configure the locations that the panorama should connect to.
+6. Optimize the new 360 image when the production optimization tool is available.
+
+The original panorama file remains stored under `public/uploads/panos`.
+
+### 4. Edit a Location
+
+Select a panorama and choose **Edit Location**.
+
+The Admin can:
+
+- Change the location name
+- Replace the 360 image
+- Map the panorama to the site or area map
+- Configure Map Locations / connected panoramas
+
+Save the changes after editing.
+
+### 5. Configure Tour Mode or Safety Mode
+
+Use the Tour Mode / Safety Mode switch, then select **Edit Tour Mode** or **Edit Safety Mode**.
+
+Changes are stored in PostgreSQL as part of the current map configuration.
+
+### 6. Connect One Panorama to Another
+
+Use **Map Locations** inside Edit Location to configure where a user should go when selecting a navigation point.
+
+The destination relationship is stored in PostgreSQL. The actual panorama image remains stored in `public/uploads/panos`.
+
+### 7. Optimize a 360 Image
+
+After adding or replacing a panorama, open **360 Image Maintenance** from Location Configuration.
+
+For a single location, select:
+
+**Optimize This 360 Image**
+
+For several newly added or updated panoramas, select:
+
+**Optimize All New / Updated Images**
+
+Optimization creates multiresolution image tiles. These allow the viewer to load smaller image sections instead of downloading the full panorama at once.
+
+The original panorama is not deleted or replaced by the optimization process.
+
+### 8. Review Old Unused Files
+
+Open **Old Unused Files** inside 360 Image Maintenance.
+
+Unused files are images that still exist in storage but are no longer referenced by the current map configuration, usually after replacing an image.
+
+The system does not automatically delete unused files.
+
+An Admin can:
+
+- Select individual unused files
+- Select all shown unused files
+- Preview a file
+- Delete one file
+- Delete selected files
+
+Delete files only after confirming that they are no longer required.
+
+### 9. Sign Out
+
+Admin users should sign out after completing configuration work, especially on shared computers.
+
+## Important Rules
+
+- PostgreSQL is the source of truth for the live map configuration.
+- The application does not write normal map edits back to `streetview-data.json`.
+- Actual panorama, thumbnail, map, machine, and safety images are stored as files under `public/uploads`.
+- Do not manually rename or move files inside `public/uploads` after they have been registered by the system.
+- Do not delete panorama folders manually while they are still referenced by the current map.
+- Use the Admin interface to replace or delete images.
+- Multiresolution optimization may create hundreds of small JPG tiles for one high-resolution panorama. This is normal.
+- Higher multiresolution levels contain more tiles because they provide more detail.
+- Do not stop or rebuild the backend while a large batch optimization is still running.
+- Old unused files are never deleted automatically.
+- Keep both the PostgreSQL data and the complete `public/uploads` folder in backups.
+
+## Data Storage
 
 ### PostgreSQL
 
-PostgreSQL stores:
+PostgreSQL stores the live application structure, including:
 
-- sites and parent areas
-- panorama locations / scene IDs
-- panorama names
-- panorama image references
-- multires configuration
-- map coordinates
-- panorama-to-panorama navigation links
-- arrow positions
-- Tour Mode data
-- Safety Mode data
-- machine / popup configuration
-- users and sessions
-- asset registry and processing status
-- audit logs
+- Sites
+- Areas
+- Panorama locations
+- Panorama names
+- Panorama file references
+- Map coordinates
+- Connected / next panorama relationships
+- Tour Mode configuration
+- Safety Mode configuration
+- Machine areas
+- Safety popups
+- Users and sessions
+- Asset records
+- Audit information
+- Multiresolution status and configuration
 
-The main map configuration is stored in `map.map_state.factory_maps` as JSONB.
+The main live map structure is stored in the configured PostgreSQL schema, normally:
 
-### Project folder
+```text
+map
+```
 
-Actual image bytes and generated panorama tiles are stored under:
+### Image Files
+
+Actual image files are stored inside the project:
 
 ```text
 public/uploads/
-├── panos/
-├── thumbs/
-├── maps/
 ├── machines/
-└── safety-popups/
+├── maps/
+├── panos/
+├── safety-popups/
+└── thumbs/
 ```
 
-New panorama uploads use a structure similar to:
+Optimized panoramas may contain folders similar to:
 
 ```text
-public/uploads/panos/location-name-.../
-├── original.jpg          # untouched uploaded source
-└── tiles/                # generated Pannellum multires files
-    ├── 1/
-    ├── 2/
-    ├── ...
-    ├── fallback/
-    └── config.json
+public/uploads/panos/
+└── panorama-folder/
+    ├── original.jpg
+    └── tiles/
+        ├── 1/
+        ├── 2/
+        ├── 3/
+        ├── 4/
+        ├── fallback/
+        └── config.json
 ```
 
-The original panorama is not resized or recompressed.
+The `original.jpg` remains the original uploaded panorama. The tile folders are generated files used for faster viewing.
 
-## PostgreSQL tables
+### Migration JSON
 
-The API automatically creates / upgrades the configured schema when the database user has permission.
+The project may contain:
 
-Main tables:
-
-- `map.map_state`
-- `map.map_assets`
-- `map.map_users`
-- `map.map_sessions`
-- `map.map_audit_logs`
-
-`map.map_assets` tracks original file size, generated multires size, referenced / unused state, multires processing state, and manual deletion audit information.
-
-If the dedicated database user cannot create the schema, run `database/001_create_map_schema.sql` once as a PostgreSQL administrator after replacing `streetview_app` with the real application user.
-
-## Configure `.env`
-
-Copy:
-
-```powershell
-Copy-Item .env.example .env
+```text
+migration/streetview-data.json
 ```
 
-Then fill in the real PostgreSQL credentials and application passwords.
+This is for initial migration or manual recovery. It is not the live runtime map database after PostgreSQL has been populated.
 
-No fixed `C:/RIEMS-Data/...` storage location is required. If `STREETVIEW_STORAGE_DIR` is not configured, local development uses this project's `public` folder automatically.
+For production, after confirming the complete map exists in PostgreSQL, set:
 
-## Local development
-
-Install packages:
-
-```powershell
-npm.cmd install
+```env
+IMPORT_JSON_ON_START=false
 ```
 
-Start API + Vite:
+## Reminders and Useful Facts
 
-```powershell
-npm.cmd run dev
+- A 10–15 MB panorama can take time to optimize because the server must convert it into cube faces and multiple tile levels.
+- Batch optimization of many panoramas can take tens of minutes or longer depending on image resolution and server performance.
+- Multiresolution optimization normally uses more disk space than the original image because multiple resolution levels are generated.
+- Hundreds of generated JPG tiles for one panorama are normal.
+- The application processes panorama optimization conservatively to avoid excessive CPU, RAM, and disk usage.
+- Existing optimized panoramas do not need to be optimized again unless the panorama is replaced.
+- If a panorama is replaced, the old file may appear under Old Unused Files until an Admin deletes it.
+- Moving the application to another computer does not require hard-coded `C:\RIEMS-Data` paths. Image storage is relative to the project `public/uploads` folder.
+- Database backups alone are not enough. Always back up `public/uploads` as well.
+- Do not use `docker compose down -v` as a routine restart command.
+
+## Running the System with Docker
+
+This section is for the person responsible for hosting the Company Street View system.
+
+### Requirements
+
+- Docker Desktop or Docker Engine
+- Access to the PostgreSQL database used by the application
+- The complete project folder
+- A configured `.env` file
+- Enough local storage for original panoramas and generated multiresolution tiles
+
+The PostgreSQL database must already exist. The application creates its required schema and tables automatically when the configured PostgreSQL user has sufficient permissions.
+
+### Configure `.env`
+
+Create or update `.env` in the main project folder:
+
+```env
+APP_PORT=5055
+TZ=Asia/Manila
+
+POSTGRES_ENABLED=true
+POSTGRES_HOST=your_database_host
+POSTGRES_PORT=5432
+POSTGRES_DB=your_database_name
+POSTGRES_USER=your_database_user
+POSTGRES_PASSWORD=your_database_password
+POSTGRES_SCHEMA=map
+
+POSTGRES_POOL_MAX=10
+POSTGRES_CONNECT_TIMEOUT_MS=10000
+POSTGRES_SSL=false
+
+IMPORT_JSON_ON_START=false
+MAX_UPLOAD_MB=50
+
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_strong_admin_password
+
+VIEWER_USERNAME=viewer
+VIEWER_PASSWORD=your_strong_viewer_password
+
+AUTH_SESSION_HOURS=12
+AUTH_COOKIE_SECURE=false
 ```
 
-`npm.cmd start` is also available and starts the same local API + Vite workflow.
+Do not add the old machine-specific storage paths unless a future deployment intentionally requires a custom external storage directory.
 
-### Multires during Windows local development
+The default deployment stores image files under the project `public/uploads` folder.
 
-The application still works if the multires generator is not installed locally. In that case:
+### Start the Application
 
-1. the original 360 image is saved safely;
-2. the scene temporarily remains equirectangular;
-3. the asset appears as `unavailable` / `not generated` in **Storage & Multires**;
-4. the tiles can be generated later from the Docker host.
-
-To generate multires directly from `npm run dev` on Windows, install Python 3 and Hugin / `nona`, then configure the optional `MULTIRES_*` paths in `.env` if they are not already on PATH.
-
-## Docker deployment
-
-Build and start:
+Open PowerShell or Command Prompt in the project folder:
 
 ```powershell
 docker compose up -d --build
 ```
+
+### Check the Containers
+
+```powershell
+docker compose ps
+```
+
+The API and Nginx containers should show as running or healthy.
+
+### Open the System
+
+On the computer running Docker:
+
+```text
+http://localhost:5055
+```
+
+From another computer on the allowed internal network:
+
+```text
+http://SERVER_IP:5055
+```
+
+Replace `SERVER_IP` with the IP address of the Docker host.
+
+The firewall and plant network must allow access to the configured application port.
+
+### Check Application Health
+
+```powershell
+curl.exe http://localhost:5055/health
+```
+
+If the application does not respond, inspect the container status and logs.
+
+### Start Again
+
+```powershell
+docker compose up -d
+```
+
+### Restart the Application
+
+Avoid restarting while panorama optimization is actively running.
+
+When no optimization is running:
+
+```powershell
+docker compose restart
+```
+
+### Rebuild After Receiving Updated Files
+
+Wait for any active panorama optimization to finish first.
+
+Then run:
+
+```powershell
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+```
+
+### Stop the Application
+
+```powershell
+docker compose down
+```
+
+### Check Application Messages
+
+```powershell
+docker compose logs --tail=100
+```
+
+To follow new messages:
+
+```powershell
+docker compose logs -f
+```
+
+For API-specific messages:
+
+```powershell
+docker compose logs --tail=200 streetview-api
+```
+
+## Basic Troubleshooting
+
+### The System Does Not Open
+
+Check the containers:
+
+```powershell
+docker compose ps
+```
+
+Then check the logs:
+
+```powershell
+docker compose logs --tail=200
+```
+
+### PostgreSQL Connection Error
+
+- Confirm the PostgreSQL server is running.
+- Confirm the host, port, database, username, and password in `.env`.
+- Confirm the configured user can access or create the `map` schema.
+- Confirm the Docker host can reach the PostgreSQL server over the required network.
+- Contact the database administrator if the connection still fails.
+
+### A Panorama Does Not Display
+
+Confirm that the file referenced by the map still exists under:
+
+```text
+public/uploads/panos
+```
+
+Do not manually rename panorama files or folders after upload.
+
+If the original file is missing, use **Edit Location → Change 360 Image** to upload it again.
+
+### Optimize 360 Image Fails
+
+Confirm that:
+
+- The original panorama exists under `public/uploads/panos`.
+- The API container is running.
+- The Docker image includes the multiresolution dependencies.
+- The application logs do not show a generator error.
 
 Check:
 
 ```powershell
-docker compose ps
 docker compose logs --tail=200 streetview-api
-docker compose logs --tail=100 streetview
 ```
 
-The backend Docker image includes:
+If the original file exists but optimization fails, review the generator error in the logs before re-uploading the panorama.
 
-- Python 3
-- Pillow
-- NumPy
-- Hugin `nona`
-- the official Pannellum 2.5.7 `generate.py` utility
+### Optimization Takes a Long Time
 
-The Docker build downloads the official generator and normal npm / Docker dependencies. The running application does not need internet access after the required images have been built / cached.
+This can be normal for high-resolution panoramas.
 
-## Automatic multires generation
+The server creates:
 
-For a new 360 upload:
+- Cube faces
+- Several resolution levels
+- Many individual JPG tiles
+
+Large batches should be allowed to finish without restarting the API container.
+
+### There Are Hundreds of JPG Files in a Panorama Folder
+
+This is expected after multiresolution optimization.
+
+Higher tile levels contain more JPG files because they provide higher visual detail.
+
+Do not manually delete these tile files while the panorama is marked as optimized.
+
+### Old Unused Files Appear
+
+These are usually old panorama, thumbnail, map, machine, or popup files that are no longer referenced by the current map.
+
+Review them in **360 Image Maintenance → Old Unused Files**.
+
+Nothing is deleted automatically.
+
+### The Database Has the Map but Images Are Missing
+
+The PostgreSQL database and image files are separate.
+
+Restoring only PostgreSQL does not restore the panorama images.
+
+Restore the matching backup of:
 
 ```text
-Admin uploads 360
-      |
-      v
-Untouched original saved
-      |
-      v
-Asset registered in PostgreSQL
-      |
-      v
-Pannellum multires generation
-      |
-      +-- success -> scene uses multires tiles
-      |
-      `-- failure -> original remains safe and scene uses equirectangular
+public/uploads
 ```
 
-Generation is serialized through a queue to avoid multiple high-resolution conversions competing for CPU / memory at the same time.
+as well.
 
-Default settings:
+## Backup
 
-```env
-MULTIRES_ENABLED=true
-MULTIRES_TILE_SIZE=512
-MULTIRES_FALLBACK_SIZE=1024
-MULTIRES_TILE_QUALITY=85
-MULTIRES_TIMEOUT_MS=1200000
-```
+A complete system backup requires both:
 
-The original panorama remains available even after multires generation.
+### 1. PostgreSQL
 
-## Existing panoramas
+Back up the configured `map` schema / database according to the site's PostgreSQL backup procedure.
 
-Open:
+### 2. Image Storage
+
+Back up the complete folder:
 
 ```text
-Admin -> Storage & Multires
+public/uploads/
 ```
 
-Then use:
+This includes original panoramas, optimized tiles, thumbnails, maps, machine images, and safety popup images.
 
-```text
-Generate for Existing Panoramas
-```
+Both backups are required for a complete restoration.
 
-The server uses the existing original panorama files, generates tiles, and updates matching scenes in PostgreSQL to use multires. Re-uploading is not required.
+## Security
 
-At startup the API also reconciles `/uploads/...` references already stored in the map against the actual `public/uploads` folder. This registers older files in `map.map_assets` so they can be managed by the Storage page.
-
-## Manual unused-file cleanup
-
-When a scene, panorama, map, thumbnail, machine image, or popup image is replaced / removed, the old asset becomes **unreferenced**.
-
-It is not immediately deleted.
-
-The Admin **Storage & Multires** page shows:
-
-- total storage
-- original image storage
-- generated tile storage
-- unused asset count / size
-- multires ready / pending counts
-- unused-file age
-- individual Preview / Delete controls
-
-There is also a manual retention control, e.g.:
-
-```text
-Unused for at least: [30] days
-[Delete Eligible]
-```
-
-**This is only a filter for the admin button. There is no timer and no automatic 30-day deletion.**
-
-An admin must press the button and confirm the deletion. Every deletion is recorded in `map.map_audit_logs`.
-
-A live referenced asset cannot be deleted through the cleanup API.
-
-## Initial JSON migration
-
-`migration/streetview-data.json` exists only as the initial database seed.
-
-On first startup, when `map.map_state` is empty:
-
-```text
-migration/streetview-data.json
-        -> PostgreSQL
-```
-
-Normal edits after that are saved to PostgreSQL, not back to the JSON file.
-
-Manual import:
-
-```powershell
-docker compose exec streetview-api node scripts/import-json.cjs migration/streetview-data.json
-```
-
-## Persistent storage behavior
-
-Docker bind-mounts:
-
-```text
-./public/uploads
-```
-
-into both the API and Nginx containers.
-
-Therefore these normal commands do not delete uploaded images:
-
-```powershell
-docker compose restart
-docker compose stop
-docker compose down
-docker compose up -d --build
-```
-
-Do not manually replace / delete the project folder without backing up `public/uploads`.
-
-## Backups
-
-A complete backup requires both:
-
-1. PostgreSQL schema `map`
-2. `public/uploads`
-
-Example PostgreSQL backup:
-
-```powershell
-pg_dump -h YOUR_POSTGRES_SERVER -U YOUR_DEDICATED_APP_USER -d YOUR_DATABASE -n map -Fc -f streetview-map.backup
-```
-
-Example image / tile backup:
-
-```powershell
-robocopy ".\public\uploads" "E:\RIEMS-Backups\3D-Map\uploads" /MIR
-```
-
-## Performance behavior
-
-- The viewer does not preload multiple connected full-resolution panoramas.
-- Multires scenes request only the cube tiles needed for the current view / zoom level.
-- Thumbnails remain lightweight.
-- Nginx serves `/uploads/*` directly with long-lived immutable caching.
-- PostgreSQL does not serve image bytes.
-- Panorama originals are retained for future regeneration.
-
-## Security notes
-
-- Password verification occurs in the API.
-- Passwords are stored as salted hashes.
-- Admin write / upload / cleanup / generation routes require an HttpOnly admin session.
-- Referenced assets cannot be deleted by the cleanup API.
-- Keep the application on the intended internal network and do not expose the application port publicly.
-- No panorama is uploaded to Pannellum or another external service; generation happens locally on the application host.
-
-## Health check
-
-```text
-http://SERVER_IP:APP_PORT/health
-```
-
-The health response includes PostgreSQL status, current map version, storage root, upload limit, and multires generator / queue status.
+- Keep `.env` private.
+- Do not commit `.env` to Git.
+- Do not include production credentials in public ZIP files.
+- Use strong Admin and Viewer passwords.
+- Share Admin credentials only with authorized personnel.
+- Do not expose PostgreSQL directly to untrusted networks.
+- Keep the Street View system on the approved internal network.
+- Do not expose plant images or internal map information to the public internet.
+- Sign out after using Admin functions on a shared computer.

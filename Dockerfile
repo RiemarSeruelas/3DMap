@@ -29,6 +29,7 @@ RUN apt-get update \
   && curl -fsSL \
        https://raw.githubusercontent.com/mpetroff/pannellum/2.5.7/utils/multires/generate.py \
        -o /opt/pannellum/generate.py \
+  && sed -i 's/from distutils.spawn import find_executable/from shutil import which as find_executable/' /opt/pannellum/generate.py \
   && chmod 0755 /opt/pannellum/generate.py \
   && rm -rf /var/lib/apt/lists/*
 
