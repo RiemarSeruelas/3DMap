@@ -13,7 +13,6 @@ const {
   updateAssetMultires,
   attachMultiresToMapAsset,
   markAssetDeleted,
-  audit,
 } = require("./repository.cjs");
 const {
   generateMultires,
@@ -40,16 +39,6 @@ const allowedImageMimeTypes = new Set([
   "image/webp",
 ]);
 const maxUploadMb = Number(process.env.MAX_UPLOAD_MB || 50);
-
-async function safeAudit(action, username, details = {}) {
-  try {
-    await audit(action, username, details);
-  } catch (error) {
-    // Audit logging must never invalidate a successfully generated / deleted
-    // asset. The main state changes have already been committed at this point.
-    console.warn(`[streetview] Audit write failed for ${action}:`, error?.message || error);
-  }
-}
 
 function ensureStorage() {
   fs.mkdirSync(tempDir, { recursive: true });
@@ -320,12 +309,6 @@ async function generateAssetMultires(assetOrId, username = "admin") {
       generated.multiRes,
       username,
     );
-    await safeAudit("multires_generated", username, {
-      assetId: asset.id,
-      publicPath: asset.public_path,
-      bytes: generated.bytes,
-      scenesUpdated: attached.updated,
-    });
     return { asset: updated, multiRes: generated.multiRes, scenesUpdated: attached.updated };
   } catch (error) {
     const unavailable = error?.code === "MULTIRES_UNAVAILABLE";
@@ -337,12 +320,6 @@ async function generateAssetMultires(assetOrId, username = "admin") {
       multiRes: null,
       multiresDir: null,
       multiresBytes: 0,
-    });
-    await safeAudit("multires_generation_failed", username, {
-      assetId: asset.id,
-      publicPath: asset.public_path,
-      status,
-      error: String(error?.message || error).slice(0, 1200),
     });
     error.multiresStatus = status;
     throw error;
@@ -579,14 +556,6 @@ async function deleteAssetFiles(asset, username, reason = "manual_cleanup") {
   if (sourcePath) await removeEmptyParent(path.dirname(sourcePath));
 
   const deleted = await markAssetDeleted(asset.id, username, reason);
-  await safeAudit("asset_deleted", username, {
-    assetId: asset.id,
-    publicPath: asset.public_path,
-    kind: asset.kind,
-    originalBytes: asset.size_bytes,
-    multiresBytes: asset.multires_bytes,
-    reason,
-  });
   return deleted;
 }
 

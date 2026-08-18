@@ -128,16 +128,28 @@ async function migrate() {
       )
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS map_sessions_expiry_idx ON ${schema}.map_sessions (expires_at)`);
+
     await client.query(`
-      CREATE TABLE IF NOT EXISTS ${schema}.map_audit_logs (
-        id BIGSERIAL PRIMARY KEY,
-        action TEXT NOT NULL,
-        username TEXT,
-        details JSONB NOT NULL DEFAULT '{}'::jsonb,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      CREATE TABLE IF NOT EXISTS ${schema}.map_usage_sessions (
+        session_id TEXT PRIMARY KEY,
+        username TEXT NOT NULL,
+        role TEXT NOT NULL CHECK (role IN ('admin', 'user')),
+        ip_address TEXT,
+        user_agent TEXT,
+        last_path TEXT,
+        started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        ended_at TIMESTAMPTZ
       )
     `);
-    await client.query(`CREATE INDEX IF NOT EXISTS map_audit_created_idx ON ${schema}.map_audit_logs (created_at DESC)`);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS map_usage_started_idx
+      ON ${schema}.map_usage_sessions (started_at DESC)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS map_usage_username_idx
+      ON ${schema}.map_usage_sessions (username, started_at DESC)
+    `);
     await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK");

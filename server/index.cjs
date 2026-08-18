@@ -10,7 +10,9 @@ const {
   getMapState,
   seedMapState,
   saveMapState,
-  audit,
+  startUsageSession,
+  touchUsageSession,
+  endUsageSession,
   storageSummary,
   listAssets,
   getAssetById,
@@ -23,6 +25,7 @@ const {
   login,
   logout,
   readSession,
+  requireAuth,
   requireAdmin,
   setSessionCookie,
   clearSessionCookie,
@@ -135,11 +138,9 @@ app.post("/api/auth/login", async (req, res, next) => {
 
     const session = await login(username, password);
     if (!session) {
-      await audit("login_failed", username, { ip: req.ip });
       return res.status(401).json({ ok: false, error: "Invalid username or password" });
     }
     setSessionCookie(res, session.token);
-    await audit("login_success", session.username, { role: session.role, ip: req.ip });
     return res.json({ ok: true, username: session.username, role: session.role, expiresAt: session.expiresAt });
   } catch (error) {
     next(error);
@@ -156,13 +157,72 @@ app.get("/api/auth/session", async (req, res, next) => {
   }
 });
 
+app.post("/api/usage/session/start", requireAuth, async (req, res, next) => {
+  try {
+    const sessionId = String(req.body?.sessionId || "").trim();
+    const pagePath = String(req.body?.path || "").slice(0, 1000) || null;
+    if (!sessionId || sessionId.length > 128) {
+      return res.status(400).json({ ok: false, error: "Invalid usage session id" });
+    }
+
+    const row = await startUsageSession({
+      sessionId,
+      username: req.auth.username,
+      role: req.auth.role,
+      ipAddress: req.ip || null,
+      userAgent: String(req.get("user-agent") || "").slice(0, 1000) || null,
+      path: pagePath,
+    });
+    return res.json({ ok: true, session: row });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/usage/session/heartbeat", requireAuth, async (req, res, next) => {
+  try {
+    const sessionId = String(req.body?.sessionId || "").trim();
+    const pagePath = String(req.body?.path || "").slice(0, 1000) || null;
+    if (!sessionId || sessionId.length > 128) {
+      return res.status(400).json({ ok: false, error: "Invalid usage session id" });
+    }
+
+    let row = await touchUsageSession(sessionId, pagePath);
+    if (!row) {
+      row = await startUsageSession({
+        sessionId,
+        username: req.auth.username,
+        role: req.auth.role,
+        ipAddress: req.ip || null,
+        userAgent: String(req.get("user-agent") || "").slice(0, 1000) || null,
+        path: pagePath,
+      });
+    }
+    return res.json({ ok: true, session: row });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/usage/session/end", requireAuth, async (req, res, next) => {
+  try {
+    const sessionId = String(req.body?.sessionId || "").trim();
+    if (!sessionId || sessionId.length > 128) {
+      return res.status(400).json({ ok: false, error: "Invalid usage session id" });
+    }
+
+    await endUsageSession(sessionId);
+    return res.json({ ok: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/auth/logout", async (req, res, next) => {
   try {
     const token = parseCookies(req.headers.cookie || "")[COOKIE_NAME];
-    const session = await readSession(req);
     await logout(token);
     clearSessionCookie(res);
-    if (session) await audit("logout", session.username, { ip: req.ip });
     return res.json({ ok: true });
   } catch (error) {
     next(error);
@@ -192,11 +252,6 @@ async function uploadHandler(req, res, next) {
       req.body?.kind || req.query?.kind || req.body?.type || req.query?.type,
       req.auth.username,
     );
-    await audit("asset_uploaded", req.auth.username, {
-      publicPath: result.publicPath,
-      kind: result.kind,
-      size: result.size,
-    });
     return res.json(result);
   } catch (error) {
     next(error);
@@ -309,12 +364,6 @@ app.post("/api/admin/storage-cleanup", requireAdmin, async (req, res, next) => {
         failed.push({ id: asset.id, error: String(error?.message || error) });
       }
     }
-    await audit("storage_cleanup_completed", req.auth.username, {
-      days,
-      requestedIds: ids,
-      deletedCount: deleted.length,
-      failedCount: failed.length,
-    });
     return res.json({ ok: true, days, requestedIds: ids, deleted, failed });
   } catch (error) {
     next(error);

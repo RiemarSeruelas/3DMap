@@ -3,16 +3,8 @@ dist/
 .env
 *.log
 
-# Large uploaded assets stay on the host and are not committed.
-public/uploads/*
+# Runtime image storage stays on the host and is never committed.
+# The API recreates the panos / thumbs / maps / machines / safety-popups
+# subfolders automatically when it starts.
+public/uploads/**
 !public/uploads/.gitkeep
-!public/uploads/panos/
-!public/uploads/thumbs/
-!public/uploads/maps/
-!public/uploads/machines/
-!public/uploads/safety-popups/
-!public/uploads/panos/.gitkeep
-!public/uploads/thumbs/.gitkeep
-!public/uploads/maps/.gitkeep
-!public/uploads/machines/.gitkeep
-!public/uploads/safety-popups/.gitkeep

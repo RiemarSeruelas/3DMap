@@ -85,18 +85,6 @@ async function saveMapState(factoryMaps, username = "admin") {
         [references],
       );
     }
-
-    await client.query(
-      `INSERT INTO ${schema}.map_audit_logs (action, username, details)
-       VALUES ('map_saved', $1, $2::jsonb)`,
-      [
-        username,
-        JSON.stringify({
-          version: Number(result.rows[0].version),
-          referencedAssets: references.length,
-        }),
-      ],
-    );
     await client.query("COMMIT");
     return {
       version: Number(result.rows[0].version),
@@ -248,20 +236,7 @@ async function attachMultiresToMapAsset(publicPath, assetId, multiRes, username 
   if (!state) return { updated: 0, state: null };
   const changed = updateSceneMultires(state.factoryMaps, publicPath, assetId, multiRes);
   if (!changed.updated) return { updated: 0, state };
-  const saved = await saveMapState(changed.factoryMaps, username);
-  try {
-    await audit("multires_attached_to_map", username, {
-      assetId,
-      publicPath,
-      scenesUpdated: changed.updated,
-      version: saved.version,
-    });
-  } catch (error) {
-    // The map update is already committed. Do not turn a successful multires
-    // attachment into a failure solely because this secondary audit insert failed.
-    console.warn("[streetview] Multires attachment audit failed:", error?.message || error);
-  }
-  return { updated: changed.updated, state: saved };
+  const saved = await saveMapState(changed.factoryMaps, username);  return { updated: changed.updated, state: saved };
 }
 
 async function listAssets({ includeDeleted = false, kind = null, limit = 1000 } = {}) {
@@ -344,11 +319,55 @@ async function getCleanupCandidates({ days = 30, ids = null } = {}) {
   return result.rows.map(normalizeAsset);
 }
 
-async function audit(action, username, details = {}) {
-  await pool.query(
-    `INSERT INTO ${schema}.map_audit_logs (action, username, details) VALUES ($1,$2,$3::jsonb)`,
-    [action, username || null, JSON.stringify(details)],
+async function startUsageSession({
+  sessionId,
+  username,
+  role,
+  ipAddress = null,
+  userAgent = null,
+  path = null,
+}) {
+  const result = await pool.query(
+    `INSERT INTO ${schema}.map_usage_sessions
+      (session_id, username, role, ip_address, user_agent, last_path)
+     VALUES ($1,$2,$3,$4,$5,$6)
+     ON CONFLICT (session_id) DO UPDATE SET
+       username = EXCLUDED.username,
+       role = EXCLUDED.role,
+       ip_address = COALESCE(EXCLUDED.ip_address, ${schema}.map_usage_sessions.ip_address),
+       user_agent = COALESCE(EXCLUDED.user_agent, ${schema}.map_usage_sessions.user_agent),
+       last_path = COALESCE(EXCLUDED.last_path, ${schema}.map_usage_sessions.last_path),
+       last_seen_at = NOW(),
+       ended_at = NULL
+     RETURNING *`,
+    [sessionId, username, role, ipAddress, userAgent, path],
   );
+  return result.rows[0] || null;
+}
+
+async function touchUsageSession(sessionId, path = null) {
+  const result = await pool.query(
+    `UPDATE ${schema}.map_usage_sessions
+     SET last_seen_at = NOW(),
+         last_path = COALESCE($2, last_path),
+         ended_at = NULL
+     WHERE session_id = $1
+     RETURNING *`,
+    [sessionId, path],
+  );
+  return result.rows[0] || null;
+}
+
+async function endUsageSession(sessionId) {
+  const result = await pool.query(
+    `UPDATE ${schema}.map_usage_sessions
+     SET last_seen_at = NOW(),
+         ended_at = COALESCE(ended_at, NOW())
+     WHERE session_id = $1
+     RETURNING *`,
+    [sessionId],
+  );
+  return result.rows[0] || null;
 }
 
 module.exports = {
@@ -366,5 +385,7 @@ module.exports = {
   storageSummary,
   markAssetDeleted,
   getCleanupCandidates,
-  audit,
+  startUsageSession,
+  touchUsageSession,
+  endUsageSession,
 };
